@@ -1,4 +1,5 @@
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
@@ -7,99 +8,232 @@ import java.util.Scanner;
 public class Starter {
 	Connection connection;
 	Scanner scanner;
-	Statement statement;
 	
-	public static void main(String[] args) throws Exception{
-		String password = [password here];
-		Starter starter = new Starter(DriverManager.getConnection("jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC", "root", password));
+	public static void main(String[] args) throws SQLException {
+		Scanner scanner = new Scanner(System.in);
 		
-		// Options for restarting table
-		if (!starter.actOnAllTables("drop")) {
-			starter.actOnAllTables("truncate");
+		System.out.print("Input database password: ");
+		String password = scanner.next();
+		
+		Connection connection = DriverManager.getConnection(
+				"jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC", 
+				"root", 
+				password
+		);
+		
+		Starter starter = new Starter(connection, scanner); 
+		
+		if(starter.promptAction("reset")) {
+		    starter.actOnAllTables("drop");
 		}
+		
 		starter.createTables();
+
+		if(starter.promptAction("repopulate")) {
+		    starter.actOnAllTables("truncate");
+		    starter.populateTables();
+		}
+		
 		starter.close();
 	}
 	
-	public Starter(Connection connection) {
+	public Starter(Connection connection, Scanner scanner) {
 		this.connection = connection;
-		this.scanner = new Scanner(System.in);
+		this.scanner = scanner;
+	}
+	
+	public void actOnAllTables(String action) throws SQLException {
+		Statement grabStatement = connection.createStatement(); // Grab all tables
+		ResultSet rs = grabStatement.executeQuery("SHOW TABLES");
+		
+		Statement execStatement = connection.createStatement(); // Open another statement for executing actions
+
+		while(rs.next()){ // Action all tables
+			execStatement.execute(action + " TABLE " + rs.getString(1));
+		}
+		
+		grabStatement.close();
+		execStatement.close();
+	}
+	
+	public boolean promptAction(String action) {
+		System.out.println("Do you want to " + action + " all tables? Enter yes or no.");
+		if(scanner.next().toLowerCase().equals("yes")) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
-	public void createTables() throws Exception {
+	public void createTables() throws SQLException {
 		createEntitySets();
 		createRelationshipSets();
 	}
 	
-	public void createEntitySets() throws Exception{
-		this.statement = this.connection.createStatement();
-		this.statement.execute("CREATE TABLE IF NOT EXISTS INGREDIENTS (ID_INGREDIENT INT NOT NULL AUTO_INCREMENT, " 
-				+ "INGREDIENT_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY (ID_INGREDIENT))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS COOKING_APPLIANCES (ID_COOKING_APPLIANCE INT NOT "
-				+ "NULL AUTO_INCREMENT, COOKING_APPLIANCE_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY "
-				+ "(ID_COOKING_APPLIANCE))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS USERS (ID_USER INT NOT NULL AUTO_INCREMENT, " 
-				+ "USER_NAME VARCHAR(45) NOT NULL UNIQUE, EMAIL_ADDRESS VARCHAR(45) NOT NULL UNIQUE, "
-				+ "PROFILE_PICTURE BLOB, ACCOUNT_CREATION_DATE DATE NOT NULL, PRIMARY KEY (ID_USER))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES (ID_RECIPE INT NOT NULL AUTO_INCREMENT, " 
-				+ "RECIPE_NAME VARCHAR(45) NOT NULL, COOKING_TIME TIME, PUBLICATION_DATE DATE NOT NULL, PRIMARY "
-				+ "KEY (ID_RECIPE))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS REVIEWS (ID_REVIEW INT NOT NULL AUTO_INCREMENT, " 
-				+ "TEXT VARCHAR(45) NOT NULL, IMAGE BLOB, RATING SMALLINT NOT NULL, PRIMARY KEY (ID_REVIEW))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS NATIONALITY (ID_NATIONALITY INT NOT NULL AUTO_INCREMENT, " 
-				+ "NATIONALITY_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY (ID_NATIONALITY))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS DISH_TYPE (ID_DISH_TYPE INT NOT NULL AUTO_INCREMENT, " 
-				+ "DISH_TYPE_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY (ID_DISH_TYPE))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS (ID_DIETARY_RESTRICTION INT NOT NULL AUTO_INCREMENT, " 
-				+ "DIETARY_RESTRICTION_NAME VARCHAR(45) NOT NULL UNIQUE, SYMBOL BLOB, PRIMARY KEY (ID_DIETARY_RESTRICTION))");
-		this.statement.close();
-	}
-	
-	public void createRelationshipSets() throws Exception{
-		this.statement = this.connection.createStatement();
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_INGREDIENTS (ID_RECIPE INT NOT NULL, ID_INGREDIENT INT NOT NULL, "
-				+ "PRIMARY KEY (ID_RECIPE, ID_INGREDIENT))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_COOKING_APPLIANCES (ID_RECIPE INT NOT NULL, ID_COOKING_APPLIANCE "
-				+ "INT NOT NULL, PRIMARY KEY (ID_RECIPE, ID_COOKING_APPLIANCE))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_REVIEWS (ID_RECIPE INT NOT NULL, ID_REVIEW INT NOT"
-				+ " NULL, PRIMARY KEY (ID_RECIPE, ID_REVIEW))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_USER_AUTHOR (ID_RECIPE INT NOT NULL, ID_USER INT NOT"
-				+ " NULL, PRIMARY KEY (ID_RECIPE, ID_USER))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS USER_FOLLOWED__USER_FOLLOWER (ID_USER_FOLLOWED INT NOT NULL, ID_USER_FOLLOWER INT NOT"
-				+ " NULL, PRIMARY KEY (ID_USER_FOLLOWED, ID_USER_FOLLOWER))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_USER_BOOKMARKER (ID_RECIPE INT NOT NULL, ID_USER INT NOT"
-				+ " NULL, PRIMARY KEY (ID_RECIPE, ID_USER))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_NATIONALITIES (ID_RECIPE INT NOT NULL, ID_NATIONALITY INT NOT"
-				+ " NULL, PRIMARY KEY (ID_RECIPE, ID_NATIONALITY))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_DISH_TYPE (ID_RECIPE INT NOT NULL, ID_DISH_TYPE INT NOT"
-				+ " NULL, PRIMARY KEY (ID_RECIPE, ID_DISH_TYPE))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS INGREDIENTS_DIETARY_RESTRICTIONS (ID_INGREDIENT INT NOT NULL, ID_DIETARY_RESTRICTION INT NOT"
-				+ " NULL, PRIMARY KEY (ID_INGREDIENT, ID_DIETARY_RESTRICTION))");
-		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPE_DIETARY_RESTRICTIONS (ID_RECIPE INT NOT NULL, ID_DIETARY_RESTRICTION INT NOT"
-				+ " NULL, PRIMARY KEY (ID_RECIPE, ID_DIETARY_RESTRICTION))");
-		this.statement.close();
-	}
-	public boolean actOnAllTables(String action) throws Exception{ // False if action not done. True if action done
-		System.out.println("Are you sure you want to " + action.toLowerCase() + " all tables?"); // Verification to ensure that action is intentional
-		String response = this.scanner.next();
-		if(!response.toLowerCase().equals("yes")) {
-			return false;
-		}
+	public void createEntitySets() throws SQLException {
+		String[] codeblocks = {
+				"""
+		        CREATE TABLE IF NOT EXISTS INGREDIENTS (
+		            ID_INGREDIENT INT NOT NULL AUTO_INCREMENT,
+		            INGREDIENT_NAME VARCHAR(45) NOT NULL UNIQUE,
+		            PRIMARY KEY (ID_INGREDIENT)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS COOKING_APPLIANCES (
+		        	ID_COOKING_APPLIANCE INT NOT NULL AUTO_INCREMENT,
+		        	COOKING_APPLIANCE_NAME VARCHAR(45) NOT NULL UNIQUE,
+		        	PRIMARY KEY (ID_COOKING_APPLIANCE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS USERS (
+		        	ID_USER INT NOT NULL AUTO_INCREMENT,
+		        	USER_NAME VARCHAR(45) NOT NULL UNIQUE,
+		        	EMAIL_ADDRESS VARCHAR(45) NOT NULL UNIQUE,
+		        	PROFILE_PICTURE BLOB,
+		        	ACCOUNT_CREATION_DATE DATE NOT NULL,
+		        	PRIMARY KEY (ID_USER)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES (
+		            ID_RECIPE INT NOT NULL AUTO_INCREMENT,
+		            RECIPE_NAME VARCHAR(45) NOT NULL,
+		            COOKING_TIME TIME,
+		            PUBLICATION_DATE DATE NOT NULL,
+		            PRIMARY KEY (ID_RECIPE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS REVIEWS (
+		            ID_REVIEW INT NOT NULL AUTO_INCREMENT,
+		            TEXT VARCHAR(45) NOT NULL,
+		            IMAGE BLOB,
+		            RATING SMALLINT NOT NULL,
+		            PRIMARY KEY (ID_REVIEW)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS NATIONALITY (
+		            ID_NATIONALITY INT NOT NULL AUTO_INCREMENT,
+		            NATIONALITY_NAME VARCHAR(45) NOT NULL UNIQUE,
+		            PRIMARY KEY (ID_NATIONALITY)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS DISH_TYPE (
+		            ID_DISH_TYPE INT NOT NULL AUTO_INCREMENT,
+		            DISH_TYPE_NAME VARCHAR(45) NOT NULL UNIQUE,
+		            PRIMARY KEY (ID_DISH_TYPE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS (
+		            ID_DIETARY_RESTRICTION INT NOT NULL AUTO_INCREMENT,
+		            DIETARY_RESTRICTION_NAME VARCHAR(45) NOT NULL UNIQUE,
+		            SYMBOL BLOB,
+		            PRIMARY KEY (ID_DIETARY_RESTRICTION)
+		        )
+		        """
+		};
 		
-		Statement statement = this.connection.createStatement(); // Grab all tables
-		String showSq = "SHOW TABLES";
-		ResultSet rs = statement.executeQuery(showSq);
-		statement = this.connection.createStatement();
-
-		while(rs.next()){ // Action all tables
-			String dropSq = action + " TABLE " + rs.getString(1);
-			statement.execute(dropSq);
-		}
-		statement.close();
-		return true;
+		executeAll(codeblocks);
 	}
 	
-	public void close() throws Exception{ // Deallocate memory
+	public void createRelationshipSets() throws SQLException {
+		String[] codeblocks = {
+				"""
+		        CREATE TABLE IF NOT EXISTS RECIPES_INGREDIENTS (
+		            ID_RECIPE INT NOT NULL,
+		            ID_INGREDIENT INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_INGREDIENT)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_COOKING_APPLIANCES (
+		            ID_RECIPE INT NOT NULL,
+		            ID_COOKING_APPLIANCE INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_COOKING_APPLIANCE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_REVIEWS (
+		            ID_RECIPE INT NOT NULL,
+		            ID_REVIEW INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_REVIEW)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_USER_AUTHOR (
+		            ID_RECIPE INT NOT NULL,
+		            ID_USER INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_USER)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS USER_FOLLOWED__USER_FOLLOWER (
+		            ID_USER_FOLLOWED INT NOT NULL,
+		            ID_USER_FOLLOWER INT NOT NULL,
+		            PRIMARY KEY (ID_USER_FOLLOWED, ID_USER_FOLLOWER)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_USER_BOOKMARKER (
+		            ID_RECIPE INT NOT NULL,
+		            ID_USER INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_USER)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_NATIONALITIES (
+		            ID_RECIPE INT NOT NULL,
+		            ID_NATIONALITY INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_NATIONALITY)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_DISH_TYPE (
+		            ID_RECIPE INT NOT NULL,
+		            ID_DISH_TYPE INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_DISH_TYPE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS INGREDIENTS_DIETARY_RESTRICTIONS (
+		            ID_INGREDIENT INT NOT NULL,
+		            ID_DIETARY_RESTRICTION INT NOT NULL,
+		            PRIMARY KEY (ID_INGREDIENT, ID_DIETARY_RESTRICTION)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPE_DIETARY_RESTRICTIONS (
+		            ID_RECIPE INT NOT NULL,
+		            ID_DIETARY_RESTRICTION INT NOT NULL,
+		            PRIMARY KEY (ID_RECIPE, ID_DIETARY_RESTRICTION)
+		        )
+		        """
+		};
+
+		executeAll(codeblocks);
+	}
+	
+	public void populateTables() throws SQLException {
+		// To be implemented
+	}
+	
+	public void executeAll(String[] codeblocks) throws SQLException {
+		Statement statement = connection.createStatement();
+		
+		for (String block : codeblocks) {
+            statement.execute(block);
+        }
+		
+		statement.close();
+	}
+	
+	public void close() throws SQLException{ // Clean up
 		this.connection.close();
 		this.scanner.close();
 	}
