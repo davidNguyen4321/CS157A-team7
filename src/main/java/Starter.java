@@ -10,8 +10,10 @@ public class Starter {
 	Statement statement;
 	
 	public static void main(String[] args) throws Exception{
-		String password = [password here];
-		Starter starter = new Starter(DriverManager.getConnection("jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC", "root", password));
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Input database password");
+		String password = scanner.next();
+		Starter starter = new Starter(DriverManager.getConnection("jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC", "root", password), scanner);
 		
 		// Options for restarting table
 		if (!starter.actOnAllTables("drop")) {
@@ -21,9 +23,9 @@ public class Starter {
 		starter.close();
 	}
 	
-	public Starter(Connection connection) {
+	public Starter(Connection connection, Scanner scanner) {
 		this.connection = connection;
-		this.scanner = new Scanner(System.in);
+		this.scanner = scanner;
 	}
 
 	public void createTables() throws Exception {
