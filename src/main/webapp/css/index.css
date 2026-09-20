@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* CSS Variables */
+:root {
+  --background: #FAF6F0;
+  --foreground: #1C1917;
+  --card: #FFFFFF;
+  --card-foreground: #1C1917;
+  --primary: #1E4E3B;
+  --primary-foreground: #FAF6F0;
+  --secondary: #EDE5D8;
+  --secondary-foreground: #3D2B1F;
+  --muted: #F0EAE0;
+  --muted-foreground: #7A6A5A;
+  --accent: #D4782A;
+  --accent-foreground: #FAF6F0;
+  --border: #D9CFC3;
+  --ring: #1E4E3B;
+  --radius: 6px;
+  --action-btn-width: 10rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Outfit', system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+/* Global Fluid Containers (tight side margins everywhere) */
+.header-inner,
+.hero-content-wrapper,
+.sections-container,
+.footer-inner {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Slightly tighter header side padding on small screens */
+@media (max-width: 639px) {
+  .header-inner { padding-left: 1rem; padding-right: 1rem; }
+}
+
+/* Header & Layout */
+header {
+  position: static;
+  z-index: 50;
+  background-color: rgba(250, 246, 240, 0.98);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 6rem;
+  height: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+.nav-group { display: flex; align-items: center; gap: 1.5rem; }
+
+/* Plate Logo Design with Text Inside (used in the header and footer) */
+.plate-logo {
+  width: 5rem;
+  height: 5rem;
+  background-color: #FFFFFF;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+  flex-shrink: 0;
+  padding: 0.35rem;
+}
+.plate-rim {
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #FFFFFF 60%, rgba(212, 120, 42, 0.08) 100%);
+}
+.plate-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 1.05;
+}
+.logo-recipe {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+.logo-genie {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1.125rem;
+}
+
+nav.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Nav buttons for Discover, Share, Library (orange; green when active) */
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: var(--accent);
+  color: #FFFFFF;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s, background-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.header-btn:hover {
+  opacity: 0.9;
+}
+.header-btn.active {
+  background-color: var(--primary);
+  color: #FFFFFF;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Empty center column that keeps the header balanced */
+.header-spacer { display: flex; justify-content: center; }
+
+/* Right Action Group: Username left of profile picture */
+.header-actions { display: flex; align-items: center; }
+.user-profile-group { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; }
+.username-display {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.user-avatar { width: 3rem; height: 3rem; border-radius: 9999px; background-color: var(--secondary); display: flex; align-items: center; justify-content: center; font-size: 1.125rem; transition: box-shadow 0.2s; border: 1px solid var(--border); flex-shrink: 0; }
+.user-avatar:hover { box-shadow: 0 0 0 2px var(--primary); }
+
+/* Hero Section */
+.hero-section { position: relative; overflow: hidden; background-color: var(--primary); color: white; min-width: 25rem; }
+.hero-bg-blobs { position: absolute; inset: 0; opacity: 0.1; pointer-events: none; }
+.blob-1 { position: absolute; top: 0; right: 0; width: 24rem; height: 24rem; background-color: var(--accent); border-radius: 9999px; filter: blur(3rem); transform: translateY(-50%) translateX(33.33%); }
+.blob-2 { position: absolute; bottom: 0; left: 0; width: 20rem; height: 20rem; background-color: white; border-radius: 9999px; filter: blur(3rem); transform: translateY(50%) translateX(-33.33%); }
+
+.hero-content-wrapper {
+  position: relative;
+  margin: 0 auto;
+  padding-top: 3.5rem;
+  padding-bottom: 3.5rem;
+}
+@media (min-width: 640px) {
+  .hero-content-wrapper {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+}
+
+.hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background-color: rgba(255,255,255,0.1); border-radius: 9999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 500; margin-bottom: 1rem; }
+.hero-badge-dot { width: 0.375rem; height: 0.375rem; background-color: var(--accent); border-radius: 9999px; }
+.hero-title { font-family: 'Fraunces', Georgia, serif; font-size: 2.25rem; font-weight: 600; line-height: 1.2; margin: 0; }
+@media (min-width: 640px) { .hero-title { font-size: 3rem; } }
+@media (min-width: 1024px) { .hero-title { font-size: 3.75rem; } }
+.hero-title em { font-style: normal; color: #F4C07A; }
+.hero-desc { margin-top: 1rem; color: rgba(255,255,255,0.75); font-size: 1rem; line-height: 1.6; max-width: 32rem; }
+@media (min-width: 640px) { .hero-desc { font-size: 1.125rem; } }
+
+/* Smart Search Box Form */
+.search-form { margin-top: 2rem; background-color: white; border-radius: 0.75rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); width: 100%; overflow: hidden; }
+
+.search-top-bar {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-icon-fixed {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.search-top-bar input {
+  flex: 1;
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.search-top-bar input::placeholder { color: var(--muted-foreground); }
+
+.filter-btn {
+  background-color: #EC4899;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 0;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.filter-btn:hover {
+  opacity: 0.9;
+}
+
+/* Wide screens: both buttons share one fixed width so their left edges line up */
+@media (min-width: 640px) {
+  .filter-btn,
+  .find-recipes-submit {
+    flex: 0 0 var(--action-btn-width);
+    width: var(--action-btn-width);
+  }
+}
+
+/* Narrow / zoomed screens: Filters wraps onto its own full-width row */
+@media (max-width: 639px) {
+  .search-top-bar {
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
+.search-bottom-row { display: flex; flex-direction: column; }
+@media (min-width: 640px) { .search-bottom-row { flex-direction: row; } }
+.search-filter-col { flex: 1; display: flex; align-items: center; gap: 0.625rem; padding: 0.75rem 1rem; text-align: left; border-top: 1px solid var(--border); }
+@media (min-width: 640px) { .search-filter-col { border-top: none; border-right: 1px solid var(--border); } }
+.filter-icon-box { width: 1.75rem; height: 1.75rem; border-radius: var(--radius); background-color: var(--secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.75rem; }
+.filter-label { font-size: 0.625rem; font-weight: 600; color: var(--muted-foreground); letter-spacing: 0.05em; text-transform: uppercase; }
+.filter-sub { font-size: 0.875rem; color: var(--foreground); }
+.find-recipes-submit { padding: 0.875rem 1.25rem; background-color: var(--accent); color: white; font-weight: 600; font-size: 0.875rem; border: none; cursor: pointer; }
+.find-recipes-submit:hover { opacity: 0.9; }
+
+/* Personalized Sections (Your Feed, Reviews for You, Your Most Popular) */
+.sections-container { padding-top: 2rem; display: flex; flex-direction: column; gap: 2.5rem; }
+.section-title { font-family: 'Fraunces', Georgia, serif; font-size: 1.25rem; font-weight: 600; margin: 0; }
+.section-subtitle { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 0.125rem; margin-bottom: 1rem; }
+
+.horizontal-scroll-row { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem; }
+
+/* Recipe cards (Your Feed and Your Most Popular) */
+.recipe-card { flex-shrink: 0; width: 20rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow 0.2s; }
+.recipe-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+
+.recipe-card-img { position: relative; height: 10rem; background-color: var(--muted); overflow: hidden; }
+.recipe-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.recipe-card-badges { position: absolute; left: 0.5rem; right: 0.5rem; bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; gap: 0.375rem; }
+.card-badge-group { display: flex; gap: 0.375rem; }
+.badge-pill { color: white; font-size: 0.75rem; font-weight: 600; background-color: rgba(0,0,0,0.45); backdrop-filter: blur(4px); padding: 0.2rem 0.6rem; border-radius: 9999px; white-space: nowrap; }
+
+/* Rank circle on the top-left of the image (Your Most Popular) */
+.rank-badge { position: absolute; top: 0.5rem; left: 0.5rem; width: 1.5rem; height: 1.5rem; background-color: var(--accent); border-radius: 9999px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: bold; }
+
+.recipe-card-body { padding: 1rem; display: flex; flex-direction: column; flex: 1; }
+.recipe-card-title { font-family: 'Fraunces', Georgia, serif; font-size: 1.125rem; font-weight: 600; margin: 0; }
+.recipe-card-desc { font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.5; margin: 0.375rem 0 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.recipe-card-footer { margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+
+/* Shared card pieces (also used by review cards) */
+.card-author { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); min-width: 0; }
+.card-avatar { width: 1.75rem; height: 1.75rem; border-radius: 9999px; background-color: var(--secondary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0; }
+.card-stats { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.75rem; font-size: 0.75rem; color: var(--muted-foreground); }
+.card-bookmark, .card-rating { display: inline-flex; align-items: center; gap: 0.25rem; }
+
+/* Star rating: set --rating (0-5, decimals allowed) and the stars fill to match */
+.stars { --percent: calc(var(--rating) / 5 * 100%); display: inline-block; font-size: 0.95rem; letter-spacing: 1px; line-height: 1; }
+.stars::before { content: '★★★★★'; background: linear-gradient(90deg, var(--accent) var(--percent), var(--border) var(--percent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+
+/* Review cards (Reviews for You) */
+.review-card { flex-shrink: 0; width: 21rem; display: flex; gap: 0.75rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 0.75rem; transition: box-shadow 0.2s; }
+.review-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+
+.review-thumb { width: 5rem; flex-shrink: 0; border-radius: 0.5rem; overflow: hidden; background-color: var(--muted); }
+.review-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.review-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.review-title { font-family: 'Fraunces', Georgia, serif; font-size: 0.9375rem; font-weight: 600; color: var(--foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; }
+.review-text { font-size: 0.8125rem; color: var(--muted-foreground); line-height: 1.5; margin: 0.25rem 0 0.625rem; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.review-footer { margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+.review-meta { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.75rem; color: var(--muted-foreground); }
+.review-date { font-size: 0.75rem; color: var(--muted-foreground); white-space: nowrap; }
+
+/* Footer */
+footer { border-top: 1px solid var(--border); background-color: var(--card); margin-top: 3rem; }
+.footer-inner { padding-top: 1.25rem; padding-bottom: 1.25rem; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 1rem; font-size: 1.25rem; color: var(--muted-foreground); }
+@media (min-width: 640px) { .footer-inner { flex-direction: row; } }
+.footer-brand { display: flex; align-items: center; gap: 0.5rem; }
+.footer-links { display: flex; gap: 1rem; }
+.footer-links a { color: inherit; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--foreground); }
