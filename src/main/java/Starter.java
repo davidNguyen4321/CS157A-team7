@@ -7,12 +7,13 @@ import java.util.Scanner;
 public class Starter {
 	Connection connection;
 	Scanner scanner;
+	Statement statement;
 	
 	public static void main(String[] args) throws Exception{
-		String password = "SixNine-42020";
+		String password = [password here]
 		Starter starter = new Starter(DriverManager.getConnection("jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC", "root", password));
 		
-		// Drop tables for a new start
+		// Options for restarting table
 		if (!starter.actOnAllTables("drop")) {
 			starter.actOnAllTables("truncate");
 		}
@@ -26,12 +27,28 @@ public class Starter {
 	}
 
 	public void createTables() throws Exception {
-		Statement statement = this.connection.createStatement();
-		String createSql = "CREATE TABLE IF NOT EXISTS INGREDIENTS (ID_INGREDIENT INT NOT NULL AUTO_INCREMENT, " 
-				+ "INGREDIENT_NAME VARCHAR(45) NOT NULL, PRIMARY KEY (ID_INGREDIENT))";
-		statement.execute(createSql);
-		
-		statement.close();
+		this.statement = this.connection.createStatement();
+		this.statement.execute("CREATE TABLE IF NOT EXISTS INGREDIENTS (ID_INGREDIENT INT NOT NULL AUTO_INCREMENT, " 
+				+ "INGREDIENT_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY (ID_INGREDIENT))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS COOKING_APPLIANCES (ID_COOKING_APPLIANCE INT NOT "
+				+ "NULL AUTO_INCREMENT, COOKING_APPLIANCE_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY "
+				+ "(ID_COOKING_APPLIANCE))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS USERS (ID_USER INT NOT NULL AUTO_INCREMENT, " 
+				+ "USER_NAME VARCHAR(45) NOT NULL UNIQUE, EMAIL_ADDRESS VARCHAR(45) NOT NULL UNIQUE, "
+				+ "PROFILE_PICTURE BLOB, ACCOUNT_CREATION_DATE DATE NOT NULL, PRIMARY KEY (ID_USER))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES (ID_RECIPE INT NOT NULL AUTO_INCREMENT, " 
+				+ "RECIPE_NAME VARCHAR(45) NOT NULL, COOKING_TIME TIME, PUBLICATION_DATE DATE NOT NULL, PRIMARY "
+				+ "KEY (ID_RECIPE))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS REVIEWS (ID_REVIEW INT NOT NULL AUTO_INCREMENT, " 
+				+ "TEXT VARCHAR(45) NOT NULL, IMAGE BLOB, RATING SMALLINT NOT NULL, PRIMARY KEY (ID_REVIEW))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS NATIONALITY (ID_NATIONALITY INT NOT NULL AUTO_INCREMENT, " 
+				+ "NATIONALITY_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY (ID_NATIONALITY))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS DISH_TYPE (ID_DISH_TYPE INT NOT NULL AUTO_INCREMENT, " 
+				+ "DISH_TYPE_NAME VARCHAR(45) NOT NULL UNIQUE, PRIMARY KEY (ID_DISH_TYPE))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS (ID_DIETARY_RESTRICTION INT NOT NULL AUTO_INCREMENT, " 
+				+ "DIETARY_RESTRICTION_NAME VARCHAR(45) NOT NULL UNIQUE, SYMBOL BLOB, PRIMARY KEY (ID_DIETARY_RESTRICTION))");
+		this.statement.execute("CREATE TABLE IF NOT EXISTS RECIPES_INGREDIENTS (ID_RECIPE INT NOT NULL, ID_INGREDIENT INT NOT NULL, PRIMARY KEY (ID_RECIPE, ID_INGREDIENT))");
+		this.statement.close();
 	}
 	
 	public boolean actOnAllTables(String action) throws Exception{ // False if action not done. True if action done
@@ -44,17 +61,17 @@ public class Starter {
 		Statement statement = this.connection.createStatement(); // Grab all tables
 		String showSq = "SHOW TABLES";
 		ResultSet rs = statement.executeQuery(showSq);
-		
+		statement = this.connection.createStatement();
+
 		while(rs.next()){ // Action all tables
 			String dropSq = action + " TABLE " + rs.getString(1);
-			statement = this.connection.createStatement();
 			statement.execute(dropSq);
 		}
 		statement.close();
 		return true;
 	}
 	
-	public void close() throws Exception{
+	public void close() throws Exception{ // Deallocate memory
 		this.connection.close();
 		this.scanner.close();
 	}
