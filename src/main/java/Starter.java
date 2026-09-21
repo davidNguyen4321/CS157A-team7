@@ -4,6 +4,7 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Starter {
 	Connection connection;
@@ -31,7 +32,8 @@ public class Starter {
 
 		if(starter.promptAction("repopulate")) {
 		    starter.actOnAllTables("truncate");
-		    starter.populateTables();
+		    StarterPopulate starterpopulate = new StarterPopulate(starter);
+		    starterpopulate.populateTables();
 		}
 		
 		starter.close();
@@ -113,8 +115,7 @@ public class Starter {
 		        CREATE TABLE IF NOT EXISTS REVIEWS (
 		            ID_REVIEW INT NOT NULL AUTO_INCREMENT,
 		            TEXT TEXT(3000) NOT NULL,
-		            IMAGE_PATH TEXT(100),
-		            RATING SMALLINT NOT NULL,
+		            RATING INT NOT NULL,
 		            PRIMARY KEY (ID_REVIEW)
 		        )
 		        """,
@@ -254,112 +255,68 @@ public class Starter {
 		};
 
 		executeAll(codeblocks);
-	}
+	}	
 	
-	public void populateTables() throws SQLException {
-		populateEntitySets();
-		populateRelationships();
-	}
-	
-	public void populateEntitySets() throws SQLException {
-		populateIngredients();
-		populateCookingAppliances();
-		populateUsers();
-		populateRecipes();
-		populateReviews();
-		populateNationalities();
-		populateDishTypes();
-		populateDietaryRestrictions();
-		populateImages();
-	}
-	
-	public void populateRelationships() throws SQLException {
-	}
-	
-	public void populateIngredients() throws SQLException {
-		String[] codeblocks = {
-				formatIngredient("pineapple"),
-				formatIngredient("orange"),
-				formatIngredient("vanilla pudding"),
-				formatIngredient("strawberry"),
-				formatIngredient("banana"),
-				formatIngredient("blueberry")
-		};
+	public void addIngredient(String ingredientname, String[] dietaryrestrictions) throws SQLException {
+		int ingredientId = createIngredient(ingredientname);
+		ArrayList<Integer> dietaryResitrctionIds = selectDietaryRestrictions(dietaryrestrictions);
+		ArrayList<String> dietaryRestrictionsRelationships = new ArrayList<String>();
+		
+		for(int dietaryResitrctionId : dietaryResitrctionIds) {
+			dietaryRestrictionsRelationships.add(
+					"""
+			        INSERT INTO INGREDIENTS_DIETARY_RESTRICTIONS (ID_INGREDIENT, ID_DIETARY_RESTRICTION)
+		        	VALUES ('""" + ingredientId + """
+		        	', '""" + dietaryResitrctionId + """
+		        	')
+		        	""");
+		}
+		
+		String[] codeblocks = new String[dietaryRestrictionsRelationships.size()];
+		codeblocks = dietaryRestrictionsRelationships.toArray(codeblocks);
+		
 		executeAll(codeblocks);
 	}
 	
-	public void populateCookingAppliances() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
+	public int createIngredient(String ingredientname) throws SQLException { //TODO: standardize
+		String addIngredient = """
+        INSERT INTO INGREDIENTS (INGREDIENT_NAME)
+    	VALUES ('""" + ingredientname.toLowerCase() + """
+    	')
+    	""";
+		String[] key = {"ID_INGREDIENT"};
+		return createAndQueryId(addIngredient, key);
 	}
 	
-	public void populateUsers() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	public void populateRecipes() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	
-	public void populateReviews() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	public void populateNationalities() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	public void populateDishTypes() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	public void populateDietaryRestrictions() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	public void populateImages() throws SQLException {
-		String[] codeblocks = {
-				"""
-				
-				"""
-		};
-	}
-	
-	public String formatIngredient(String ingredientname) throws SQLException {
-		return 	"""
-		        INSERT INTO INGREDIENTS (INGREDIENT_NAME)
-	        	VALUES ('""" + ingredientname.toLowerCase() + """
-	        	')
-	        	""";
+	public int createAndQueryId(String query, String[] key) throws SQLException{
+		int generatedKey = 0; // Default value: 0. ID should never be 0 unless there is no key that matches
+		Statement statement = connection.prepareStatement(query, key); // add ingredient
+		statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+		ResultSet resultSet = statement.getGeneratedKeys();
 		
+		if(resultSet.next()) {
+			generatedKey= resultSet.getInt(1);
+		}
+		statement.close();
+		resultSet.close();
+		
+		return generatedKey;
+	}
+	
+	public ArrayList<Integer> selectDietaryRestrictions(String[] dietaryrestrictions) throws SQLException{
+		Statement statement = connection.createStatement(); // grab dietary restrictions ID
+		String selectDietaryRestrictionsId = "SELECT ID_DIETARY_RESTRICTION FROM DIETARY_RESTRICTIONS"
+												+ " WHERE DIETARY_RESTRICTION_NAME IN ('" + String.join("', '", dietaryrestrictions) +"')";
+		ResultSet resultSet = statement.executeQuery(selectDietaryRestrictionsId);
+		ArrayList<Integer> dietaryRestrictionsIds = new ArrayList<Integer>();
+		
+		while (resultSet.next()) {
+			dietaryRestrictionsIds.add(resultSet.getInt("ID_DIETARY_RESTRICTION"));
+		}
+		
+		statement.close();
+		resultSet.close();
+		return dietaryRestrictionsIds;
 	}
 	
 	public void executeAll(String[] codeblocks) throws SQLException {
@@ -377,3 +334,5 @@ public class Starter {
 		this.scanner.close();
 	}
 }
+
+
