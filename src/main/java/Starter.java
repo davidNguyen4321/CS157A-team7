@@ -92,7 +92,6 @@ public class Starter {
 		        	ID_USER INT NOT NULL AUTO_INCREMENT,
 		        	USER_NAME VARCHAR(45) NOT NULL UNIQUE,
 		        	EMAIL_ADDRESS VARCHAR(45) NOT NULL UNIQUE,
-		        	PROFILE_PICTURE BLOB,
 		        	ACCOUNT_CREATION_DATE DATE NOT NULL,
 		        	PRIMARY KEY (ID_USER)
 		        )
@@ -103,14 +102,18 @@ public class Starter {
 		            RECIPE_NAME VARCHAR(45) NOT NULL,
 		            COOKING_TIME TIME,
 		            PUBLICATION_DATE DATE NOT NULL,
+		            RECIPE_IMAGE_PATH TEXT(100),
+		            DESCRIPTION TEXT(3000),
+		            INSTRUCTIONS TEXT(12000) NOT NULL,
 		            PRIMARY KEY (ID_RECIPE)
 		        )
-		        """,
+		        """, // 3000 bytes ~ 500 words
+		        	// 12000 bytes ~ 2000 words
 		        """
 		        CREATE TABLE IF NOT EXISTS REVIEWS (
 		            ID_REVIEW INT NOT NULL AUTO_INCREMENT,
-		            TEXT VARCHAR(45) NOT NULL,
-		            IMAGE BLOB,
+		            TEXT TEXT(3000) NOT NULL,
+		            IMAGE_PATH TEXT(100),
 		            RATING SMALLINT NOT NULL,
 		            PRIMARY KEY (ID_REVIEW)
 		        )
@@ -133,8 +136,14 @@ public class Starter {
 		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS (
 		            ID_DIETARY_RESTRICTION INT NOT NULL AUTO_INCREMENT,
 		            DIETARY_RESTRICTION_NAME VARCHAR(45) NOT NULL UNIQUE,
-		            SYMBOL BLOB,
 		            PRIMARY KEY (ID_DIETARY_RESTRICTION)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS IMAGES (
+		            ID_IMAGE INT NOT NULL AUTO_INCREMENT,
+		            IMAGE_PATH VARCHAR(45) NOT NULL UNIQUE,
+		            PRIMARY KEY (ID_IMAGE)
 		        )
 		        """
 		};
@@ -166,21 +175,21 @@ public class Starter {
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_USER_AUTHOR (
+		        CREATE TABLE IF NOT EXISTS RECIPES_USER_AUTHORS (
 		            ID_RECIPE INT NOT NULL,
 		            ID_USER INT NOT NULL,
 		            PRIMARY KEY (ID_RECIPE, ID_USER)
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS USER_FOLLOWED__USER_FOLLOWER (
+		        CREATE TABLE IF NOT EXISTS USER_FOLLOWEDS__USER_FOLLOWERS (
 		            ID_USER_FOLLOWED INT NOT NULL,
 		            ID_USER_FOLLOWER INT NOT NULL,
 		            PRIMARY KEY (ID_USER_FOLLOWED, ID_USER_FOLLOWER)
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_USER_BOOKMARKER (
+		        CREATE TABLE IF NOT EXISTS RECIPES_USER_BOOKMARKERS (
 		            ID_RECIPE INT NOT NULL,
 		            ID_USER INT NOT NULL,
 		            PRIMARY KEY (ID_RECIPE, ID_USER)
@@ -194,7 +203,7 @@ public class Starter {
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_DISH_TYPE (
+		        CREATE TABLE IF NOT EXISTS RECIPES_DISH_TYPES (
 		            ID_RECIPE INT NOT NULL,
 		            ID_DISH_TYPE INT NOT NULL,
 		            PRIMARY KEY (ID_RECIPE, ID_DISH_TYPE)
@@ -213,6 +222,34 @@ public class Starter {
 		            ID_DIETARY_RESTRICTION INT NOT NULL,
 		            PRIMARY KEY (ID_RECIPE, ID_DIETARY_RESTRICTION)
 		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS USERS_IMAGES (
+		        	ID_USER INT NOT NULL,
+		        	ID_IMAGE INT NOT NULL,
+		        	PRIMARY KEY (ID_USER, ID_IMAGE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES_IMAGES (
+		        	ID_RECIPE INT NOT NULL,
+		        	ID_IMAGE INT NOT NULL,
+		        	PRIMARY KEY(ID_RECIPE, ID_IMAGE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS REVIEWS_IMAGES (
+		        	ID_REVIEW INT NOT NULL,
+		        	ID_IMAGE INT NOT NULL,
+		        	PRIMARY KEY(ID_REVIEW, ID_IMAGE)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS_IMAGES (
+		        	ID_DIETARY_RESTRICTION INT NOT NULL,
+		        	ID_IMAGE INT NOT NULL,
+		        	PRIMARY KEY(ID_DIETARY_RESTRICTION, ID_IMAGE)
+		        )
 		        """
 		};
 
@@ -220,7 +257,109 @@ public class Starter {
 	}
 	
 	public void populateTables() throws SQLException {
-		// To be implemented
+		populateEntitySets();
+		populateRelationships();
+	}
+	
+	public void populateEntitySets() throws SQLException {
+		populateIngredients();
+		populateCookingAppliances();
+		populateUsers();
+		populateRecipes();
+		populateReviews();
+		populateNationalities();
+		populateDishTypes();
+		populateDietaryRestrictions();
+		populateImages();
+	}
+	
+	public void populateRelationships() throws SQLException {
+	}
+	
+	public void populateIngredients() throws SQLException {
+		String[] codeblocks = {
+				formatIngredient("pineapple"),
+				formatIngredient("orange"),
+				formatIngredient("vanilla pudding"),
+				formatIngredient("strawberry"),
+				formatIngredient("banana"),
+				formatIngredient("blueberry")
+		};
+		executeAll(codeblocks);
+	}
+	
+	public void populateCookingAppliances() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public void populateUsers() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public void populateRecipes() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	
+	public void populateReviews() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public void populateNationalities() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public void populateDishTypes() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public void populateDietaryRestrictions() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public void populateImages() throws SQLException {
+		String[] codeblocks = {
+				"""
+				
+				"""
+		};
+	}
+	
+	public String formatIngredient(String ingredientname) throws SQLException {
+		return 	"""
+		        INSERT INTO INGREDIENTS (INGREDIENT_NAME)
+	        	VALUES ('""" + ingredientname.toLowerCase() + """
+	        	')
+	        	""";
+		
 	}
 	
 	public void executeAll(String[] codeblocks) throws SQLException {
