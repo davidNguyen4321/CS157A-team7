@@ -1,11 +1,19 @@
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
+import java.sql.Connection;
+import java.sql.ResultSet;
 
-public class StarterPopulate {
+public class StarterPopulator {
 	Starter starter;
-	public StarterPopulate(Starter starter) {
-		this.starter=starter;
+	Connection connection;
+	
+	public StarterPopulator(Starter starter) {
+		this.starter = starter;
+		this.connection = starter.connection;
 	}
+	
 	public void populateTables() throws SQLException {
 		populateEntitySets();
 		populateRelationships();
@@ -24,7 +32,7 @@ public class StarterPopulate {
 	}
 	
 	public void populateRelationships() throws SQLException {
-		//TODO: fill table
+		// To be implemented
 	}
 	
 	public void populateDietaryRestrictions() throws SQLException {
@@ -43,27 +51,27 @@ public class StarterPopulate {
 	
 	public void populateIngredients() throws SQLException {
 		String[] restrictions = {"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free", "palaeo"};
-		starter.addIngredient("pineapple", restrictions);
-		starter.addIngredient("orange", restrictions);
-		starter.addIngredient("strawberry", restrictions);
-		starter.addIngredient("banana", restrictions);
-		starter.addIngredient("blueberry", restrictions);
-		starter.addIngredient("tomato", restrictions);
-		starter.addIngredient("tomato puree", restrictions);
-		starter.addIngredient("basil", restrictions);
-		starter.addIngredient("black pepper", restrictions);
-		starter.addIngredient("yeast", restrictions);
+		addIngredient("pineapple", restrictions);
+		addIngredient("orange", restrictions);
+		addIngredient("strawberry", restrictions);
+		addIngredient("banana", restrictions);
+		addIngredient("blueberry", restrictions);
+		addIngredient("tomato", restrictions);
+		addIngredient("tomato puree", restrictions);
+		addIngredient("basil", restrictions);
+		addIngredient("black pepper", restrictions);
+		addIngredient("yeast", restrictions);
 		
 		restrictions = new String[]{"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free"};
-		starter.addIngredient("salt", restrictions);
+		addIngredient("salt", restrictions);
 		
 		restrictions = new String[]{"vegatarian", "vegan", "dairy-free", "pescetarian", "shellfish-free"};
-		starter.addIngredient("flour", restrictions);
+		addIngredient("flour", restrictions);
 
 		restrictions = new String[]{"vegatarian", "pescetarian", "shellfish-free"};
-		starter.addIngredient("mozzarella", restrictions);
-		starter.addIngredient("parmesan", restrictions);
-		starter.addIngredient("vanilla pudding", restrictions);
+		addIngredient("mozzarella", restrictions);
+		addIngredient("parmesan", restrictions);
+		addIngredient("vanilla pudding", restrictions);
 	}
 	
 	public void populateCookingAppliances() throws SQLException {
@@ -180,5 +188,67 @@ public class StarterPopulate {
 	        	', """ + rating + """
 	        	)
 	        	""";
+	}
+	
+	public void addIngredient(String ingredientname, String[] dietaryrestrictions) throws SQLException {
+		int ingredientId = createIngredient(ingredientname);
+		ArrayList<Integer> dietaryResitrctionIds = selectDietaryRestrictions(dietaryrestrictions);
+		ArrayList<String> dietaryRestrictionsRelationships = new ArrayList<String>();
+		
+		for(int dietaryResitrctionId : dietaryResitrctionIds) {
+			dietaryRestrictionsRelationships.add(
+					"""
+			        INSERT INTO INGREDIENTS_DIETARY_RESTRICTIONS (ID_INGREDIENT, ID_DIETARY_RESTRICTION)
+		        	VALUES ('""" + ingredientId + """
+		        	', '""" + dietaryResitrctionId + """
+		        	')
+		        	""");
+		}
+		
+		String[] codeblocks = new String[dietaryRestrictionsRelationships.size()];
+		codeblocks = dietaryRestrictionsRelationships.toArray(codeblocks);
+		
+		starter.executeAll(codeblocks);
+	}
+	
+	public int createIngredient(String ingredientname) throws SQLException { //TODO: standardize
+		String addIngredient = """
+        INSERT INTO INGREDIENTS (INGREDIENT_NAME)
+    	VALUES ('""" + ingredientname.toLowerCase() + """
+    	')
+    	""";
+		String[] key = {"ID_INGREDIENT"};
+		return createAndQueryId(addIngredient, key);
+	}
+	
+	public int createAndQueryId(String query, String[] key) throws SQLException{
+		int generatedKey = 0; // Default value: 0. ID should never be 0 unless there is no key that matches
+		Statement statement = connection.prepareStatement(query, key); // add ingredient
+		statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+		ResultSet resultSet = statement.getGeneratedKeys();
+		
+		if(resultSet.next()) {
+			generatedKey= resultSet.getInt(1);
+		}
+		statement.close();
+		resultSet.close();
+		
+		return generatedKey;
+	}
+	
+	public ArrayList<Integer> selectDietaryRestrictions(String[] dietaryrestrictions) throws SQLException{
+		Statement statement = connection.createStatement(); // grab dietary restrictions ID
+		String selectDietaryRestrictionsId = "SELECT ID_DIETARY_RESTRICTION FROM DIETARY_RESTRICTIONS"
+												+ " WHERE DIETARY_RESTRICTION_NAME IN ('" + String.join("', '", dietaryrestrictions) +"')";
+		ResultSet resultSet = statement.executeQuery(selectDietaryRestrictionsId);
+		ArrayList<Integer> dietaryRestrictionsIds = new ArrayList<Integer>();
+		
+		while (resultSet.next()) {
+			dietaryRestrictionsIds.add(resultSet.getInt("ID_DIETARY_RESTRICTION"));
+		}
+		
+		statement.close();
+		resultSet.close();
+		return dietaryRestrictionsIds;
 	}
 }
