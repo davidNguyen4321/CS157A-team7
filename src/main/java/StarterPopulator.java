@@ -7,11 +7,14 @@ import java.sql.ResultSet;
 
 public class StarterPopulator {
 	Starter starter;
+	StarterSelector starterselector;
 	Connection connection;
 	
 	public StarterPopulator(Starter starter) {
 		this.starter = starter;
 		this.connection = starter.connection;
+		this.starterselector= new StarterSelector(this.connection);
+		
 	}
 	
 	public void populateTables() throws SQLException {
@@ -205,7 +208,7 @@ public class StarterPopulator {
 	
 	public void addIngredient(String ingredientname, String[] dietaryrestrictions) throws SQLException {
 		int ingredientId = createIngredient(ingredientname);
-		ArrayList<Integer> dietaryRestrictionIds = selectDietaryRestrictions(dietaryrestrictions);
+		ArrayList<Integer> dietaryRestrictionIds = this.starterselector.selectDietaryRestrictionIds(dietaryrestrictions);
 		ArrayList<String> dietaryRestrictionsRelationships = new ArrayList<String>();
 		
 		for(int dietaryRestrictionId : dietaryRestrictionIds) {
@@ -247,21 +250,5 @@ public class StarterPopulator {
 		resultSet.close();
 		
 		return generatedKey;
-	}
-	
-	public ArrayList<Integer> selectDietaryRestrictions(String[] dietaryrestrictions) throws SQLException{
-		Statement statement = connection.createStatement(); // grab dietary restrictions ID
-		String selectDietaryRestrictionsId = "SELECT ID_DIETARY_RESTRICTION FROM DIETARY_RESTRICTIONS"
-												+ " WHERE DIETARY_RESTRICTION_NAME IN ('" + String.join("', '", dietaryrestrictions) +"')";
-		ResultSet resultSet = statement.executeQuery(selectDietaryRestrictionsId);
-		ArrayList<Integer> dietaryRestrictionsIds = new ArrayList<Integer>();
-		
-		while (resultSet.next()) {
-			dietaryRestrictionsIds.add(resultSet.getInt("ID_DIETARY_RESTRICTION"));
-		}
-		
-		statement.close();
-		resultSet.close();
-		return dietaryRestrictionsIds;
 	}
 }
