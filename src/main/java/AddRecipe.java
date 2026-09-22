@@ -1,42 +1,59 @@
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
+import java.sql.SQLException;
 
 public class AddRecipe {
 	Connection connection;
+	StarterPopulator starterpopulator;
 	
-	public AddRecipe(Connection connection) {
+	public AddRecipe(Connection connection, StarterPopulator starterpopulator) {
 		this.connection = connection;
+		this.starterpopulator = starterpopulator;
 	}
 	
-	public void addRecipe() {
-		Date today = Date.valueOf(LocalDate.now());
+	public void addRecipe(
+			String recipename,
+			int cookingtime,
+			String recipeimagepath,
+			String description,
+			String instructions,
+			String[] ingredients,
+			String[] cookingappliances,
+			String author,
+			String[] nationality,
+			String[] dishtypes
+	) throws SQLException {
+		int recipeId = createRecipe(recipename, cookingtime, recipeimagepath, description, instructions);
+		// TODO: add relationships
 	}
 	
 	/*
-	 * String recipeName, 
-	 * int cookingTime, 
-	 * String recipeImagePath, 
-	 * String Description, 
-	 * String Instructions, 
-	 * String[] Ingredients, 
-	 * String[] cookingAppliances, 
+	 * String recipename, 
+	 * Time cookingtime, 
+	 * String recipeimagepath, 
+	 * String description, 
+	 * String instructions, 
+	 * String[] ingredients, 
+	 * String[] cookingappliances, 
 	 * String author, 
 	 * String[] nationality, 
-	 * String[] dishTypes, 
-	 * String imagePath
+	 * String[] dishtypes, 
 	 */
-	public void createRecipe() {
-		// To be implemented
+	public int createRecipe(String recipename, int cookingtime, String recipeimagepath, String description, String instructions) throws SQLException { //TODO: standardize
+		Date today = Date.valueOf(LocalDate.now());
+		String addRecipe = """
+        INSERT INTO RECIPES (RECIPE_NAME, COOKING_TIME, PUBLICATION_DATE, RECIPE_IMAGE_PATH, DESCRIPTION, INSTRUCTIONS)
+    	VALUES ('""" + recipename.toLowerCase() + """
+    	', '""" + cookingtime + """
+    	', '""" + today + """
+    	', '""" + recipeimagepath + """
+    	', '""" + description + """
+    	', '""" + instructions + """
+    	')
+    	""";
+		String[] key = {"ID_RECIPE"};
+		return this.starterpopulator.createAndQueryId(addRecipe, key);
 	}
-	
-	/*
-	 * ID_RECIPE INT NOT NULL AUTO_INCREMENT,
-	 * RECIPE_NAME VARCHAR(45) NOT NULL,
-	 * COOKING_TIME TIME,
-	 * PUBLICATION_DATE DATE NOT NULL,
-	 * RECIPE_IMAGE_PATH TEXT(100),
-	 * DESCRIPTION TEXT(3000),
-	 * INSTRUCTIONS TEXT(12000) NOT NULL
-	 */
 }

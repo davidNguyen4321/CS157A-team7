@@ -101,7 +101,7 @@ public class StarterPopulator {
 	
 	public void populateNationality() throws SQLException {
 		String[] codeblocks = {
-				formatNationality("Italian")
+				formatNationality("italian")
 		};
 		starter.executeAll(codeblocks);
 	}
@@ -115,9 +115,22 @@ public class StarterPopulator {
 	}
 	
 	public void populateRecipes() throws SQLException {
-		String[] codeblocks = {
-		};
-		starter.executeAll(codeblocks);
+		AddRecipe addrecipe = new AddRecipe(connection, this);
+		String recipename = "Sunshine Salad";
+		int cookingtime = 30; // minutes
+		String recipeimagepath = "images/Sunshine-Fruit-Salad.jpg";
+		String description = "A delicious side dish for brunch!";
+		String instructions = "1. Cut pineapples and bananas.\n"
+				+ "2. Peel oranges\n"
+				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
+				+ "4. Keep refrigerated until served.\n"
+				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
+		String[] ingredients = {"pineapple", "orange", "vanilla pudding", "strawberry", "banana", "blueberry"};
+		String[] cookingappliances = null;
+		String author = "Bob";
+		String[] nationality = null;
+		String[] dishtypes = {"salad"};
+		addrecipe.addRecipe(recipename, cookingtime, recipeimagepath, description, instructions, ingredients, cookingappliances, author, nationality, dishtypes);
 	}
 	
 	
@@ -167,7 +180,7 @@ public class StarterPopulator {
 	
 	public String formatNationality(String nationalityname) {
 		return """
-		        INSERT INTO NATIONALITY (NATIONALITY_NAME)
+		        INSERT INTO NATIONALITIES (NATIONALITY_NAME)
 	        	VALUES ('""" + nationalityname.toLowerCase() + """
 	        	')
 	        	""";
@@ -175,7 +188,7 @@ public class StarterPopulator {
 	
 	public String formatDishType(String dishtype) {
 		return """
-		        INSERT INTO DISH_TYPE (DISH_TYPE_NAME)
+		        INSERT INTO DISH_TYPES (DISH_TYPE_NAME)
 	        	VALUES ('""" + dishtype.toLowerCase() + """
 	        	')
 	        	""";
@@ -192,15 +205,15 @@ public class StarterPopulator {
 	
 	public void addIngredient(String ingredientname, String[] dietaryrestrictions) throws SQLException {
 		int ingredientId = createIngredient(ingredientname);
-		ArrayList<Integer> dietaryResitrctionIds = selectDietaryRestrictions(dietaryrestrictions);
+		ArrayList<Integer> dietaryRestrictionIds = selectDietaryRestrictions(dietaryrestrictions);
 		ArrayList<String> dietaryRestrictionsRelationships = new ArrayList<String>();
 		
-		for(int dietaryResitrctionId : dietaryResitrctionIds) {
+		for(int dietaryRestrictionId : dietaryRestrictionIds) {
 			dietaryRestrictionsRelationships.add(
 					"""
 			        INSERT INTO INGREDIENTS_DIETARY_RESTRICTIONS (ID_INGREDIENT, ID_DIETARY_RESTRICTION)
 		        	VALUES ('""" + ingredientId + """
-		        	', '""" + dietaryResitrctionId + """
+		        	', '""" + dietaryRestrictionId + """
 		        	')
 		        	""");
 		}

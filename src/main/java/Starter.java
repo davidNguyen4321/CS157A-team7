@@ -103,14 +103,14 @@ public class Starter {
 		        CREATE TABLE IF NOT EXISTS RECIPES (
 		            ID_RECIPE INT NOT NULL AUTO_INCREMENT,
 		            RECIPE_NAME VARCHAR(45) NOT NULL,
-		            COOKING_TIME TIME,
+		            COOKING_TIME INT,
 		            PUBLICATION_DATE DATE NOT NULL,
 		            RECIPE_IMAGE_PATH TEXT(100),
 		            DESCRIPTION TEXT(3000),
 		            INSTRUCTIONS TEXT(12000) NOT NULL,
 		            PRIMARY KEY (ID_RECIPE)
 		        )
-		        """, 
+		        """, // cooking time is in minutes
 		        """
 		        CREATE TABLE IF NOT EXISTS REVIEWS (
 		            ID_REVIEW INT NOT NULL AUTO_INCREMENT,
@@ -120,14 +120,14 @@ public class Starter {
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS NATIONALITY (
+		        CREATE TABLE IF NOT EXISTS NATIONALITIES (
 		            ID_NATIONALITY INT NOT NULL AUTO_INCREMENT,
 		            NATIONALITY_NAME VARCHAR(45) NOT NULL UNIQUE,
 		            PRIMARY KEY (ID_NATIONALITY)
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS DISH_TYPE (
+		        CREATE TABLE IF NOT EXISTS DISH_TYPES (
 		            ID_DISH_TYPE INT NOT NULL AUTO_INCREMENT,
 		            DISH_TYPE_NAME VARCHAR(45) NOT NULL UNIQUE,
 		            PRIMARY KEY (ID_DISH_TYPE)
@@ -172,16 +172,16 @@ public class Starter {
 		        CREATE TABLE IF NOT EXISTS RECIPES_REVIEWS (
 		            ID_RECIPE INT NOT NULL,
 		            ID_REVIEW INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_REVIEW)
+		            PRIMARY KEY (ID_REVIEW)
 		        )
-		        """,
+		        """,// many to one
 		        """
 		        CREATE TABLE IF NOT EXISTS RECIPES_USER_AUTHORS (
 		            ID_RECIPE INT NOT NULL,
 		            ID_USER INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_USER)
+		            PRIMARY KEY (ID_RECIPE)
 		        )
-		        """,
+		        """,//many to one
 		        """
 		        CREATE TABLE IF NOT EXISTS USER_FOLLOWEDS__USER_FOLLOWERS (
 		            ID_USER_FOLLOWED INT NOT NULL,
@@ -228,30 +228,30 @@ public class Starter {
 		        CREATE TABLE IF NOT EXISTS USERS_IMAGES (
 		        	ID_USER INT NOT NULL,
 		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY (ID_USER, ID_IMAGE)
+		        	PRIMARY KEY (ID_USER)
 		        )
-		        """,
+		        """, // many to one
 		        """
 		        CREATE TABLE IF NOT EXISTS RECIPES_IMAGES (
 		        	ID_RECIPE INT NOT NULL,
 		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY(ID_RECIPE, ID_IMAGE)
+		        	PRIMARY KEY(ID_RECIPE)
 		        )
-		        """,
+		        """, // many to one for now, only cover images are supported. including images in the instructions is beyond the current scope
 		        """
 		        CREATE TABLE IF NOT EXISTS REVIEWS_IMAGES (
 		        	ID_REVIEW INT NOT NULL,
 		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY(ID_REVIEW, ID_IMAGE)
+		        	PRIMARY KEY(ID_REVIEW)
 		        )
-		        """,
+		        """, // many to one for now
 		        """
 		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS_IMAGES (
 		        	ID_DIETARY_RESTRICTION INT NOT NULL,
 		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY(ID_DIETARY_RESTRICTION, ID_IMAGE)
+		        	PRIMARY KEY(ID_DIETARY_RESTRICTION)
 		        )
-		        """
+		        """ // many to one
 		};
 
 		executeAll(codeblocks);
