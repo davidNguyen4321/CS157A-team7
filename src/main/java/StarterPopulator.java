@@ -121,7 +121,7 @@ public class StarterPopulator {
 		String recipeimagepath = "images/Sunshine-Fruit-Salad.jpg";
 		String description = "A delicious side dish for brunch!";
 		String instructions = "1. Cut pineapples and bananas.\n"
-				+ "2. Peel oranges\n"
+				+ "2. Peel oranges.\n"
 				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
 				+ "4. Keep refrigerated until served.\n"
 				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile

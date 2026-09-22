@@ -29,18 +29,6 @@ public class AddRecipe {
 		// TODO: add relationships
 	}
 	
-	/*
-	 * String recipename, 
-	 * Time cookingtime, 
-	 * String recipeimagepath, 
-	 * String description, 
-	 * String instructions, 
-	 * String[] ingredients, 
-	 * String[] cookingappliances, 
-	 * String author, 
-	 * String[] nationality, 
-	 * String[] dishtypes, 
-	 */
 	public int createRecipe(String recipename, int cookingtime, String recipeimagepath, String description, String instructions) throws SQLException { //TODO: standardize
 		Date today = Date.valueOf(LocalDate.now());
 		String addRecipe = """
