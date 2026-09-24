@@ -140,7 +140,7 @@ public class Starter {
 		            AUTHOR_ID INT NOT NULL,
 		            CUISINE_ID INT NULL,
 		            PRIMARY KEY (RECIPE_ID),
-		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID),
+		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE,
 		            FOREIGN KEY (CUISINE_ID) REFERENCES CUISINES (CUISINE_ID)
 		        )
 		        """,
@@ -155,8 +155,8 @@ public class Starter {
 		            RECIPE_ID INT NOT NULL,
 		        	USER_ID INT NOT NULL,
 		            PRIMARY KEY (REVIEW_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID),
-		        	FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID),
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+		        	FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE,
 		        	UNIQUE (RECIPE_ID, USER_ID)
 		        )
 		        """,
@@ -169,102 +169,60 @@ public class Starter {
 		String[] codeblocks = {
 				"""
 		        CREATE TABLE IF NOT EXISTS RECIPES_INGREDIENTS (
-		            ID_RECIPE INT NOT NULL,
-		            ID_INGREDIENT INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_INGREDIENT)
+		            RECIPE_ID INT NOT NULL,
+					INGREDIENT_ID INT NOT NULL,
+					AMOUNT DECIMAL(5,2) NULL,
+					AMOUNT_UNIT VARCHAR(25) NULL,
+		            PRIMARY KEY (RECIPE_ID, INGREDIENT_ID),
+					FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+					FOREIGN KEY (INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID)
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_COOKING_APPLIANCES (
-		            ID_RECIPE INT NOT NULL,
-		            ID_COOKING_APPLIANCE INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_COOKING_APPLIANCE)
+		        CREATE TABLE IF NOT EXISTS RECIPES_APPLIANCES (
+		            RECIPE_ID INT NOT NULL,
+		            APPLIANCE_ID INT NOT NULL,
+		            PRIMARY KEY (RECIPE_ID, APPLIANCE_ID),
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (APPLIANCE_ID) REFERENCES APPLIANCES (APPLIANCE_ID)
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_REVIEWS (
-		            ID_RECIPE INT NOT NULL,
-		            ID_REVIEW INT NOT NULL,
-		            PRIMARY KEY (ID_REVIEW)
-		        )
-		        """,// many to one
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_USER_AUTHORS (
-		            ID_RECIPE INT NOT NULL,
-		            ID_USER INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE)
-		        )
-		        """,//many to one
-		        """
-		        CREATE TABLE IF NOT EXISTS USER_FOLLOWEDS__USER_FOLLOWERS (
-		            ID_USER_FOLLOWED INT NOT NULL,
-		            ID_USER_FOLLOWER INT NOT NULL,
-		            PRIMARY KEY (ID_USER_FOLLOWED, ID_USER_FOLLOWER)
+		        CREATE TABLE IF NOT EXISTS FOLLOWED (
+		            FOLLOWER_ID INT NOT NULL,
+		            FOLLOWING_ID INT NOT NULL,
+		            PRIMARY KEY (FOLLOWER_ID, FOLLOWING_ID),
+		            FOREIGN KEY (FOLLOWER_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (FOLLOWING_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_USER_BOOKMARKERS (
-		            ID_RECIPE INT NOT NULL,
-		            ID_USER INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_USER)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_NATIONALITIES (
-		            ID_RECIPE INT NOT NULL,
-		            ID_NATIONALITY INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_NATIONALITY)
+		        CREATE TABLE IF NOT EXISTS BOOKMARKED (
+		            RECIPE_ID INT NOT NULL,
+		            USER_ID INT NOT NULL,
+		            PRIMARY KEY (RECIPE_ID, USER_ID),
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE
 		        )
 		        """,
 		        """
 		        CREATE TABLE IF NOT EXISTS RECIPES_DISH_TYPES (
-		            ID_RECIPE INT NOT NULL,
-		            ID_DISH_TYPE INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_DISH_TYPE)
+		            RECIPE_ID INT NOT NULL,
+		            DISH_TYPE_ID INT NOT NULL,
+		            PRIMARY KEY (RECIPE_ID, DISH_TYPE_ID),
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (DISH_TYPE_ID) REFERENCES DISH_TYPES (DISH_TYPE_ID)
 		        )
 		        """,
 		        """
 		        CREATE TABLE IF NOT EXISTS INGREDIENTS_DIETARY_RESTRICTIONS (
-		            ID_INGREDIENT INT NOT NULL,
-		            ID_DIETARY_RESTRICTION INT NOT NULL,
-		            PRIMARY KEY (ID_INGREDIENT, ID_DIETARY_RESTRICTION)
+		            INGREDIENT_ID INT NOT NULL,
+		            DIETARY_RESTRICTION_ID INT NOT NULL,
+		            PRIMARY KEY (INGREDIENT_ID, DIETARY_RESTRICTION_ID),
+		            FOREIGN KEY (INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID),
+		            FOREIGN KEY (DIETARY_RESTRICTION_ID) REFERENCES DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_ID)
 		        )
 		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPE_DIETARY_RESTRICTIONS (
-		            ID_RECIPE INT NOT NULL,
-		            ID_DIETARY_RESTRICTION INT NOT NULL,
-		            PRIMARY KEY (ID_RECIPE, ID_DIETARY_RESTRICTION)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS USERS_IMAGES (
-		        	ID_USER INT NOT NULL,
-		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY (ID_USER)
-		        )
-		        """, // many to one
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_IMAGES (
-		        	ID_RECIPE INT NOT NULL,
-		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY(ID_RECIPE)
-		        )
-		        """, // many to one for now, only cover images are supported. including images in the instructions is beyond the current scope
-		        """
-		        CREATE TABLE IF NOT EXISTS REVIEWS_IMAGES (
-		        	ID_REVIEW INT NOT NULL,
-		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY(ID_REVIEW)
-		        )
-		        """, // many to one for now
-		        """
-		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS_IMAGES (
-		        	ID_DIETARY_RESTRICTION INT NOT NULL,
-		        	ID_IMAGE INT NOT NULL,
-		        	PRIMARY KEY(ID_DIETARY_RESTRICTION)
-		        )
-		        """ // many to one
 		};
 
 		executeAll(codeblocks);
