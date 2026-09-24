@@ -50,9 +50,11 @@ public class Starter {
 		
 		Statement execStatement = connection.createStatement(); // Open another statement for executing actions
 
+		execStatement.execute("SET FOREIGN_KEY_CHECKS = 0");
 		while(rs.next()){ // Action all tables
 			execStatement.execute(action + " TABLE " + rs.getString(1));
 		}
+	    execStatement.execute("SET FOREIGN_KEY_CHECKS = 1");
 		
 		grabStatement.close();
 		execStatement.close();
@@ -73,80 +75,91 @@ public class Starter {
 		createRelationshipSets();
 	}
 	
-	// 3000 bytes ~ 500 words
 	public void createEntitySets() throws SQLException {
 		String[] codeblocks = {
 				"""
-		        CREATE TABLE IF NOT EXISTS INGREDIENTS (
-		            ID_INGREDIENT INT NOT NULL AUTO_INCREMENT,
-		            INGREDIENT_NAME VARCHAR(45) NOT NULL UNIQUE,
-		            PRIMARY KEY (ID_INGREDIENT)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS COOKING_APPLIANCES (
-		        	ID_COOKING_APPLIANCE INT NOT NULL AUTO_INCREMENT,
-		        	COOKING_APPLIANCE_NAME VARCHAR(45) NOT NULL UNIQUE,
-		        	PRIMARY KEY (ID_COOKING_APPLIANCE)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS USERS (
-		        	ID_USER INT NOT NULL AUTO_INCREMENT,
-		        	USER_NAME VARCHAR(45) NOT NULL UNIQUE,
-		        	EMAIL_ADDRESS VARCHAR(45) NOT NULL UNIQUE,
-		        	ACCOUNT_CREATION_DATE DATE NOT NULL,
-		        	PRIMARY KEY (ID_USER)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES (
-		            ID_RECIPE INT NOT NULL AUTO_INCREMENT,
-		            RECIPE_NAME VARCHAR(45) NOT NULL,
-		            COOKING_TIME INT,
-		            PUBLICATION_DATE DATE NOT NULL,
-		            RECIPE_IMAGE_PATH TEXT(100),
-		            DESCRIPTION TEXT(3000),
-		            INSTRUCTIONS TEXT(12000) NOT NULL,
-		            PRIMARY KEY (ID_RECIPE)
-		        )
-		        """, // cooking time is in minutes
-		        """
-		        CREATE TABLE IF NOT EXISTS REVIEWS (
-		            ID_REVIEW INT NOT NULL AUTO_INCREMENT,
-		            TEXT TEXT(3000) NOT NULL,
-		            RATING INT NOT NULL,
-		            PRIMARY KEY (ID_REVIEW)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS NATIONALITIES (
-		            ID_NATIONALITY INT NOT NULL AUTO_INCREMENT,
-		            NATIONALITY_NAME VARCHAR(45) NOT NULL UNIQUE,
-		            PRIMARY KEY (ID_NATIONALITY)
+		        CREATE TABLE IF NOT EXISTS CUISINES (
+		            CUISINE_ID INT NOT NULL AUTO_INCREMENT,
+		            CUISINE_NAME VARCHAR(50) NOT NULL UNIQUE,
+		            BASE_CUISINE_ID INT NULL,
+		            PRIMARY KEY (CUISINE_ID),
+		        	FOREIGN KEY (BASE_CUISINE_ID) REFERENCES CUISINES (CUISINE_ID)
 		        )
 		        """,
 		        """
 		        CREATE TABLE IF NOT EXISTS DISH_TYPES (
-		            ID_DISH_TYPE INT NOT NULL AUTO_INCREMENT,
-		            DISH_TYPE_NAME VARCHAR(45) NOT NULL UNIQUE,
-		            PRIMARY KEY (ID_DISH_TYPE)
-		        )
+				    DISH_TYPE_ID INT NOT NULL AUTO_INCREMENT,
+				    DISH_TYPE_NAME VARCHAR(50) NOT NULL UNIQUE,
+				    PRIMARY KEY (DISH_TYPE_ID)
+				)
 		        """,
 		        """
 		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS (
-		            ID_DIETARY_RESTRICTION INT NOT NULL AUTO_INCREMENT,
-		            DIETARY_RESTRICTION_NAME VARCHAR(45) NOT NULL UNIQUE,
-		            PRIMARY KEY (ID_DIETARY_RESTRICTION)
+				    DIETARY_RESTRICTION_ID INT NOT NULL AUTO_INCREMENT,
+				    DIETARY_RESTRICTION_NAME VARCHAR(50) NOT NULL UNIQUE,
+				    PRIMARY KEY (DIETARY_RESTRICTION_ID)
+				)
+		        """,
+				"""
+		        CREATE TABLE IF NOT EXISTS INGREDIENTS (
+		            INGREDIENT_ID INT NOT NULL AUTO_INCREMENT,
+		            INGREDIENT_NAME VARCHAR(150) NOT NULL UNIQUE,
+		          	BASE_INGREDIENT_ID INT NULL,
+		            PRIMARY KEY (INGREDIENT_ID),
+		            FOREIGN KEY (BASE_INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID)
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS IMAGES (
-		            ID_IMAGE INT NOT NULL AUTO_INCREMENT,
-		            IMAGE_PATH VARCHAR(45) NOT NULL UNIQUE,
-		            PRIMARY KEY (ID_IMAGE)
+		        CREATE TABLE IF NOT EXISTS APPLIANCES (
+		        	APPLIANCE_ID INT NOT NULL AUTO_INCREMENT,
+		        	APPLIANCE_NAME VARCHAR(50) NOT NULL UNIQUE,
+		        	PRIMARY KEY (APPLIANCE_ID)
 		        )
+		        """,
 		        """
+		        CREATE TABLE IF NOT EXISTS USERS (
+		        	USER_ID INT NOT NULL AUTO_INCREMENT,
+		        	USER_NAME VARCHAR(50) NOT NULL UNIQUE,
+		        	EMAIL_ADDRESS VARCHAR(254) NOT NULL UNIQUE,
+		        	PASSWORD_HASH VARCHAR(150) NOT NULL,
+		        	AVATAR_PATH VARCHAR(150) NULL,
+		        	JOIN_DATE DATE NOT NULL DEFAULT (CURRENT_DATE),
+		        	PRIMARY KEY (USER_ID)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS RECIPES (
+		            RECIPE_ID INT NOT NULL AUTO_INCREMENT,
+		            RECIPE_NAME VARCHAR(150) NOT NULL,
+		            COOK_MINUTES INT NULL,
+		            DESCRIPTION TEXT NULL,
+		            INSTRUCTIONS TEXT NOT NULL,
+		            COURSE ENUM('Appetizer', 'Main Course', 'Side Dish', 'Dessert') NULL,
+		            IMAGE_PATH VARCHAR(150) NULL,
+		            PUBLISH_DATE DATE NOT NULL DEFAULT (CURRENT_DATE),
+		            AUTHOR_ID INT NOT NULL,
+		            CUISINE_ID INT NULL,
+		            PRIMARY KEY (RECIPE_ID),
+		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID),
+		            FOREIGN KEY (CUISINE_ID) REFERENCES CUISINES (CUISINE_ID)
+		        )
+		        """,
+		        """
+		        CREATE TABLE IF NOT EXISTS REVIEWS (
+		            REVIEW_ID INT NOT NULL AUTO_INCREMENT,
+		            RATING INT NOT NULL,
+		            CHECK (RATING BETWEEN 1 AND 5),
+		            CONTENT TEXT NULL,
+		            PHOTO_PATH VARCHAR(150) NULL,
+		            POST_DATE DATE NOT NULL DEFAULT (CURRENT_DATE),
+		            RECIPE_ID INT NOT NULL,
+		        	USER_ID INT NOT NULL,
+		            PRIMARY KEY (REVIEW_ID),
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID),
+		        	FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID),
+		        	UNIQUE (RECIPE_ID, USER_ID)
+		        )
+		        """,
 		};
 		
 		executeAll(codeblocks);
