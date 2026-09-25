@@ -42,7 +42,6 @@ public class AddRecipe {
 	}
 	
 	public int createRecipe(String recipename, int cookminutes, String description, String instructions, String course, String imagepath, int authorid, int cuisineid) throws SQLException { //TODO: standardize
-		Date today = Date.valueOf(LocalDate.now());
 		String addRecipe = """
         INSERT INTO RECIPES (RECIPE_NAME, COOK_MINUTES, DESCRIPTION, INSTRUCTIONS, COURSE, IMAGE_PATH, AUTHOR_ID, CUISINE_ID)
     	VALUES ('""" + recipename.toLowerCase() + """

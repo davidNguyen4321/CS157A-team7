@@ -117,6 +117,17 @@ public class Starter {
 		        )
 		        """,
 		        """
+		        CREATE TABLE IF NOT EXISTS USERS (
+		        	USER_ID INT NOT NULL AUTO_INCREMENT,
+		        	USER_NAME VARCHAR(50) NOT NULL UNIQUE,
+		        	EMAIL_ADDRESS VARCHAR(254) NOT NULL UNIQUE,
+		        	PASSWORD_HASH VARCHAR(150) NOT NULL,
+		        	AVATAR_PATH VARCHAR(150) NULL,
+		        	JOIN_DATE DATE NOT NULL DEFAULT (CURRENT_DATE),
+		        	PRIMARY KEY (USER_ID)
+		        )
+		        """,
+		        """
 		        CREATE TABLE IF NOT EXISTS RECIPES (
 		            RECIPE_ID INT NOT NULL AUTO_INCREMENT,
 		            RECIPE_NAME VARCHAR(150) NOT NULL,
@@ -147,17 +158,6 @@ public class Starter {
 		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
 		        	FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE,
 		        	UNIQUE (RECIPE_ID, USER_ID)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS USERS (
-		        	USER_ID INT NOT NULL AUTO_INCREMENT,
-		        	USER_NAME VARCHAR(50) NOT NULL UNIQUE,
-		        	EMAIL_ADDRESS VARCHAR(254) NOT NULL UNIQUE,
-		        	PASSWORD_HASH VARCHAR(150) NOT NULL,
-		        	AVATAR_PATH VARCHAR(150) NULL,
-		        	JOIN_DATE DATE NOT NULL DEFAULT (CURRENT_DATE),
-		        	PRIMARY KEY (USER_ID)
 		        )
 		        """
 		};

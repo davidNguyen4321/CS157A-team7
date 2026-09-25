@@ -78,8 +78,7 @@ public class StarterPopulator {
 	
 	public void populateReviews() throws SQLException {
 		String[] codeblocks = {
-				 formatReview("Delicious", 5),
-				 formatReview("Feels like its missing something", 3)
+				 
 		};
 		starter.executeAll(codeblocks);
 	}
@@ -143,12 +142,15 @@ public class StarterPopulator {
 	}
 	
 	public String formatCuisine(String cuisinename, String basecuisinename) throws SQLException {
-		int basecuisineid = this.starterselector.selectCuisineIds(new String[]{basecuisinename}).get(0);
+		Integer basecuisineid = null;
+		if (basecuisinename != null && basecuisinename.isEmpty()) {
+			basecuisineid = this.starterselector.selectCuisineIds(new String[]{basecuisinename}).get(0);
+		}
 		return 	"""
-		        INSERT INTO CUISINES (CUISIEN_NAME, BASE_CUISINE_ID)
+		        INSERT INTO CUISINES (CUISINE_NAME, BASE_CUISINE_ID)
 	        	VALUES ('""" + cuisinename.toLowerCase() + """
-	        	', '""" + basecuisineid + """
-	        	')
+	        	', """ + basecuisineid + """
+	        	)
 	        	""";
 	}
 	
@@ -168,23 +170,24 @@ public class StarterPopulator {
 	        	""";
 	}
 	
-	public String formatReview(String dishtype, int rating) { // DO NOT USE SINGLE QUOTES IN THE REVIEW TEXT.
+	public String formatReview(int rating, String content, String photopath, int recipeid, String username) throws SQLException{ // DO NOT USE SINGLE QUOTES IN THE REVIEW basecuisineids.
+		int userid = this.starterselector.selectUserIds(new String[]{username}).get(0);
 		return """
-		        INSERT INTO REVIEWS (TEXT, RATING)
-	        	VALUES ('""" + dishtype.toLowerCase() + """
-	        	', """ + rating + """
-	        	)
+		        INSERT INTO REVIEWS (RATING, CONTENT, PHOTO_PATH, RECIPE_ID, USER_ID)
+	        	VALUES (""" + rating + """
+	        	, '""" + content.toLowerCase() + """
+	        	', '""" + photopath + """
+	        	', """ + recipeid + """
+	        	, '""" + userid + """
+	        	')
 	        	""";
 	}
 	
 	public String formatUser(String username, String emailaddress) throws SQLException {
-		Date now = new Date();
-		java.sql.Date sqldate = new java.sql.Date(now.getTime());
 		return 	"""
-		        INSERT INTO USERS (USER_NAME, EMAIL_ADDRESS, ACCOUNT_CREATION_DATE)
+		        INSERT INTO USERS (USER_NAME, EMAIL_ADDRESS)
 	        	VALUES ('""" + username + """
 	        	', '""" + emailaddress + """
-	        	', '""" + sqldate + """
 	        	')
 	        	""";
 	}
@@ -210,13 +213,16 @@ public class StarterPopulator {
 		starter.executeAll(codeblocks);
 	}
 	
-	public int createIngredient(String ingredientname, String baseingredientname) throws SQLException { //TODO: standardize
-		int baseingredientid = this.starterselector.selectIngredientIds(new String[]{baseingredientname}).get(0);
+	public int createIngredient(String ingredientname, String baseingredientname) throws SQLException {
+		Integer baseingredientid = null;
+		if (baseingredientname != null && baseingredientname.isEmpty()) {
+			baseingredientid = this.starterselector.selectIngredientIds(new String[]{baseingredientname}).get(0);
+		}
 		String addIngredient = """
         INSERT INTO INGREDIENTS (INGREDIENT_NAME, BASE_INGREDIENT_ID)
     	VALUES ('""" + ingredientname.toLowerCase() + """
-    	'""" + baseingredientid + """
-    	')
+    	', """ + baseingredientid + """
+    	)
     	""";
 		String[] key = {"INGREDIENT_ID"};
 		return createAndQueryId(addIngredient, key);
