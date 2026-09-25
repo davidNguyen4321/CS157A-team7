@@ -10,32 +10,28 @@ public class StarterSelector {
 		this.connection = connection;
 	}	
 	
+	public ArrayList<Integer> selectApplianceIds(String[] appliances) throws SQLException{ //Automatically formats the request to the selector
+		return selectIds("APPLIANCES", "APPLIANCE_ID", "APPLIANCE_NAME", appliances);
+	}
+	
+	public ArrayList<Integer> selectCuisineIds(String[] cuisines) throws SQLException{ //Automatically formats the request to the selector
+		return selectIds("CUISINES", "CUISINE_ID", "CUISINE_ID", cuisines);
+	}
+	
 	public ArrayList<Integer> selectDietaryRestrictionIds(String[] dietaryrestrictions) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("DIETARY_RESTRICTIONS", "ID_DIETARY_RESTRICTION", "DIETARY_RESTRICTION_NAME", dietaryrestrictions);
-	}
-	
-	public ArrayList<Integer> selectIngredientIds(String[] ingredients) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("INGREDIENTS", "ID_INGREDIENT", "INGREDIENT_NAME", ingredients);
-	}
-	
-	public ArrayList<Integer> selectCookingApplianceIds(String[] cookingappliances) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("COOKING_APPLIANCES", "ID_COOKING_APPLIANCE", "COOKING_APPLIANCE_NAME", cookingappliances);
-	}
-	
-	public ArrayList<Integer> selectImageIds(String[] images) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("IMAGES", "ID_IMAGE", "IMAGE_PATH", images);
-	}
-	
-	public ArrayList<Integer> selectUserIds(String[] users) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("USERS", "ID_USER", "USER_NAME", users);
-	}
-	
-	public ArrayList<Integer> selectNationalityIds(String[] nationalities) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("NATIONALITIES", "ID_NATIONALITY", "NATIONALITY_NAME", nationalities);
+		return selectIds("DIETARY_RESTRICTIONS", "DIETARY_RESTRICTION_ID", "DIETARY_RESTRICTION_NAME", dietaryrestrictions);
 	}
 	
 	public ArrayList<Integer> selectDishTypeIds(String[] dishtypes) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("DISH_TYPES", "ID_DISH_TYPE", "DISH_TYPE_NAME", dishtypes);
+		return selectIds("DISH_TYPES", "DISH_TYPE_ID", "DISH_TYPE_NAME", dishtypes);
+	}
+	
+	public ArrayList<Integer> selectIngredientIds(String[] ingredients) throws SQLException{ //Automatically formats the request to the selector
+		return selectIds("INGREDIENTS", "INGREDIENT_ID", "INGREDIENT_NAME", ingredients);
+	}
+	
+	public ArrayList<Integer> selectUserIds(String[] users) throws SQLException{ //Automatically formats the request to the selector
+		return selectIds("USERS", "USER_ID", "USER_NAME", users);
 	}
 	
 	//recipes and reviews do not have candidate keys, so they are omitted
