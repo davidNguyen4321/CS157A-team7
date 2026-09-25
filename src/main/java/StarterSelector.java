@@ -15,7 +15,7 @@ public class StarterSelector {
 	}
 	
 	public ArrayList<Integer> selectCuisineIds(String[] cuisines) throws SQLException{ //Automatically formats the request to the selector
-		return selectIds("CUISINES", "CUISINE_ID", "CUISINE_ID", cuisines);
+		return selectIds("CUISINES", "CUISINE_ID", "CUISINE_NAME", cuisines);
 	}
 	
 	public ArrayList<Integer> selectDietaryRestrictionIds(String[] dietaryrestrictions) throws SQLException{ //Automatically formats the request to the selector

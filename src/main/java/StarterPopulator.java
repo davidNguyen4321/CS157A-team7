@@ -27,11 +27,10 @@ public class StarterPopulator {
 		populateCuisines();
 		populateDietaryRestrictions();
 		populateDishTypes();
-		populateReviews();
 		populateUsers();
-
 		populateIngredients();
 		populateRecipes();
+		populateReviews();
 	}
 	
 	public void populateRelationships() throws SQLException {
@@ -47,11 +46,8 @@ public class StarterPopulator {
 	}
 	
 	public void populateCuisines() throws SQLException {
-		String[] codeblocks = {
-				formatCuisine("mediterranean", null),
-				formatCuisine("italian", "mediterranean")
-		};
-		starter.executeAll(codeblocks);
+		addCuisine("mediterranean", null);
+		addCuisine("italian", "mediterranean");
 	}
 	
 	public void populateDietaryRestrictions() throws SQLException {
@@ -85,8 +81,8 @@ public class StarterPopulator {
 	
 	public void populateUsers() throws SQLException {
 		String[] codeblocks = {
-				formatUser("Bob", "Bob@gmail.com"),
-				formatUser("Tom", "Tom@gmail.com")
+				formatUser("Bob", "Bob@gmail.com", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "images/Bob.jpg"),
+				formatUser("Tom", "Tom@gmail.com", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33", null)
 		};
 		starter.executeAll(codeblocks);
 	}
@@ -126,8 +122,8 @@ public class StarterPopulator {
 		String course = "Dessert";
 		String imagepath = "images/Sunshine-Fruit-Salad.jpg";
 		String author = "Bob";
-		String cuisine = null;
-		String[] appliances = null;
+		String cuisine = "italian";
+		String[] appliances = new String[]{};
 		String[] ingredients = {"pineapple", "orange", "vanilla pudding", "strawberry", "banana", "blueberry"};
 		String[] dishtypes = {"salad"};
 		addrecipe.addRecipe(recipename, cookminutes, description, instructions, course, imagepath, author, cuisine, appliances, dishtypes, ingredients);
@@ -141,17 +137,20 @@ public class StarterPopulator {
 	        	""";
 	}
 	
-	public String formatCuisine(String cuisinename, String basecuisinename) throws SQLException {
+	public void addCuisine(String cuisinename, String basecuisinename) throws SQLException {
 		Integer basecuisineid = null;
-		if (basecuisinename != null && basecuisinename.isEmpty()) {
-			basecuisineid = this.starterselector.selectCuisineIds(new String[]{basecuisinename}).get(0);
+		ArrayList<Integer> basecuisineids = this.starterselector.selectCuisineIds(new String[]{basecuisinename});
+		if (basecuisineids.size()>0) { // if cuisine was found
+			basecuisineid = basecuisineids.get(0);
 		}
-		return 	"""
+		String addCuisine = """
 		        INSERT INTO CUISINES (CUISINE_NAME, BASE_CUISINE_ID)
 	        	VALUES ('""" + cuisinename.toLowerCase() + """
 	        	', """ + basecuisineid + """
 	        	)
 	        	""";
+		execute(addCuisine);
+		
 	}
 	
 	public String formatDietaryRestriction(String dietaryrestrictionname) {
@@ -183,12 +182,18 @@ public class StarterPopulator {
 	        	""";
 	}
 	
-	public String formatUser(String username, String emailaddress) throws SQLException {
+	public String formatUser(String username, String emailaddress, String passwordhash, String avatarpath) throws SQLException {
+		String avatarpathcleaned = null;
+		if (avatarpath != null && !avatarpath.isEmpty()) {
+			avatarpathcleaned = "'"+avatarpath+"'";
+		} 
 		return 	"""
-		        INSERT INTO USERS (USER_NAME, EMAIL_ADDRESS)
+		        INSERT INTO USERS (USER_NAME, EMAIL_ADDRESS, PASSWORD_HASH, AVATAR_PATH)
 	        	VALUES ('""" + username + """
 	        	', '""" + emailaddress + """
-	        	')
+	        	', '""" + passwordhash + """
+	        	', """ + avatarpathcleaned + """
+	        	)
 	        	""";
 	}
 	
@@ -215,8 +220,9 @@ public class StarterPopulator {
 	
 	public int createIngredient(String ingredientname, String baseingredientname) throws SQLException {
 		Integer baseingredientid = null;
-		if (baseingredientname != null && baseingredientname.isEmpty()) {
-			baseingredientid = this.starterselector.selectIngredientIds(new String[]{baseingredientname}).get(0);
+		ArrayList<Integer> baseingredientids = this.starterselector.selectIngredientIds(new String[]{baseingredientname});
+		if (baseingredientids.size()>0) {
+			baseingredientid = baseingredientids.get(0);
 		}
 		String addIngredient = """
         INSERT INTO INGREDIENTS (INGREDIENT_NAME, BASE_INGREDIENT_ID)
@@ -226,6 +232,12 @@ public class StarterPopulator {
     	""";
 		String[] key = {"INGREDIENT_ID"};
 		return createAndQueryId(addIngredient, key);
+	}
+	
+	public void execute(String query) throws SQLException{//intended for singular executions
+		Statement statement = connection.createStatement();
+		statement.execute(query);
+		statement.close();
 	}
 	
 	public int createAndQueryId(String query, String[] key) throws SQLException{
