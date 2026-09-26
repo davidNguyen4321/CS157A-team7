@@ -22,11 +22,12 @@ public class AddRecipe {
 	
 	public void addRecipe(
 			String recipename,
-			int cookminutes,
-			String description,
+			String recipeimagepath,
+			String recipedescription,
 			String instructions,
+			Integer totalminutes,
+			String whentoeat,
 			String course,
-			String imagepath,
 			String author,
 			String cuisine,
 			String[] appliances,
@@ -41,30 +42,26 @@ public class AddRecipe {
 			cuisineid = cuisineids.get(0);
 		}
 		
-		int recipeid = createRecipe(recipename, cookminutes, description, instructions, course, imagepath, authorid, cuisineid);
+		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, whentoeat, course, authorid);
 		
 		addRecipeRelationships(this.starterselector.selectApplianceIds(appliances), "APPLIANCE_ID", recipeid, "RECIPES_APPLIANCES");
 		addRecipeRelationships(this.starterselector.selectDishTypeIds(dishtypes), "DISH_TYPE_ID", recipeid, "RECIPES_DISH_TYPES");
 		addRecipeRelationships(this.starterselector.selectIngredientIds(ingredients), "INGREDIENT_ID", recipeid, "RECIPES_INGREDIENTS");
 	}
 	
-	public int createRecipe(String recipename, Integer cookminutes, String description, String instructions, String course, String imagepath, Integer authorid, Integer cuisineid) throws SQLException { //TODO: standardize
-		String addRecipe = """
-        INSERT INTO RECIPES (RECIPE_NAME, COOK_MINUTES, DESCRIPTION, INSTRUCTIONS, COURSE, IMAGE_PATH, AUTHOR_ID, CUISINE_ID)
-    	VALUES ('""" + recipename.toLowerCase() + """
-    	', """ + cookminutes + """
-    	, '""" + description + """
-    	', '""" + instructions + """
-    	', '""" + course + """
-    	', '""" + imagepath + """			
-    	', '""" + authorid + """
-    	', """ + cuisineid + """
-    	)
-    	""";
+	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, String whentoeat, String course, Integer authorid) throws SQLException {
+		String recipeimagepathcleaned = this.starterpopulator.clean(recipeimagepath);
+		String recipedescriptioncleaned = this.starterpopulator.clean(recipedescription);
+		String whentoeatcleaned = this.starterpopulator.clean(whentoeat);
+		String coursecleaned = this.starterpopulator.clean(course);
+		
+		String addRecipe = MessageFormat.format(this.starterpopulator.doubleSingleQuote("""
+        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, WHEN_TO_EAT, COURSE, AUTHOR_ID)
+    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutes, whentoeatcleaned, coursecleaned, authorid);
 		String[] key = {"ID_RECIPE"};
 		return this.starterpopulator.createAndQueryId(addRecipe, key);
 	}
-	
+
 	public void addRecipeRelationships(ArrayList<Integer> manyids, String manyidcolumnname, int recipeid, String tablename) throws SQLException {
 		String[] codeblocks = new String[manyids.size()];
 		for (int i = 0; i<manyids.size(); i++) {
@@ -75,8 +72,8 @@ public class AddRecipe {
 	}
 	
 	public String formatRecipeRelationship(int manyid, String manyidcolumnname, int recipeid, String tablename) {
-		return MessageFormat.format("""
+		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
 		        INSERT INTO {0} ({1}, RECIPE_ID)
-	        	VALUES ({2}, {3})""", tablename, manyidcolumnname, manyid, recipeid);
+	        	VALUES ({2}, {3})"""), tablename, manyidcolumnname, manyid, recipeid);
 	}
 }
