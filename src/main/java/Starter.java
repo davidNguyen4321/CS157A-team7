@@ -151,8 +151,10 @@ public class Starter {
 		            TOTAL_MINUTES INT NULL,
 		            MINUTES_AI_GENERATED BOOLEAN NOT NULL,
 		            COURSE ENUM('Entrée', 'Appetizer / Side', 'Dessert', 'Other') NOT NULL,
+		            CUISINE_ID INT NULL,
 		            AUTHOR_ID INT NULL,
-		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID)
+		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID),
+		            UNIQUE (RECIPE_NAME, AUTHOR_ID)
 		        )
 		        """, // Hard delete for 'Deleted' after 30 days, for 'Moderated' after violation expires
 		        """
