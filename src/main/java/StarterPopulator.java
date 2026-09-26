@@ -5,6 +5,7 @@ import java.util.Date;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
+import java.time.OffsetDateTime;
 
 public class StarterPopulator {
 	Starter starter;
@@ -47,30 +48,25 @@ public class StarterPopulator {
 	}
 	
 	public void populateCuisines() throws SQLException {
-		addCuisine("mediterranean", null);
-		addCuisine("italian", "mediterranean");
+		addCuisine("mediterranean", "Cuisine from the Mediterranean basin, commonly using olives, wheat, and grapes.", null);
+		addCuisine("italian", "Famous for its simplicity, and even more popular in kitchens worldwide.", "mediterranean");
 	}
-	
 	public void populateDietaryRestrictions() throws SQLException {
-		String[] codeblocks = {
-				formatDietaryRestriction("vegan"),
-				formatDietaryRestriction("vegetarian"),
-				formatDietaryRestriction("gluten-free"),
-				formatDietaryRestriction("dairy-free"),
-				formatDietaryRestriction("pescetarian"),
-				formatDietaryRestriction("shellfish-free"),
-				formatDietaryRestriction("paleo")
-
-		};
-		starter.executeAll(codeblocks);
+		addDietaryRestriction("vegan", "Does not contain meat or animal products.", null);
+		addDietaryRestriction("vegetarian", "Does not contain meat.", null);
+		addDietaryRestriction("gluten-free", "Does not contain the protein gluten.", null);
+		addDietaryRestriction("dairy-free", "Does not contain milk or food made from milk.", null);
+		addDietaryRestriction("pescetarian", "Does not contain any meat, except fish", null);
+		addDietaryRestriction("shellfish-free", "Does not contain shellfish", null);
+		addDietaryRestriction("paleo", "Diet based on foods humans may have eaten during the Paleolithic Era", null);
 	}
 	
 	public void populateDishTypes() throws SQLException {
-		String[] codeblocks = {
-				formatDishType("salad"),
-				formatDishType("flatbread")
-		};
-		starter.executeAll(codeblocks);
+		addDishType("salad", "A dish containing mixed ingredients", null);
+		addDishType("fruit salad", "A dish containing mixed fruit", "salad");
+		addDishType("bread", "Baked food product from water, flour, and often yeast.", null);
+		addDishType("flatbread", "A type of bread where the dough is rolled flat.", "bread");
+		addDishType("pizza", "Italian dish, typically with a flatbread base, covered with tomato sauce, and topped by cheese.", "flatbread");
 	}
 	
 	public void populateReviews() throws SQLException {
@@ -82,12 +78,11 @@ public class StarterPopulator {
 	
 	public void populateUsers() throws SQLException {
 		String[] codeblocks = {
-				formatUser("Bob", "Bob@gmail.com", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "images/avatars/Bob.jpg"),
-				formatUser("Tom", "Tom@gmail.com", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33", null)
+				formatUser("Bob", "images/avatars/Bob.jpg", "Professional chef with 10 years of experience", "UTC-2", "Bob@gmail.com", null, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"),
+				formatUser("Tom", null, null, "UTC+8", null, "+1 1234567890", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33")
 		};
 		starter.executeAll(codeblocks);
 	}
-	
 	public void populateIngredients() throws SQLException {
 		String[] restrictions = {"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free", "palaeo"};
 		addIngredient("pineapple", "images/ingredients/Pineapple.webp", "Tropical fruit with a tough, spiky skin.", null, restrictions);
@@ -112,7 +107,6 @@ public class StarterPopulator {
 		restrictions = new String[]{"vegatarian", "pescetarian", "shellfish-free"};
 		addIngredient("cheese", "images/ingredients/sharp-cheddar-baby-swiss.webp", "Dairy product from curdling milk.", null, restrictions);
 		addIngredient("mozzarella", "images/ingredients/mozzarella.jpg", "Semi-soft non-aged cheese prepared using the pasta filata method.", "cheese", restrictions);
-		addIngredient("parmesan", "images/ingredients/mozzarella.jpg", "Semi-soft non-aged cheese prepared using the pasta filata method.", "cheese", restrictions);
 		addIngredient("parmesan", "images/ingredients/parmesan.jpg", "The \"King of Cheese,\" Parmigiano-Reggiano, Parmesan is an italian hard, granular cheese.", "cheese", restrictions);
 		addIngredient("vanilla pudding", "images/ingredients/vanilla-pudding.webp", "Rich, silky custard with its titular flavor", null, restrictions);
 	}
@@ -120,106 +114,101 @@ public class StarterPopulator {
 	public void populateRecipes() throws SQLException {
 		AddRecipe addrecipe = new AddRecipe(connection, this);
 		String recipename = "Sunshine Fruit Salad";
-		int cookminutes = 30; // minutes
-		String description = "A delicious side dish for brunch!";
+		String recipeimagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
+		String recipedescription = "A delicious side dish for brunch!";
 		String instructions = "1. Cut pineapples and bananas.\n"
 				+ "2. Peel oranges.\n"
 				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
 				+ "4. Keep refrigerated until served.\n"
 				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
+		Integer totalminutes = 30; // minutes
+		String whentoeat = "Dinner";
 		String course = "Dessert";
-		String imagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
 		String author = "Bob";
 		String cuisine = "italian";
 		String[] appliances = new String[]{};
 		String[] ingredients = {"pineapple", "orange", "vanilla pudding", "strawberry", "banana", "blueberry"};
-		String[] dishtypes = {"salad"};
-		addrecipe.addRecipe(recipename, cookminutes, description, instructions, course, imagepath, author, cuisine, appliances, dishtypes, ingredients);
+		String[] dishtypes = {"fruit salad"};
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, whentoeat, course, author, cuisine, appliances, dishtypes, ingredients);
 	}
 	
 	public String formatAppliance(String appliancename, String applianceimagepath, String appliancedescription) throws SQLException {
-		return 	MessageFormat.format("""
+		return 	MessageFormat.format(doubleSingleQuote("""
 		        INSERT INTO APPLIANCES (APPLIANCE_NAME, APPLIANCE_IMAGE_PATH, APPLIANCE_DESCRIPTION)
-	        	VALUES ('{0}', '{1}', '{2}')""",
+	        	VALUES ('{0}', '{1}', '{2}')"""),
 	        	appliancename.toLowerCase(), applianceimagepath, appliancedescription);
-	}
+	}		        
 	
-	public void addCuisine(String cuisinename, String basecuisinename) throws SQLException {
+	public void addCuisine(String cuisinename, String cuisinedescription, String basecuisinename) throws SQLException {
 		Integer basecuisineid = null;
 		ArrayList<Integer> basecuisineids = this.starterselector.selectCuisineIds(new String[]{basecuisinename});
 		if (basecuisineids.size()>0) { // if cuisine was found
 			basecuisineid = basecuisineids.get(0);
 		}
-		String addCuisine = """
-		        INSERT INTO CUISINES (CUISINE_NAME, BASE_CUISINE_ID)
-	        	VALUES ('""" + cuisinename.toLowerCase() + """
-	        	', """ + basecuisineid + """
-	        	)
-	        	""";
-		execute(addCuisine);
+		String addcuisine = MessageFormat.format(doubleSingleQuote("""
+		        INSERT INTO CUISINES (CUISINE_NAME, CUISINE_DESCRIPTION, BASE_CUISINE_ID)
+	        	VALUES ('{0}', '{1}', {2})"""), cuisinename.toLowerCase(), cuisinedescription, basecuisineid);
+		execute(addcuisine);
 	}
 	
-	public String formatDietaryRestriction(String dietaryrestrictionname) {
-		return """
-		        INSERT INTO DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_NAME)
-	        	VALUES ('""" + dietaryrestrictionname.toLowerCase() + """
-	        	')
-	        	""";
+	public void addDietaryRestriction(String dietaryrestrictionname, String dietaryrestrictiondescription, String basedietaryrestrictionname) throws SQLException {
+		Integer basedietaryrestrictionid = null;
+		ArrayList<Integer> basedietaryrestrictionids = this.starterselector.selectDietaryRestrictionIds(new String[]{basedietaryrestrictionname});
+		if (basedietaryrestrictionids.size()>0) { // if cuisine was found
+			basedietaryrestrictionid = basedietaryrestrictionids.get(0);
+		}
+		String adddietaryrestriction = MessageFormat.format(doubleSingleQuote("""
+		        INSERT INTO DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_NAME, DIETARY_RESTRICTION_DESCRIPTION, BASE_DIETARY_RESTRICTION_ID)
+	        	VALUES ('{0}', '{1}', {2})"""), dietaryrestrictionname.toLowerCase(), dietaryrestrictiondescription, basedietaryrestrictionid);
+		execute(adddietaryrestriction);
 	}
 	
-	public String formatDishType(String dishtype) {
-		return """
-		        INSERT INTO DISH_TYPES (DISH_TYPE_NAME)
-	        	VALUES ('""" + dishtype.toLowerCase() + """
-	        	')
-	        	""";
+	public void addDishType(String dishtypename, String dishtypedescription, String basedishtypename) throws SQLException{
+		Integer basedishtypeid = null;
+		ArrayList<Integer> basedishtypeids = this.starterselector.selectDietaryRestrictionIds(new String[]{basedishtypename});
+		if (basedishtypeids.size()>0) { // if cuisine was found
+			basedishtypeid = basedishtypeids.get(0);
+		}
+		String adddishtype = MessageFormat.format(doubleSingleQuote("""
+		        INSERT INTO DISH_TYPES (DISH_TYPE_NAME, DISH_TYPE_DESCRIPTION, BASE_DISH_TYPE_ID)
+	        	VALUES ('{0}', '{1}', {2})"""), dishtypename, dishtypedescription, basedishtypeid);
+		execute(adddishtype);
 	}
 	
 	public String formatReview(int rating, String content, String photopath, int recipeid, String username) throws SQLException{ // DO NOT USE SINGLE QUOTES IN THE REVIEW basecuisineids.
+		String contentcleaned = clean(content);
+		String photopathcleaned = clean(photopath);
 		int userid = this.starterselector.selectUserIds(new String[]{username}).get(0);
-		return """
+		return MessageFormat.format(doubleSingleQuote("""
 		        INSERT INTO REVIEWS (RATING, CONTENT, PHOTO_PATH, RECIPE_ID, USER_ID)
-	        	VALUES (""" + rating + """
-	        	, '""" + content.toLowerCase() + """
-	        	', '""" + photopath + """
-	        	', """ + recipeid + """
-	        	, '""" + userid + """
-	        	')
-	        	""";
+	        	VALUES ()"""), rating, contentcleaned, photopathcleaned, recipeid, userid);
 	}
 	
-	public String formatUser(String username, String emailaddress, String passwordhash, String avatarpath) throws SQLException {
-		String avatarpathcleaned = null;
-		if (avatarpath != null && !avatarpath.isEmpty()) {
-			avatarpathcleaned = "'"+avatarpath+"'";
-		} 
-		return 	"""
-		        INSERT INTO USERS (USER_NAME, EMAIL_ADDRESS, PASSWORD_HASH, AVATAR_PATH)
-	        	VALUES ('""" + username + """
-	        	', '""" + emailaddress + """
-	        	', '""" + passwordhash + """
-	        	', """ + avatarpathcleaned + """
-	        	)
-	        	""";
+	public String formatUser(String username, String userimagepath, String userdescription, String usertimedisplay, String emailaddress, String phonenumber, String passwordhash) throws SQLException {
+		String userimagepathcleaned = clean(userimagepath);
+		String userdescriptioncleaned = clean(userdescription);
+		String emailaddresscleaned = clean(emailaddress);
+		String phonenumbercleaned = clean(phonenumber);
+
+		return 	MessageFormat.format(doubleSingleQuote("""
+		        INSERT INTO USERS (USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, USER_TIME_DISPLAY, EMAIL_ADDRESS, PHONE_NUMBER, PASSWORD_HASH)
+	        	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, '{6}')"""), username, userimagepathcleaned, userdescriptioncleaned, usertimedisplay, emailaddresscleaned, phonenumbercleaned, passwordhash);
 	}
 	
 	public void addIngredient(String ingredientname, String ingredientimagepath, String ingredientdescription, String baseingredientname, String[] dietaryrestrictions) throws SQLException {
-		int ingredientId = createIngredient(ingredientname, ingredientimagepath, ingredientdescription, baseingredientname);
-		ArrayList<Integer> dietaryRestrictionIds = this.starterselector.selectDietaryRestrictionIds(dietaryrestrictions);
-		ArrayList<String> dietaryRestrictionsRelationships = new ArrayList<String>();
+		int ingredientid = createIngredient(ingredientname, ingredientimagepath, ingredientdescription, baseingredientname);
+		ArrayList<Integer> dietaryrestrictionids = this.starterselector.selectDietaryRestrictionIds(dietaryrestrictions);
+		ArrayList<String> dietaryrestrictionsrelationships = new ArrayList<String>();
 		
-		for(int dietaryRestrictionId : dietaryRestrictionIds) {
-			dietaryRestrictionsRelationships.add(
-					"""
-			        INSERT INTO INGREDIENTS_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID)
-		        	VALUES ('""" + ingredientId + """
-		        	', '""" + dietaryRestrictionId + """
-		        	')
-		        	""");
+		for(int dietaryrestrictionid : dietaryrestrictionids) {
+			dietaryrestrictionsrelationships.add(
+			MessageFormat.format(doubleSingleQuote("""
+			INSERT INTO INGREDIENTS_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID) 
+			VALUES ({0}, {1})"""), ingredientid, dietaryrestrictionid));
 		}
 		
-		String[] codeblocks = new String[dietaryRestrictionsRelationships.size()];
-		codeblocks = dietaryRestrictionsRelationships.toArray(codeblocks);
+		String[] codeblocks = new String[dietaryrestrictionsrelationships.size()];
+		codeblocks = dietaryrestrictionsrelationships.toArray(codeblocks);
 		
 		starter.executeAll(codeblocks);
 	}
@@ -232,12 +221,12 @@ public class StarterPopulator {
 		if (baseingredientids.size()>0) {
 			baseingredientid = baseingredientids.get(0);
 		}
-		String addIngredient = MessageFormat.format("""
+		String addingredient = MessageFormat.format(doubleSingleQuote("""
         INSERT INTO INGREDIENTS (INGREDIENT_NAME, INGREDIENT_IMAGE_PATH, INGREDIENT_DESCRIPTION, BASE_INGREDIENT_ID)
-    	VALUES ('{0}', '{1}', '{2}', {3})""",
+    	VALUES ('{0}', '{1}', '{2}', {3})"""),
     	ingredientname.toLowerCase(), ingredientimagepath, ingredientdescription, baseingredientid);
 		String[] key = {"INGREDIENT_ID"};
-		return createAndQueryId(addIngredient, key);
+		return createAndQueryId(addingredient, key);
 	}
 	
 	public void execute(String query) throws SQLException{//intended for singular executions
@@ -247,17 +236,28 @@ public class StarterPopulator {
 	}
 	
 	public int createAndQueryId(String query, String[] key) throws SQLException{
-		int generatedKey = 0; // Default value: 0. ID should never be 0 unless there is no key that matches
+		int generatedkey = 0; // Default value: 0. ID should never be 0 unless there is no key that matches
 		Statement statement = connection.prepareStatement(query, key); // add ingredient
 		statement.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
-		ResultSet resultSet = statement.getGeneratedKeys();
+		ResultSet resultset = statement.getGeneratedKeys();
 		
-		if(resultSet.next()) {
-			generatedKey= resultSet.getInt(1);
+		if(resultset.next()) {
+			generatedkey= resultset.getInt(1);
 		}
 		statement.close();
-		resultSet.close();
+		resultset.close();
 		
-		return generatedKey;
+		return generatedkey;
+	}
+	
+	public String clean(String string) {
+		if (string != null && !string.isEmpty()) {
+			return "'"+string+"'";
+		}
+		return null;
+	}
+	
+	public String doubleSingleQuote(String string) {
+		return string.replace("'", "''");
 	}
 }

@@ -131,7 +131,7 @@ public class Starter {
 		        	USER_TIME_DISPLAY VARCHAR(25) NOT NULL,
 		        	EMAIL_ADDRESS VARCHAR(254) NULL UNIQUE,
 		        	PHONE_NUMBER VARCHAR(25) NULL UNIQUE,
-		        	CHECK (COALESCE (EMAIL_ADDRESS, PHONE_NUMBER) IS NOT NULL)
+		        	CHECK (COALESCE (EMAIL_ADDRESS, PHONE_NUMBER) IS NOT NULL),
 		        	PASSWORD_HASH VARCHAR(254) NOT NULL,
 		        	JOIN_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP)
 		        )
@@ -145,14 +145,10 @@ public class Starter {
 		            INSTRUCTIONS TEXT NOT NULL,
 		            TOTAL_MINUTES INT NULL,
 		            WHEN_TO_EAT VARCHAR(25) NULL,
-		            COURSE VARCHAR(25) 
-		            
-		            
-		            
-		            COURSE ENUM('Appetizer', 'Main Course', 'Side Dish', 'Dessert') NULL,
+		            COURSE VARCHAR(25) NULL,
 		            PUBLISH_DATE DATE NOT NULL DEFAULT (CURRENT_DATE),
 		            AUTHOR_ID INT NOT NULL,
-		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID) ON DELETE CASCADE
 		        )
 		        """,
 		        """
