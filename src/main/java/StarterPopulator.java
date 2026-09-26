@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.text.MessageFormat;
 
 public class StarterPopulator {
 	Starter starter;
@@ -39,7 +40,7 @@ public class StarterPopulator {
 	
 	public void populateAppliances() throws SQLException {
 		String[] codeblocks = {
-				formatAppliance("pizza oven")
+				formatAppliance("pizza oven", "images/appliances/pizza_oven.webp", "An oven that is specially suited for making pizzas, especially Neapolitan pizza.")
 		};
 		starter.executeAll(codeblocks);
 
@@ -81,7 +82,7 @@ public class StarterPopulator {
 	
 	public void populateUsers() throws SQLException {
 		String[] codeblocks = {
-				formatUser("Bob", "Bob@gmail.com", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "images/Bob.jpg"),
+				formatUser("Bob", "Bob@gmail.com", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "images/avatars/Bob.jpg"),
 				formatUser("Tom", "Tom@gmail.com", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33", null)
 		};
 		starter.executeAll(codeblocks);
@@ -89,29 +90,36 @@ public class StarterPopulator {
 	
 	public void populateIngredients() throws SQLException {
 		String[] restrictions = {"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free", "palaeo"};
-		String[] ingredients = {"pineapple", "orange", "strawberry", "banana", "blueberry", "tomato", "tomato puree", "basil", "black pepper", "yeast"};
-		for (String ingredient : ingredients) {
-			addIngredient(ingredient, null, restrictions);
-		}
-		addIngredient("plum tomato", "tomato", restrictions);
-		addIngredient("san marzano", "plum tomato", restrictions);
+		addIngredient("pineapple", "images/ingredients/Pineapple.webp", "Tropical fruit with a tough, spiky skin.", null, restrictions);
+		addIngredient("orange", "images/ingredients/Ambersweet_oranges.jpg", "Citric berry known for its distinctive color.", null, restrictions);
+		addIngredient("strawberry", "images/ingredients/Strawberries.jpg", "Sweet summer aggregate accessory fruit.", null, restrictions);
+		addIngredient("banana", "images/ingredients/bananas.avif", "Elongated, yellow fruit.", null, restrictions);
+		addIngredient("blueberry", "images/ingredients/blueberries.avif", "Small, round, dark blue berries.", null, restrictions);
+		addIngredient("tomato", "images/ingredients/tomato.webp", "Vibrant fruit popular in many dishes.", null, restrictions);
+		addIngredient("tomato puree", "images/ingredients/fresh-tomato-puree.jpg", "Thick liquid made by cooking and straining tomatoes.", null, restrictions);
+		addIngredient("basil", "images/ingredients/basil.jpg", "Popular, fragant leafy green used as a culinary herb.", null, restrictions);
+		addIngredient("black pepper", "images/ingredients/Black-Pepper.jpg", "Dark brown/black and wrinkled, lighter when ground.", null, restrictions);
+		addIngredient("yeast", "images/ingredients/yeast.jpg", "Used to cause fermentation and leavening, such as in baking.", null, restrictions);
+		addIngredient("plum tomato", "images/ingredients/plum-tomato.jpg", "Generally oval or cylindrical in shape, bred for sauce and packing.", "tomato", restrictions);
+		addIngredient("san marzano tomato", "images/ingredients/San-Marzano-Tomatoes.jpg", "Thicker flesh, fewer seeds, and lower water content than other plum tomato varieties.", "plum tomato", restrictions);
 		
 		restrictions = new String[]{"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free"};
-		addIngredient("salt", null, restrictions);
+		addIngredient("salt", "images/ingredients/salt.webp", "Fine and refined mineral for seasoning foods.", null, restrictions);
 		
 		restrictions = new String[]{"vegatarian", "vegan", "dairy-free", "pescetarian", "shellfish-free"};
-		addIngredient("flour", null, restrictions);
+		addIngredient("flour", "images/ingredients/All-Purpose_Flour.jpg", "Fine white powder commonly used for baking.", null, restrictions);
 
 		restrictions = new String[]{"vegatarian", "pescetarian", "shellfish-free"};
-		addIngredient("cheese", null, restrictions);
-		addIngredient("mozzarella", "cheese", restrictions);
-		addIngredient("parmesan", "cheese",restrictions);
-		addIngredient("vanilla pudding", null, restrictions);
+		addIngredient("cheese", "images/ingredients/sharp-cheddar-baby-swiss.webp", "Dairy product from curdling milk.", null, restrictions);
+		addIngredient("mozzarella", "images/ingredients/mozzarella.jpg", "Semi-soft non-aged cheese prepared using the pasta filata method.", "cheese", restrictions);
+		addIngredient("parmesan", "images/ingredients/mozzarella.jpg", "Semi-soft non-aged cheese prepared using the pasta filata method.", "cheese", restrictions);
+		addIngredient("parmesan", "images/ingredients/parmesan.jpg", "The \"King of Cheese,\" Parmigiano-Reggiano, Parmesan is an italian hard, granular cheese.", "cheese", restrictions);
+		addIngredient("vanilla pudding", "images/ingredients/vanilla-pudding.webp", "Rich, silky custard with its titular flavor", null, restrictions);
 	}
 	
 	public void populateRecipes() throws SQLException {
 		AddRecipe addrecipe = new AddRecipe(connection, this);
-		String recipename = "Sunshine Salad";
+		String recipename = "Sunshine Fruit Salad";
 		int cookminutes = 30; // minutes
 		String description = "A delicious side dish for brunch!";
 		String instructions = "1. Cut pineapples and bananas.\n"
@@ -120,7 +128,7 @@ public class StarterPopulator {
 				+ "4. Keep refrigerated until served.\n"
 				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
 		String course = "Dessert";
-		String imagepath = "images/Sunshine-Fruit-Salad.jpg";
+		String imagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
 		String author = "Bob";
 		String cuisine = "italian";
 		String[] appliances = new String[]{};
@@ -129,12 +137,11 @@ public class StarterPopulator {
 		addrecipe.addRecipe(recipename, cookminutes, description, instructions, course, imagepath, author, cuisine, appliances, dishtypes, ingredients);
 	}
 	
-	public String formatAppliance(String appliancename) throws SQLException {
-		return 	"""
-		        INSERT INTO APPLIANCES (APPLIANCE_NAME)
-	        	VALUES ('""" + appliancename.toLowerCase() + """
-	        	')
-	        	""";
+	public String formatAppliance(String appliancename, String applianceimagepath, String appliancedescription) throws SQLException {
+		return 	MessageFormat.format("""
+		        INSERT INTO APPLIANCES (APPLIANCE_NAME, APPLIANCE_IMAGE_PATH, APPLIANCE_DESCRIPTION)
+	        	VALUES ('{0}', '{1}', '{2}')""",
+	        	appliancename.toLowerCase(), applianceimagepath, appliancedescription);
 	}
 	
 	public void addCuisine(String cuisinename, String basecuisinename) throws SQLException {
@@ -150,7 +157,6 @@ public class StarterPopulator {
 	        	)
 	        	""";
 		execute(addCuisine);
-		
 	}
 	
 	public String formatDietaryRestriction(String dietaryrestrictionname) {
@@ -197,8 +203,8 @@ public class StarterPopulator {
 	        	""";
 	}
 	
-	public void addIngredient(String ingredientname, String baseingredientname, String[] dietaryrestrictions) throws SQLException {
-		int ingredientId = createIngredient(ingredientname, baseingredientname);
+	public void addIngredient(String ingredientname, String ingredientimagepath, String ingredientdescription, String baseingredientname, String[] dietaryrestrictions) throws SQLException {
+		int ingredientId = createIngredient(ingredientname, ingredientimagepath, ingredientdescription, baseingredientname);
 		ArrayList<Integer> dietaryRestrictionIds = this.starterselector.selectDietaryRestrictionIds(dietaryrestrictions);
 		ArrayList<String> dietaryRestrictionsRelationships = new ArrayList<String>();
 		
@@ -218,18 +224,18 @@ public class StarterPopulator {
 		starter.executeAll(codeblocks);
 	}
 	
-	public int createIngredient(String ingredientname, String baseingredientname) throws SQLException {
+	
+	
+	public int createIngredient(String ingredientname, String ingredientimagepath, String ingredientdescription, String baseingredientname) throws SQLException {
 		Integer baseingredientid = null;
 		ArrayList<Integer> baseingredientids = this.starterselector.selectIngredientIds(new String[]{baseingredientname});
 		if (baseingredientids.size()>0) {
 			baseingredientid = baseingredientids.get(0);
 		}
-		String addIngredient = """
-        INSERT INTO INGREDIENTS (INGREDIENT_NAME, BASE_INGREDIENT_ID)
-    	VALUES ('""" + ingredientname.toLowerCase() + """
-    	', """ + baseingredientid + """
-    	)
-    	""";
+		String addIngredient = MessageFormat.format("""
+        INSERT INTO INGREDIENTS (INGREDIENT_NAME, INGREDIENT_IMAGE_PATH, INGREDIENT_DESCRIPTION, BASE_INGREDIENT_ID)
+    	VALUES ('{0}', '{1}', '{2}', {3})""",
+    	ingredientname.toLowerCase(), ingredientimagepath, ingredientdescription, baseingredientid);
 		String[] key = {"INGREDIENT_ID"};
 		return createAndQueryId(addIngredient, key);
 	}

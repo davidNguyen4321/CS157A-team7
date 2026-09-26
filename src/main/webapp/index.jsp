@@ -224,7 +224,7 @@
                     <% for (int i = 1; i <= 5; i++) { %>
                     <article class="recipe-card">
                         <div class="recipe-card-img">
-                            <img src="images/recipe-placeholder.jpg" alt="Recipe" />
+                            <img src="images/recipes/recipe-placeholder.jpg" alt="Recipe" />
                             <div class="rank-badge">#<%= i %></div>
                             <div class="recipe-card-badges">
                                 <div class="card-badge-group">
