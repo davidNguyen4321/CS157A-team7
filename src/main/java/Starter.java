@@ -135,7 +135,7 @@ public class Starter {
 		        	TIMEZONE VARCHAR(30) NOT NULL,
 		            PASSWORD_HASH VARCHAR(254) NOT NULL,
 		        	EMAIL_ADDRESS VARCHAR(254) NOT NULL UNIQUE,
-		        	PHONE_NUMBER VARCHAR(15) NULL UNIQUE,
+		        	PHONE_NUMBER VARCHAR(15) NULL UNIQUE
 		        )
 		        """, // Soft delete only
 		        """
@@ -303,7 +303,7 @@ public class Starter {
 		            USER_ID INT, RECIPE_ID INT, 
 		            PRIMARY KEY (USER_ID, RECIPE_ID),
 		            FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE
 		        )
 		        """,
 		        """
