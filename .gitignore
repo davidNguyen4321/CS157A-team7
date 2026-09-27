@@ -31,3 +31,6 @@ target/
 !.settings/org.eclipse.wst.common.component
 !.settings/org.eclipse.wst.common.project.facet.core.xml
 !src/main/webapp/WEB-INF/lib/*.jar
+
+# DB Authentication
+auth.txt

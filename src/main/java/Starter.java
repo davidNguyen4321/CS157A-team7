@@ -135,7 +135,7 @@ public class Starter {
 		        	TIMEZONE VARCHAR(30) NOT NULL,
 		            PASSWORD_HASH VARCHAR(254) NOT NULL,
 		        	EMAIL_ADDRESS VARCHAR(254) NOT NULL UNIQUE,
-		        	PHONE_NUMBER VARCHAR(15) NULL UNIQUE,
+		        	PHONE_NUMBER VARCHAR(15) NULL UNIQUE
 		        )
 		        """, // Soft delete only
 		        """
