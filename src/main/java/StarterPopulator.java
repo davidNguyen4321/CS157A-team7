@@ -117,45 +117,47 @@ public class StarterPopulator {
 	}
 	
 	public void populateRecipes() throws SQLException {
-		AddRecipe addrecipe = new AddRecipe(connection, this);
-		String recipename = "Sunshine Fruit Salad";
-		String recipeimagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
-		String recipedescription = "A delicious side dish for brunch!";
-		String instructions = "1. Cut pineapples and bananas.\n"
-				+ "2. Peel oranges.\n"
-				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
-				+ "4. Keep refrigerated until served.\n"
-				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
-		Integer totalminutes = 30; // minutes
-		boolean minutesaigenerated = false;
-		String course = "Dessert";
-		String author = "Bob";
-		String cuisine = null;
-		String[] appliances = new String[]{};
-		String[] dishtypes = {"fruit salad"};
-		ArrayList<RecipeIngredient> ingredients = new ArrayList<RecipeIngredient>();
-		ingredients.add(new RecipeIngredient("pineapple", 20, "oz"));
-		ingredients.add(new RecipeIngredient("madarin orange", 11, "oz"));
-		ingredients.add(new RecipeIngredient("vanilla pudding", 3.4, "oz"));
-		ingredients.add(new RecipeIngredient("strawberry", 1, "cup"));
-		ingredients.add(new RecipeIngredient("banana", 1, "cup"));
-		ingredients.add(new RecipeIngredient("blueberries", 1, "cup"));
-
-		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
+		String[] codeblocks = {};
 		
-		recipename = "Sinister Stew";
-		recipeimagepath = "images/recipes/sinisterstew.jpg";
-		recipedescription = "You should try it.";
-		instructions = "1. Eat it";
-		totalminutes = -10;
-		minutesaigenerated = false;
-		course = "Entrée";
-		author = "UpToNoGood";
-		cuisine = null;
-		appliances = new String[]{};
-		ingredients = new ArrayList<RecipeIngredient>();
-		dishtypes = new String[]{};
-		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
+//		AddRecipe addrecipe = new AddRecipe(connection, this);
+//		String recipename = "Sunshine Fruit Salad";
+//		String recipeimagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
+//		String recipedescription = "A delicious side dish for brunch!";
+//		String instructions = "1. Cut pineapples and bananas.\n"
+//				+ "2. Peel oranges.\n"
+//				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
+//				+ "4. Keep refrigerated until served.\n"
+//				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
+//		Integer totalminutes = 30; // minutes
+//		boolean minutesaigenerated = false;
+//		String course = "Dessert";
+//		String author = "Bob";
+//		String cuisine = null;
+//		String[] appliances = new String[]{};
+//		String[] dishtypes = {"fruit salad"};
+//		ArrayList<RecipeIngredient> ingredients = new ArrayList<RecipeIngredient>();
+//		ingredients.add(new RecipeIngredient("pineapple", 20, "oz"));
+//		ingredients.add(new RecipeIngredient("madarin orange", 11, "oz"));
+//		ingredients.add(new RecipeIngredient("vanilla pudding", 3.4, "oz"));
+//		ingredients.add(new RecipeIngredient("strawberry", 1, "cup"));
+//		ingredients.add(new RecipeIngredient("banana", 1, "cup"));
+//		ingredients.add(new RecipeIngredient("blueberries", 1, "cup"));
+//
+//		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
+//		
+//		recipename = "Sinister Stew";
+//		recipeimagepath = "images/recipes/sinisterstew.jpg";
+//		recipedescription = "You should try it.";
+//		instructions = "1. Eat it";
+//		totalminutes = -10;
+//		minutesaigenerated = false;
+//		course = "Entrée";
+//		author = "UpToNoGood";
+//		cuisine = null;
+//		appliances = new String[]{};
+//		ingredients = new ArrayList<RecipeIngredient>();
+//		dishtypes = new String[]{};
+//		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
 	}
 	public void populateReports() throws SQLException{
 		AddReport addreport = new AddReport(connection, this);

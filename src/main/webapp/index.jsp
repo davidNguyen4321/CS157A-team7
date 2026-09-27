@@ -1,3 +1,4 @@
+<%@ page import="java.sql.*" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -141,40 +142,69 @@
                     <p class="section-subtitle">Latest recipes from your favorite creators</p>
                 </div>
                 <div class="horizontal-scroll-row">
-                    <%-- Placeholder loop: replace with database results, one <article> per recipe --%>
-                    <% for (int i = 0; i < 5; i++) { %>
-                    <article class="recipe-card">
-                        <div class="recipe-card-img">
-                            <img src="images/recipe-placeholder.jpg" alt="Recipe" />
-                            <div class="recipe-card-badges">
-                                <div class="card-badge-group">
-                                    <span class="badge-pill">25m</span>
-                                </div>
-                                <span class="badge-pill">2025-05-25</span>
-                            </div>
-                        </div>
-                        <div class="recipe-card-body">
-                            <h3 class="recipe-card-title">Recipe Name</h3>
-                            <p class="recipe-card-desc">Description of the recipe...</p>
-                            <div class="recipe-card-footer">
-                                <div class="card-author">
-                                    <span class="card-avatar">👤</span>
-                                    <span>Author</span>
-                                </div>
-                                <div class="card-stats">
-                                    <span class="card-bookmark">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
-                                        2.5k
-                                    </span>
-                                    <span class="card-rating">
-                                        <span class="stars" style="--rating: 4.5;" aria-label="4.5 out of 5 stars"></span>
-                                        4.5 (125)
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    <% } %>
+                	<%
+                		String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
+					    String dbUser = "root";
+					    String dbPassword = "j9jjlSlv!!"; //remb to put ur own password
+					    
+					    try{
+					    	Class.forName("com.mysql.cj.jdbc.Driver");
+					    	Connection dbConnection  = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+					    	String sql = 
+					    			"SELECT RECIPE_NAME, COOKING_TIME, PUBLICATION_DATE, "+
+					    			"RECIPE_IMAGE_PATH, DESCRIPTION " + 
+					    			"FROM RECIPES " + 
+					    			"ORDER BY PUBLICATION_DATE DESC";
+					    	
+					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
+					    	ResultSet recipes = statement.executeQuery();
+					    	
+					    	while(recipes.next()){
+					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
+					    		if(imagePath == null || imagePath.isEmpty()){
+					    			imagePath = "images/recipe-placeholder.jpg";	
+					    		}
+					    		%>
+
+					    		<article class="recipe-card">
+					    		    <div class="recipe-card-img">
+					    		        <img src="<%= imagePath %>" alt="Recipe">
+
+					    		        <div class="recipe-card-badges">
+					    		            <span class="badge-pill">
+					    		                <%= recipes.getTime("COOKING_TIME") %>
+					    		            </span>
+
+					    		            <span class="badge-pill">
+					    		                <%= recipes.getDate("PUBLICATION_DATE") %>
+					    		            </span>
+					    		        </div>
+					    		    </div>
+
+					    		    <div class="recipe-card-body">
+					    		        <h3 class="recipe-card-title">
+					    		            <%= recipes.getString("RECIPE_NAME") %>
+					    		        </h3>
+
+					    		        <p class="recipe-card-desc">
+					    		            <%= recipes.getString("DESCRIPTION") %>
+					    		        </p>
+
+					    		        <div class="recipe-card-footer">
+					    		            <span>Database recipe</span>
+					    		        </div>
+					    		    </div>
+					    		</article>
+
+					    		<%
+					    		        }
+					    recipes.close();
+					    statement.close();
+					    dbConnection.close();
+					    }catch (Exception error){
+					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+					    }
+					    %>
                 </div>
             </section>
 
