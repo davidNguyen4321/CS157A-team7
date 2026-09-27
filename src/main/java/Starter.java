@@ -146,7 +146,7 @@ public class Starter {
 		            RECIPE_DESCRIPTION TEXT NULL,
 		            RECIPE_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
 		            RECIPE_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		            RECIPE_STATUS ENUM('Active', 'Deleted', 'Banned', 'Appealed') NOT NULL DEFAULT 'Active',
+		            RECIPE_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
 		            INSTRUCTIONS TEXT NOT NULL,
 		            TOTAL_MINUTES INT NULL,
 		            MINUTES_AI_GENERATED BOOLEAN NOT NULL,
@@ -163,7 +163,7 @@ public class Starter {
 		            REVIEW_DESCRIPTION TEXT NOT NULL,
 		            REVIEW_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
 		            REVIEW_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		            REVIEW_STATUS ENUM('Active', 'Deleted', 'Banned', 'Appealed') NOT NULL DEFAULT 'Active',
+		            REVIEW_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
 		            RATING INT NOT NULL,
 		            REF_RECIPE_ID INT NOT NULL,
 		            FOREIGN KEY (REF_RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
@@ -177,7 +177,7 @@ public class Starter {
 				    REPORT_ID INT PRIMARY KEY AUTO_INCREMENT,
 				    REPORT_DESCRIPTION TEXT NULL,
 				    REPORT_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-				    REPORT_STATUS ENUM('Active', 'Resolved', 'Dismissed') NOT NULL DEFAULT 'Active',
+				    REPORT_STATUS ENUM('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
 				    REASON ENUM('Spam', 'Inappropriate Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Health Concerns') NOT NULL,
 				    REPORTER_ID INT NOT NULL,
 				    FOREIGN KEY (REPORTER_ID) REFERENCES USERS (USER_ID)
@@ -236,20 +236,31 @@ public class Starter {
 			        VIOLATION_ID INT PRIMARY KEY AUTO_INCREMENT,
 			        VIOLATION_DESCRIPTION TEXT NOT NULL,
 			        VIOLATION_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-			        VIOLATION_STATUS ENUM('Active', 'Expired', 'Reversed', 'Appealed', 'Permanent') NOT NULL,
+			        VIOLATION_STATUS ENUM('Active', 'Expired', 'Reversed', 'Permanent') NOT NULL,
 				    SEVERITY ENUM('Minor', 'Moderate', 'Severe') NOT NULL,
 				    SUSPENSION_STATUS ENUM('Review', 'Recipe', 'All', 'N/A'),
-				    CAN_APPEAL BOOLEAN NOT NULL DEFAULT TRUE,
 					EXPIRE_TIMESTAMP TIMESTAMP NULL,
 				    VIOLATOR_ID INT NOT NULL,
 				    FOREIGN KEY (VIOLATOR_ID) REFERENCES USERS (USER_ID),
 				    MODERATOR_ID INT NULL,
 				    FOREIGN KEY (MODERATOR_ID) REFERENCES USERS (USER_ID),
-				    AUDITOR_ID INT NULL,
-				    FOREIGN KEY (AUDITOR_ID) REFERENCES USERS (USER_ID),
-				    REPORT_ID INT NULL,
+				    REPORT_ID INT NULL UNIQUE,
 				    FOREIGN KEY (REPORT_ID) REFERENCES REPORTS (REPORT_ID)
 				)
+		        """, // Never deleted
+		        """
+		        CREATE TABLE IF NOT EXISTS APPEALS (
+		        	APPEAL_ID INT PRIMARY KEY AUTO_INCREMENT,
+		        	APPEAL_DESCRIPTION TEXT NOT NULL,
+		        	APPEAL_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		        	APPEAL_STATUS ENUM ('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
+		        	DECISION_DESCRIPTION TEXT NULL,
+		        	RESOLVED_TIMESTAMP TIMESTAMP NULL,
+		        	AUDITOR_ID INT NULL,
+				    FOREIGN KEY (AUDITOR_ID) REFERENCES USERS (USER_ID),
+				    VIOLATION_ID INT NOT NULL UNIQUE,
+				    FOREIGN KEY (VIOLATION_ID) REFERENCES VIOLATIONS (VIOLATION_ID)
+		        )
 		        """ // Never deleted
 		};
 		
