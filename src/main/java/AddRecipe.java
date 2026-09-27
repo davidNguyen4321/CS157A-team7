@@ -1,10 +1,6 @@
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.text.MessageFormat;
 
 public class AddRecipe {
@@ -29,50 +25,99 @@ public class AddRecipe {
 			boolean minutesaigenerated,
 			String course,
 			String author,
-			String cuisine,
+			String[] cuisines,
+			boolean cuisineaigenerated,
 			String[] appliances,
 			String[] dishtypes,
+			boolean dishtypeaigenerated,
 			ArrayList<RecipeIngredient> ingredients
 	) throws SQLException {
-		
 		int authorid = this.starterselector.selectUserIds(new String[]{author}).get(0);
-		Integer cuisineid = null;
-		ArrayList<Integer> cuisineids = this.starterselector.selectCuisineIds(new String[]{cuisine});
-		if (cuisineids.size()>0) {
-			cuisineid = cuisineids.get(0);
-		}
+		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, authorid);
 		
-		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, cuisineid, authorid);
-		
-		addRecipeRelationshipsBasic(this.starterselector.selectApplianceIds(appliances), "APPLIANCE_ID", recipeid, "RECIPES_APPLIANCES");
-		addRecipeRelationshipsBasic(this.starterselector.selectDishTypeIds(dishtypes), "DISH_TYPE_ID", recipeid, "RECIPES_DISH_TYPES");
-//		addRecipeRelationshipsBasic(this.starterselector.selectIngredientIds(ingredients), "INGREDIENT_ID", recipeid, "RECIPES_INGREDIENTS");
+		addRecipeApplianceRelationship(this.starterselector.selectApplianceIds(appliances), recipeid);
+		addRecipeDishTypeRelationship(this.starterselector.selectDishTypeIds(dishtypes), recipeid, dishtypeaigenerated);
+		addRecipeCuisineRelationship(this.starterselector.selectCuisineIds(cuisines), recipeid, cuisineaigenerated);
+		addRecipeIngredientRelationship(ingredients, recipeid);
 	}
 	
-	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, boolean minutesaigenerated, String course, Integer cuisineid, Integer authorid) throws SQLException {
+	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, boolean minutesaigenerated, String course, Integer authorid) throws SQLException {
 		String recipeimagepathcleaned = this.starterpopulator.clean(recipeimagepath);
 		String recipedescriptioncleaned = this.starterpopulator.clean(recipedescription);
 		String coursecleaned = this.starterpopulator.clean(course);
 		
 		String addrecipe = MessageFormat.format(this.starterpopulator.doubleSingleQuote("""
-        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, MINUTES_AI_GENERATED, COURSE, CUISINE_ID, AUTHOR_ID)
-    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7}, {8})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutes, minutesaigenerated, coursecleaned, cuisineid, authorid);
+        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, MINUTES_AI_GENERATED, COURSE, AUTHOR_ID)
+    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutes, minutesaigenerated, coursecleaned, authorid);
 		String[] key = {"ID_RECIPE"};
 		return this.starterpopulator.createAndQueryId(addrecipe, key);
 	}
 	
-	public void addRecipeRelationshipsBasic(ArrayList<Integer> manyids, String manyidcolumnname, int recipeid, String tablename) throws SQLException {
-		String[] codeblocks = new String[manyids.size()];
-		for (int i = 0; i<manyids.size(); i++) {
-			codeblocks[i] = formatRecipeRelationshipBasic(manyids.get(i), manyidcolumnname, recipeid, tablename);
+	public void addRecipeApplianceRelationship(ArrayList<Integer> applianceids, int recipeid) throws SQLException {
+		String[] codeblocks = new String[applianceids.size()];
+		for (int i = 0; i<applianceids.size(); i++) {
+			codeblocks[i] = formatRecipeApplianceRelationship(applianceids.get(i), recipeid);
 		}
 		starter.executeAll(codeblocks);
 
 	}
 	
-	public String formatRecipeRelationshipBasic(int manyid, String manyidcolumnname, int recipeid, String tablename) {
+	public String formatRecipeApplianceRelationship(int applianceid, int recipeid) {
 		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
-		        INSERT INTO {0} ({1}, RECIPE_ID)
-	        	VALUES ({2}, {3})"""), tablename, manyidcolumnname, manyid, recipeid);
+		        INSERT INTO RECIPES_USE_APPLIANCES (APPLIANCE_ID, RECIPE_ID)
+	        	VALUES ({0}, {1})"""), applianceid, recipeid);
+	}
+	
+	public void addRecipeDishTypeRelationship(ArrayList<Integer> dishtypeids, int recipeid, boolean dishtypeaigenerated) throws SQLException {
+		String[] codeblocks = new String[dishtypeids.size()];
+		for (int i = 0; i<dishtypeids.size(); i++) {
+			codeblocks[i] = formatRecipeDishTypeRelationship(dishtypeids.get(i), recipeid, dishtypeaigenerated);
+		}
+		starter.executeAll(codeblocks);
+
+	}
+	
+	public String formatRecipeDishTypeRelationship(int dishtypeid, int recipeid, boolean dishtypeaigenerated) {
+		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
+		        INSERT INTO RECIPES_DISH_TYPES (DISH_TYPE_ID, RECIPE_ID, DISH_TYPE_AI_GENERATED)
+	        	VALUES ({0}, {1}, {2})"""), dishtypeid, recipeid, dishtypeaigenerated);
+	}
+	
+	public void addRecipeCuisineRelationship(ArrayList<Integer> cuisineids, int recipeid, boolean cuisineaigenerated) throws SQLException {
+		String[] codeblocks = new String[cuisineids.size()];
+		for (int i = 0; i<cuisineids.size(); i++) {
+			codeblocks[i] = formatRecipeDishTypeRelationship(cuisineids.get(i), recipeid, cuisineaigenerated);
+		}
+		starter.executeAll(codeblocks);
+
+	}
+	
+	public String formatRecipeCuisineRelationship(int cuisineid, int recipeid, boolean cuisineaigenerated) {
+		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
+		        INSERT INTO RECIPES_FEATURE_CUISINES (CUISINE_ID, RECIPE_ID, CUISINE_AI_GENERATED)
+	        	VALUES ({0}, {1}, {2})"""), cuisineid, recipeid, cuisineaigenerated);
+	}
+	
+	public void addRecipeIngredientRelationship(ArrayList<RecipeIngredient> ingredients, int recipeid) throws SQLException {
+		ArrayList<String> codelists = new ArrayList<String>();
+		for (RecipeIngredient ingredient : ingredients) {
+			ArrayList<Integer> ingredientids = this.starterselector.selectIngredientIds(new String[]{ingredient.name});
+			if (ingredientids.size()>0) { // if ingredient id was found
+				ingredient.id = ingredientids.get(0);
+				codelists.add(formatRecipeIngredientRelationship(ingredient, recipeid));
+			}
+		}
+		
+		String[] codeblocks = new String[codelists.size()];
+		codeblocks = codelists.toArray(codeblocks);
+		
+		starter.executeAll(codeblocks);
+	}
+	
+	public String formatRecipeIngredientRelationship(RecipeIngredient ingredient, int recipeid) {
+		String amountunitcleaned = this.starterpopulator.clean(ingredient.amountunit);
+		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
+		        INSERT INTO RECIPES_COOK_INGREDIENTS (INGREDIENT_ID, RECIPE_ID, AMOUNT, AMOUNT_UNIT)
+	        	VALUES ({0}, {1}, {2}, {3})"""), ingredient.id, recipeid, ingredient.amount, amountunitcleaned);
 	}
 }

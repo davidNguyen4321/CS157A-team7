@@ -151,10 +151,12 @@ public class Starter {
 		            TOTAL_MINUTES INT NULL,
 		            MINUTES_AI_GENERATED BOOLEAN NOT NULL,
 		            COURSE ENUM('Entrée', 'Appetizer / Side', 'Dessert', 'Other') NOT NULL,
+<<<<<<< HEAD
 		            COURSE_AI_GENERATED BOOLEAN NOT NULL,
+=======
+>>>>>>> stash
 		            AUTHOR_ID INT NULL,
-		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID),
-		            UNIQUE (RECIPE_NAME, AUTHOR_ID)
+		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID)
 		        )
 		        """, // Hard delete for 'Deleted' after 30 days, for 'Banned' after violation expires
 		        """
@@ -269,9 +271,10 @@ public class Starter {
 					FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
 					FOREIGN KEY (INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID),
 					AMOUNT DECIMAL(5,2) NULL,
-					AMOUNT_UNIT VARCHAR(25) NULL
+					AMOUNT_UNIT VARCHAR(25) NULL,
+					CHECK (NOT ((AMOUNT IS NULL OR AMOUNT_UNIT IS NULL) AND NOT (AMOUNT IS NULL AND AMOUNT_UNIT IS NULL)))
 		        )
-		        """,
+		        """,//Check: xnor such that either both the amount and amount unit are defined, or none are
 		        """
 		        CREATE TABLE IF NOT EXISTS INGREDIENTS_FIT_DIETARY_RESTRICTIONS (
 		            INGREDIENT_ID INT, DIETARY_RESTRICTION_ID INT,
@@ -303,7 +306,7 @@ public class Starter {
 		            USER_ID INT, RECIPE_ID INT, 
 		            PRIMARY KEY (USER_ID, RECIPE_ID),
 		            FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
+		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE
 		        )
 		        """,
 		        """

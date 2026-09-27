@@ -1,12 +1,18 @@
 
 public class RecipeIngredient {
 	String name;
-	String id;
-	double amount;
+	int id;
+	Double amount;
 	String amountunit;
-	public RecipeIngredient(String name, double amount, String amountunit) {
+	public RecipeIngredient(String name, Double amount, String amountunit) {
 		this.name = name;
 		this.amount = amount;
+		this.amountunit = amountunit;
+	}
+	
+	public RecipeIngredient(String name, int amount, String amountunit) {
+		this.name = name;
+		this.amount = Double.valueOf(amount);
 		this.amountunit = amountunit;
 	}
 }

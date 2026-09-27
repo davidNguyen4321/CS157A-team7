@@ -41,7 +41,9 @@ public class StarterPopulator {
 	
 	public void populateAppliances() throws SQLException {
 		String[] codeblocks = {
-				formatAppliance("pizza oven", "images/appliances/pizza_oven.webp", "An oven that is specially suited for making pizzas, especially Neapolitan pizza.")
+				formatAppliance("pizza oven", "images/appliances/pizza_oven.webp", "An oven that is specially suited for making pizzas, especially Neapolitan pizza."),
+				formatAppliance("kitchen scale", "images/appliances/kitchenscale.avif", "A device used to measure the mass/weight of ingredients."),
+				formatAppliance("stick blender", "images/appliances/stickblender.webp", "Hand-held blade grinder commonly used to purée food.")
 		};
 		starter.executeAll(codeblocks);
 
@@ -50,6 +52,7 @@ public class StarterPopulator {
 	public void populateCuisines() throws SQLException {
 		addCuisine("mediterranean", "Cuisine from the Mediterranean basin, commonly using olives, wheat, and grapes.", null);
 		addCuisine("italian", "Famous for its simplicity, and even more popular in kitchens worldwide.", "mediterranean");
+		addCuisine("american", "Cuisine prepared in the United States, known for its mixing of various other cuisines.", null);
 	}
 	public void populateDietaryRestrictions() throws SQLException {
 		addDietaryRestriction("vegan", "Does not contain meat or animal products.", null);
@@ -102,9 +105,14 @@ public class StarterPopulator {
 		addIngredient("yeast", "images/ingredients/yeast.jpg", "Used to cause fermentation and leavening, such as in baking.", null, restrictions);
 		addIngredient("plum tomato", "images/ingredients/plum-tomato.jpg", "Generally oval or cylindrical in shape, bred for sauce and packing.", "tomato", restrictions);
 		addIngredient("san marzano tomato", "images/ingredients/San-Marzano-Tomatoes.jpg", "Thicker flesh, fewer seeds, and lower water content than other plum tomato varieties.", "plum tomato", restrictions);
+		addIngredient("water", "images/ingredients/tap-water.jpg", "Frequently used for boiling, steaming, and simmering.", null, restrictions);
+
 		
 		restrictions = new String[]{"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free"};
 		addIngredient("salt", "images/ingredients/salt.webp", "Fine and refined mineral for seasoning foods.", null, restrictions);
+		addIngredient("olive oil", "images/ingredients/olive-oil.jpg", "A cooking oil used for frying foods, as a condiment, and salad dressing.", null, restrictions);
+		addIngredient("virgin olive oil", "images/ingredients/virginoliveoil.webp", "While slight sensory defects are permitted, virgin olive oil must have a free acidity less than 2.0%.", "olive oil", restrictions);
+		addIngredient("extra virgin olive oil", "images/ingredients/virginoliveoil.webp", "Must be free of sensory defects, exhibit positive fruity characteristics, and have a free acidity less than 0.8%.", "virgin olive oil", restrictions);
 		
 		restrictions = new String[]{"vegatarian", "vegan", "dairy-free", "pescetarian", "shellfish-free"};
 		addIngredient("flour", "images/ingredients/All-Purpose_Flour.jpg", "Fine white powder commonly used for baking.", null, restrictions);
@@ -117,47 +125,80 @@ public class StarterPopulator {
 	}
 	
 	public void populateRecipes() throws SQLException {
-		String[] codeblocks = {};
+		AddRecipe addrecipe = new AddRecipe(connection, this);
+		String recipename = "Sunshine Fruit Salad";
+		String recipeimagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
+		String recipedescription = "A delicious side dish for brunch!";
+		String instructions = "1. Cut pineapples and bananas.\n"
+				+ "2. Peel oranges.\n"
+				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
+				+ "4. Keep refrigerated until served.\n"
+				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
+		Integer totalminutes = 30; // minutes
+		boolean minutesaigenerated = false;
+		String course = "Dessert";
+		String author = "Bob";
+		String[] cuisines = {"American"};
+		boolean cuisineaigenerated = false;
+		String[] appliances = new String[]{};
+		String[] dishtypes = {"fruit salad"};
+		boolean dishtypesaigenerated = false;
+		ArrayList<RecipeIngredient> ingredients = new ArrayList<RecipeIngredient>();
+		ingredients.add(new RecipeIngredient("pineapple", 20, "oz"));
+		ingredients.add(new RecipeIngredient("madarin orange", 11, "oz"));
+		ingredients.add(new RecipeIngredient("vanilla pudding", 3.4, "oz"));
+		ingredients.add(new RecipeIngredient("strawberry", 1, "cup"));
+		ingredients.add(new RecipeIngredient("banana", 1, "cup"));
+		ingredients.add(new RecipeIngredient("blueberry", 1, "cup"));
+
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
+
+		recipename = "Sinister Stew";
+		recipeimagepath = "images/recipes/sinisterstew.jpg";
+		recipedescription = "You should try it.";
+		instructions = "1. Eat it";
+		totalminutes = -10;
+		minutesaigenerated = false;
+		course = "Entrée";
+		author = "UpToNoGood";
+		cuisines = new String[]{};
+		cuisineaigenerated = false;
+		appliances = new String[]{};
+		ingredients = new ArrayList<RecipeIngredient>();
+		dishtypes = new String[]{};
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
 		
-//		AddRecipe addrecipe = new AddRecipe(connection, this);
-//		String recipename = "Sunshine Fruit Salad";
-//		String recipeimagepath = "images/recipes/Sunshine-Fruit-Salad.jpg";
-//		String recipedescription = "A delicious side dish for brunch!";
-//		String instructions = "1. Cut pineapples and bananas.\n"
-//				+ "2. Peel oranges.\n"
-//				+ "3. Mix pineapples, oranges, strawberries and pudding.\n"
-//				+ "4. Keep refrigerated until served.\n"
-//				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
-//		Integer totalminutes = 30; // minutes
-//		boolean minutesaigenerated = false;
-//		String course = "Dessert";
-//		String author = "Bob";
-//		String cuisine = null;
-//		String[] appliances = new String[]{};
-//		String[] dishtypes = {"fruit salad"};
-//		ArrayList<RecipeIngredient> ingredients = new ArrayList<RecipeIngredient>();
-//		ingredients.add(new RecipeIngredient("pineapple", 20, "oz"));
-//		ingredients.add(new RecipeIngredient("madarin orange", 11, "oz"));
-//		ingredients.add(new RecipeIngredient("vanilla pudding", 3.4, "oz"));
-//		ingredients.add(new RecipeIngredient("strawberry", 1, "cup"));
-//		ingredients.add(new RecipeIngredient("banana", 1, "cup"));
-//		ingredients.add(new RecipeIngredient("blueberries", 1, "cup"));
-//
-//		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
-//		
-//		recipename = "Sinister Stew";
-//		recipeimagepath = "images/recipes/sinisterstew.jpg";
-//		recipedescription = "You should try it.";
-//		instructions = "1. Eat it";
-//		totalminutes = -10;
-//		minutesaigenerated = false;
-//		course = "Entrée";
-//		author = "UpToNoGood";
-//		cuisine = null;
-//		appliances = new String[]{};
-//		ingredients = new ArrayList<RecipeIngredient>();
-//		dishtypes = new String[]{};
-//		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
+		recipename = "Neapolitan Pizza";
+		recipeimagepath = "images/recipes/neaopolitan-pizza-authentic.jpg";
+		recipedescription = "A more practical, albeit not quite authentic version of the classic Italian dish.";
+		instructions = "1. Mix flour, water, salt, and yeast in a large bowl, water first.\n"
+				+"2. Cover the bowl with plastic wrap.\n"
+				+"3. Leave the dough to rest for an hour.\n"
+				+ "4. Remove the dough from the bowl and kneed the dough for five minutes.\n"
+				+ "5. Place the dough back in the bowl and leave it for 20 hours.\n"
+				+ "6. Divide the dough into 4 equal parts and place each ball into individual balls and cover.\n"
+				+ "7. Leave the balls to prove for 5 hours.\n"
+				+ "8. Blend";
+		totalminutes = 26*60;
+		minutesaigenerated = false;
+		course = "Entrée";
+		author = "Tom";
+		cuisines = new String[]{"italian"};
+		cuisineaigenerated = false;
+		appliances = new String[]{"pizza oven", "kitchen scale", "stick blender"};
+		ingredients = new ArrayList<RecipeIngredient>();
+		ingredients.add(new RecipeIngredient("flour", 620, "g"));
+		ingredients.add(new RecipeIngredient("water", 380, "g"));
+		ingredients.add(new RecipeIngredient("salt", 14, "g"));
+		ingredients.add(new RecipeIngredient("yeast", 0.3, "g"));
+		ingredients.add(new RecipeIngredient("san marzano tomato", 300, "g"));
+		ingredients.add(new RecipeIngredient("black pepper", null, null));
+		ingredients.add(new RecipeIngredient("mozzarella", 250, "g"));
+		ingredients.add(new RecipeIngredient("parmesan", 30, "g"));
+		ingredients.add(new RecipeIngredient("extra virgin olive oil", null, null));
+		ingredients.add(new RecipeIngredient("basil", null, null));
+		dishtypes = new String[]{"pizza"};
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
 	}
 	public void populateReports() throws SQLException{
 		AddReport addreport = new AddReport(connection, this);
@@ -244,7 +285,7 @@ public class StarterPopulator {
 		for(int dietaryrestrictionid : dietaryrestrictionids) {
 			dietaryrestrictionsrelationships.add(
 			MessageFormat.format(doubleSingleQuote("""
-			INSERT INTO INGREDIENTS_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID) 
+			INSERT INTO INGREDIENTS_FIT_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID) 
 			VALUES ({0}, {1})"""), ingredientid, dietaryrestrictionid));
 		}
 		
@@ -274,10 +315,8 @@ public class StarterPopulator {
 		        INSERT INTO VIOLATIONS (VIOLATION_DESCRIPTION, SEVERITY, IS_PERMANENT, VIOLATOR_ID, REPORT_ID)
 		    	VALUES ('{0}', '{1}', {2}, {3}, {4})"""), violationdescription, severity, ispermanent, violatorid, reportid),
 				MessageFormat.format(doubleSingleQuote("""
-		        UPDATE REPORTS SET REPORT_STATUS='Resolved' WHERE REPORT_ID={0})"""), reportid),
-				MessageFormat.format(doubleSingleQuote("""
-				UPDATE USERS SET USER_STATUS='MODERATED' WHERE USER_ID={0})"""), violatorid)
-				}; //TODO: Update the offending material
+		        UPDATE REPORTS SET REPORT_STATUS='Resolved' WHERE REPORT_ID={0})"""), reportid)
+				}; //TODO: Update the offending material and user
 		starter.executeAll(codeblocks);
 		
 	}
