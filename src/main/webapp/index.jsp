@@ -23,6 +23,17 @@
         }
     %>
 
+    <%
+        String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
+        String dbUser = "root";
+        String dbPassword = "j9jjlSlv!!";
+
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection dbConnection = DriverManager.getConnection(
+            dbURL, dbUser, dbPassword
+        );
+    %>
+
     <!--
       =========================================================================
       NAVIGATION HEADER
@@ -142,19 +153,13 @@
                     <p class="section-subtitle">Latest recipes from your favorite creators</p>
                 </div>
                 <div class="horizontal-scroll-row">
-                	<%
-                		String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
-					    String dbUser = "root";
-					    String dbPassword = "j9jjlSlv!!"; //remb to put ur own password
-					    
-					    try{
-					    	Class.forName("com.mysql.cj.jdbc.Driver");
-					    	Connection dbConnection  = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+					    <%
+					    try {
 					    	String sql = 
-					    			"SELECT RECIPE_NAME, COOKING_TIME, PUBLICATION_DATE, "+
-					    			"RECIPE_IMAGE_PATH, DESCRIPTION " + 
-					    			"FROM RECIPES " + 
-					    			"ORDER BY PUBLICATION_DATE DESC";
+					    				"SELECT RECIPE_NAME, TOTAL_MINUTES, RECIPE_ACTIVE_TIMESTAMP, "+
+					    				"RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION " +
+					    				"FROM RECIPES WHERE RECIPE_STATUS = 'Active' " +
+					    				"ORDER BY RECIPE_ACTIVE_TIMESTAMP DESC";
 					    	
 					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
 					    	ResultSet recipes = statement.executeQuery();
@@ -172,11 +177,11 @@
 
 					    		        <div class="recipe-card-badges">
 					    		            <span class="badge-pill">
-					    		                <%= recipes.getTime("COOKING_TIME") %>
+					    		                <%= recipes.getObject("TOTAL_MINUTES") == null ? "N/A" : recipes.getInt("TOTAL_MINUTES") + "m" %>
 					    		            </span>
 
 					    		            <span class="badge-pill">
-					    		                <%= recipes.getDate("PUBLICATION_DATE") %>
+					    		                <%= recipes.getTimestamp("RECIPE_ACTIVE_TIMESTAMP") %>
 					    		            </span>
 					    		        </div>
 					    		    </div>
@@ -187,7 +192,7 @@
 					    		        </h3>
 
 					    		        <p class="recipe-card-desc">
-					    		            <%= recipes.getString("DESCRIPTION") %>
+					    		            <%= recipes.getString("RECIPE_DESCRIPTION") %>
 					    		        </p>
 
 					    		        <div class="recipe-card-footer">
@@ -200,7 +205,6 @@
 					    		        }
 					    recipes.close();
 					    statement.close();
-					    dbConnection.close();
 					    }catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
@@ -215,31 +219,68 @@
                     <p class="section-subtitle">What people are saying about your recipes</p>
                 </div>
                 <div class="horizontal-scroll-row">
-                    <%-- Placeholder loop: replace with database results, one <article> per review --%>
-                    <% for (int i = 0; i < 5; i++) { %>
+                    <%
+                        String reviewSql =
+                            "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+                            "v.REVIEW_DESCRIPTION, v.RATING, " +
+                            "v.REVIEW_ACTIVE_TIMESTAMP, u.USER_NAME " +
+                            "FROM REVIEWS v " +
+                            "JOIN RECIPES r ON v.REF_RECIPE_ID = r.RECIPE_ID " +
+                            "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
+                            "WHERE v.REVIEW_STATUS = 'Active' " +
+                            "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC";
+
+                        try (
+                            PreparedStatement reviewStatement =
+                                dbConnection.prepareStatement(reviewSql);
+                            ResultSet reviews = reviewStatement.executeQuery()
+                        ) {
+                            while (reviews.next()) {
+                                String reviewImage =
+                                    reviews.getString("RECIPE_IMAGE_PATH");
+                                if (reviewImage == null || reviewImage.isEmpty()) {
+                                    reviewImage = "images/recipe-placeholder.jpg";
+                                }
+
+                                String reviewer = reviews.getString("USER_NAME");
+                                if (reviewer == null) {
+                                    reviewer = "Anonymous";
+                                }
+                    %>
                     <article class="review-card">
                         <div class="review-thumb">
-                            <img src="images/recipe-placeholder.jpg" alt="Recipe thumbnail" />
+                            <img src="<%= reviewImage %>" alt="Recipe thumbnail" />
                         </div>
                         <div class="review-body">
-                            <p class="review-title">Recipe Name</p>
-                            <p class="review-text">Content of the review...</p>
+                            <p class="review-title">
+                                <%= reviews.getString("RECIPE_NAME") %>
+                            </p>
+                            <p class="review-text">
+                                <%= reviews.getString("REVIEW_DESCRIPTION") %>
+                            </p>
                             <div class="review-footer">
                                 <div class="card-author">
                                     <span class="card-avatar">👤</span>
-                                    <span>Reviewer</span>
+                                    <span><%= reviewer %></span>
                                 </div>
                                 <div class="review-meta">
-                                    <span class="review-date">2025-10-20</span>
+                                    <span class="review-date">
+                                        <%= reviews.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %>
+                                    </span>
                                     <span class="card-rating">
-                                        <span class="stars" style="--rating: 4.5;" aria-label="4.5 out of 5 stars"></span>
-                                        4.5
+                                        <span class="stars"
+                                            style="--rating: <%= reviews.getInt("RATING") %>;"
+                                            aria-label="<%= reviews.getInt("RATING") %> out of 5 stars"></span>
+                                        <%= reviews.getInt("RATING") %>/5
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </article>
-                    <% } %>
+                    <%
+                            }
+                        }
+                    %>
                 </div>
             </section>
 
@@ -250,36 +291,67 @@
                     <p class="section-subtitle">Which of your recipes are the most popular</p>
                 </div>
                 <div class="horizontal-scroll-row">
-                    <%-- Placeholder loop: replace with database results ranked by popularity, one <article> per recipe --%>
-                    <% for (int i = 1; i <= 5; i++) { %>
+                    <%
+                        String popularSql =
+                            "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+                            "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
+                            "COUNT(b.USER_ID) AS BOOKMARK_COUNT " +
+                            "FROM RECIPES r " +
+                            "LEFT JOIN BOOKMARKED b ON r.RECIPE_ID = b.RECIPE_ID " +
+                            "WHERE r.RECIPE_STATUS = 'Active' " +
+                            "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+                            "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
+                            "r.TOTAL_MINUTES " +
+                            "ORDER BY BOOKMARK_COUNT DESC LIMIT 5";
+
+                        try (
+                            PreparedStatement popularStatement =
+                                dbConnection.prepareStatement(popularSql);
+                            ResultSet popularRecipes =
+                                popularStatement.executeQuery()
+                        ) {
+                            int rank = 1;
+                            while (popularRecipes.next()) {
+                                String popularImage =
+                                    popularRecipes.getString("RECIPE_IMAGE_PATH");
+                                if (popularImage == null || popularImage.isEmpty()) {
+                                    popularImage = "images/recipe-placeholder.jpg";
+                                }
+                    %>
                     <article class="recipe-card">
                         <div class="recipe-card-img">
-                            <img src="images/recipes/recipe-placeholder.jpg" alt="Recipe" />
-                            <div class="rank-badge">#<%= i %></div>
+                            <img src="<%= popularImage %>" alt="Recipe" />
+                            <div class="rank-badge">#<%= rank %></div>
                             <div class="recipe-card-badges">
                                 <div class="card-badge-group">
-                                    <span class="badge-pill">30m</span>
+                                    <span class="badge-pill">
+                                        <%= popularRecipes.getObject("TOTAL_MINUTES") == null ? "N/A" : popularRecipes.getInt("TOTAL_MINUTES") + "m" %>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                         <div class="recipe-card-body">
-                            <h3 class="recipe-card-title">Recipe Name</h3>
-                            <p class="recipe-card-desc">Description of the recipe...</p>
+                            <h3 class="recipe-card-title">
+                                <%= popularRecipes.getString("RECIPE_NAME") %>
+                            </h3>
+                            <p class="recipe-card-desc">
+                                <%= popularRecipes.getString("RECIPE_DESCRIPTION") %>
+                            </p>
                             <div class="recipe-card-footer">
                                 <div class="card-stats">
                                     <span class="card-bookmark">
                                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
-                                        2.5k
-                                    </span>
-                                    <span class="card-rating">
-                                        <span class="stars" style="--rating: 4.5;" aria-label="4.5 out of 5 stars"></span>
-                                        4.5 (125)
+                                        <%= popularRecipes.getInt("BOOKMARK_COUNT") %>
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </article>
-                    <% } %>
+                    <%
+                                rank++;
+                            }
+                        }
+                    %>
                 </div>
             </section>
 
@@ -305,6 +377,10 @@
             </div>
         </div>
     </footer>
+
+    <%
+        dbConnection.close();
+    %>
 
 </body>
 </html>
