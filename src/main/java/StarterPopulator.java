@@ -83,7 +83,7 @@ public class StarterPopulator {
 	public void populateUsers() throws SQLException {
 		String[] codeblocks = {
 				formatUser("Bob", "images/avatars/Bob.jpg", "Professional chef with 10 years of experience", "UTC-2", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "Bob@gmail.com", null),
-				formatUser("Tom", null, null, "UTC+8", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33", null, "+1 1234567890"),
+				formatUser("Tom", null, null, "UTC+8", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33", "tom@gmail.com", "+1 1234567890"),
 				formatUser("UpToNoGood", "images/avatars/evilhacker.webp", null, "UTC+8", "54208633d444549e359b09c53e3496b32d57974ab566d16400ef6e32f096bde4", "malicious@gmail.com", null)
 
 		};
@@ -137,6 +137,7 @@ public class StarterPopulator {
 		Integer totalminutes = 30; // minutes
 		boolean minutesaigenerated = false;
 		String course = "Dessert";
+		boolean courseaigenerated = false;
 		String author = "Bob";
 		String[] cuisines = {"American"};
 		boolean cuisineaigenerated = false;
@@ -151,7 +152,7 @@ public class StarterPopulator {
 		ingredients.add(new RecipeIngredient("banana", 1, "cup"));
 		ingredients.add(new RecipeIngredient("blueberry", 1, "cup"));
 
-		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, courseaigenerated, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
 
 		recipename = "Sinister Stew";
 		recipeimagepath = "images/recipes/sinisterstew.jpg";
@@ -160,13 +161,14 @@ public class StarterPopulator {
 		totalminutes = -10;
 		minutesaigenerated = false;
 		course = "Entrée";
+		courseaigenerated = false;
 		author = "UpToNoGood";
 		cuisines = new String[]{};
 		cuisineaigenerated = false;
 		appliances = new String[]{};
 		ingredients = new ArrayList<RecipeIngredient>();
 		dishtypes = new String[]{};
-		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, courseaigenerated, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
 		
 		recipename = "Neapolitan Pizza";
 		recipeimagepath = "images/recipes/neaopolitan-pizza-authentic.jpg";
@@ -182,6 +184,7 @@ public class StarterPopulator {
 		totalminutes = 26*60;
 		minutesaigenerated = false;
 		course = "Entrée";
+		cuisineaigenerated = false;
 		author = "Tom";
 		cuisines = new String[]{"italian"};
 		cuisineaigenerated = false;
@@ -198,7 +201,7 @@ public class StarterPopulator {
 		ingredients.add(new RecipeIngredient("extra virgin olive oil", null, null));
 		ingredients.add(new RecipeIngredient("basil", null, null));
 		dishtypes = new String[]{"pizza"};
-		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, courseaigenerated, author, cuisines, cuisineaigenerated, appliances, dishtypes, dishtypesaigenerated, ingredients);
 	}
 	public void populateReports() throws SQLException{
 		AddReport addreport = new AddReport(connection, this);
@@ -345,6 +348,20 @@ public class StarterPopulator {
 	public String clean(String string) {
 		if (string != null && !string.isEmpty()) {
 			return "'"+string+"'";
+		}
+		return null;
+	}
+	
+	public String clean(Integer integer) {
+		if (integer != null) {
+			return integer.toString().replace(",", "");
+		}
+		return null;
+	}
+	
+	public String clean(Double number) {
+		if (number != null) {
+			return number.toString().replace(",", "");
 		}
 		return null;
 	}

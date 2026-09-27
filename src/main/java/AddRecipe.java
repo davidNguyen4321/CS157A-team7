@@ -24,6 +24,7 @@ public class AddRecipe {
 			Integer totalminutes,
 			boolean minutesaigenerated,
 			String course,
+			boolean courseaigenerated,
 			String author,
 			String[] cuisines,
 			boolean cuisineaigenerated,
@@ -33,7 +34,7 @@ public class AddRecipe {
 			ArrayList<RecipeIngredient> ingredients
 	) throws SQLException {
 		int authorid = this.starterselector.selectUserIds(new String[]{author}).get(0);
-		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, authorid);
+		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, courseaigenerated, authorid);
 		
 		addRecipeApplianceRelationship(this.starterselector.selectApplianceIds(appliances), recipeid);
 		addRecipeDishTypeRelationship(this.starterselector.selectDishTypeIds(dishtypes), recipeid, dishtypeaigenerated);
@@ -41,14 +42,16 @@ public class AddRecipe {
 		addRecipeIngredientRelationship(ingredients, recipeid);
 	}
 	
-	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, boolean minutesaigenerated, String course, Integer authorid) throws SQLException {
+	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, boolean minutesaigenerated, String course, boolean courseaigenerated, Integer authorid) throws SQLException {
 		String recipeimagepathcleaned = this.starterpopulator.clean(recipeimagepath);
 		String recipedescriptioncleaned = this.starterpopulator.clean(recipedescription);
 		String coursecleaned = this.starterpopulator.clean(course);
+		String totalminutescleaned = starterpopulator.clean(totalminutes);
+		String authoridcleaned = starterpopulator.clean(authorid);
 		
 		String addrecipe = MessageFormat.format(this.starterpopulator.doubleSingleQuote("""
-        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, MINUTES_AI_GENERATED, COURSE, AUTHOR_ID)
-    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutes, minutesaigenerated, coursecleaned, authorid);
+        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, MINUTES_AI_GENERATED, COURSE, COURSE_AI_GENERATED, AUTHOR_ID)
+    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7}, {8})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutescleaned, minutesaigenerated, coursecleaned, courseaigenerated, authoridcleaned);
 		String[] key = {"ID_RECIPE"};
 		return this.starterpopulator.createAndQueryId(addrecipe, key);
 	}
@@ -63,9 +66,12 @@ public class AddRecipe {
 	}
 	
 	public String formatRecipeApplianceRelationship(int applianceid, int recipeid) {
+		String applianceidcleaned = starterpopulator.clean(applianceid);
+		String recipeidcleaned = starterpopulator.clean(recipeid);
+		
 		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
 		        INSERT INTO RECIPES_USE_APPLIANCES (APPLIANCE_ID, RECIPE_ID)
-	        	VALUES ({0}, {1})"""), applianceid, recipeid);
+	        	VALUES ({0}, {1})"""), applianceidcleaned, recipeidcleaned);
 	}
 	
 	public void addRecipeDishTypeRelationship(ArrayList<Integer> dishtypeids, int recipeid, boolean dishtypeaigenerated) throws SQLException {
@@ -78,24 +84,30 @@ public class AddRecipe {
 	}
 	
 	public String formatRecipeDishTypeRelationship(int dishtypeid, int recipeid, boolean dishtypeaigenerated) {
+		String dishtypeidcleaned = starterpopulator.clean(dishtypeid);
+		String recipeidcleaned = starterpopulator.clean(recipeid);
+		
 		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
 		        INSERT INTO RECIPES_DISH_TYPES (DISH_TYPE_ID, RECIPE_ID, DISH_TYPE_AI_GENERATED)
-	        	VALUES ({0}, {1}, {2})"""), dishtypeid, recipeid, dishtypeaigenerated);
+	        	VALUES ({0}, {1}, {2})"""), dishtypeidcleaned, recipeidcleaned, dishtypeaigenerated);
 	}
 	
 	public void addRecipeCuisineRelationship(ArrayList<Integer> cuisineids, int recipeid, boolean cuisineaigenerated) throws SQLException {
 		String[] codeblocks = new String[cuisineids.size()];
 		for (int i = 0; i<cuisineids.size(); i++) {
-			codeblocks[i] = formatRecipeDishTypeRelationship(cuisineids.get(i), recipeid, cuisineaigenerated);
+			codeblocks[i] = formatRecipeCuisineRelationship(cuisineids.get(i), recipeid, cuisineaigenerated);
 		}
 		starter.executeAll(codeblocks);
 
 	}
 	
 	public String formatRecipeCuisineRelationship(int cuisineid, int recipeid, boolean cuisineaigenerated) {
+		String cuisineidcleaned = starterpopulator.clean(cuisineid);
+		String recipeidcleaned = starterpopulator.clean(recipeid);
+
 		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
 		        INSERT INTO RECIPES_FEATURE_CUISINES (CUISINE_ID, RECIPE_ID, CUISINE_AI_GENERATED)
-	        	VALUES ({0}, {1}, {2})"""), cuisineid, recipeid, cuisineaigenerated);
+	        	VALUES ({0}, {1}, {2})"""), cuisineidcleaned, recipeidcleaned, cuisineaigenerated);
 	}
 	
 	public void addRecipeIngredientRelationship(ArrayList<RecipeIngredient> ingredients, int recipeid) throws SQLException {
@@ -116,8 +128,11 @@ public class AddRecipe {
 	
 	public String formatRecipeIngredientRelationship(RecipeIngredient ingredient, int recipeid) {
 		String amountunitcleaned = this.starterpopulator.clean(ingredient.amountunit);
+		String ingredientidcleaned = starterpopulator.clean(ingredient.id);
+		String recipeidcleaned = starterpopulator.clean(recipeid);
+		String ingredientamountcleaned = starterpopulator.clean(ingredient.amount);
 		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
 		        INSERT INTO RECIPES_COOK_INGREDIENTS (INGREDIENT_ID, RECIPE_ID, AMOUNT, AMOUNT_UNIT)
-	        	VALUES ({0}, {1}, {2}, {3})"""), ingredient.id, recipeid, ingredient.amount, amountunitcleaned);
+	        	VALUES ({0}, {1}, {2}, {3})"""), ingredientidcleaned, recipeidcleaned, ingredientamountcleaned, amountunitcleaned);
 	}
 }

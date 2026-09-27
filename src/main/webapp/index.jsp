@@ -26,7 +26,7 @@
     <%
         String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
         String dbUser = "root";
-        String dbPassword = "j9jjlSlv!!";
+        String dbPassword = "";
 
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection dbConnection = DriverManager.getConnection(
