@@ -146,7 +146,7 @@ public class Starter {
 		            RECIPE_DESCRIPTION TEXT NULL,
 		            RECIPE_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
 		            RECIPE_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		            RECIPE_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		            RECIPE_STATUS ENUM('Active', 'Deleted', 'Banned', 'Appealed') NOT NULL DEFAULT 'Active',
 		            INSTRUCTIONS TEXT NOT NULL,
 		            TOTAL_MINUTES INT NULL,
 		            MINUTES_AI_GENERATED BOOLEAN NOT NULL,
@@ -156,7 +156,7 @@ public class Starter {
 		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID),
 		            UNIQUE (RECIPE_NAME, AUTHOR_ID)
 		        )
-		        """, // Hard delete for 'Deleted' after 30 days, for 'Banned' after violation expires
+		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option 
 		        """
 		        CREATE TABLE IF NOT EXISTS REVIEWS (
 		            REVIEW_ID INT PRIMARY KEY AUTO_INCREMENT,
@@ -164,7 +164,7 @@ public class Starter {
 		            REVIEW_DESCRIPTION TEXT NOT NULL,
 		            REVIEW_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
 		            REVIEW_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		            REVIEW_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		            REVIEW_STATUS ENUM('Active', 'Deleted', 'Banned', 'Appealed') NOT NULL DEFAULT 'Active',
 		            RATING INT NOT NULL,
 		            REF_RECIPE_ID INT NOT NULL,
 		            FOREIGN KEY (REF_RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
@@ -172,14 +172,14 @@ public class Starter {
 		        	FOREIGN KEY (REVIEWER_ID) REFERENCES USERS (USER_ID),
 		        	UNIQUE (REF_RECIPE_ID, REVIEWER_ID)
 		        )
-		        """, // Hard delete for 'Deleted' after 30 days, for 'Banned' after violation expires
+		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option
 		        """
 		        CREATE TABLE IF NOT EXISTS REPORTS (
 				    REPORT_ID INT PRIMARY KEY AUTO_INCREMENT,
 				    REPORT_DESCRIPTION TEXT NULL,
 				    REPORT_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
 				    REPORT_STATUS ENUM('Active', 'Resolved', 'Dismissed') NOT NULL DEFAULT 'Active',
-				    REASON ENUM('Spam', 'Vulgar Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Other') NOT NULL,
+				    REASON ENUM('Spam', 'Inappropriate Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Health Concerns') NOT NULL,
 				    REPORTER_ID INT NOT NULL,
 				    FOREIGN KEY (REPORTER_ID) REFERENCES USERS (USER_ID)
 				)		
@@ -204,7 +204,6 @@ public class Starter {
 		            RECIPE_DESCRIPTION_SNAPSHOT TEXT NULL,
 		            RECIPE_ACTIVE_TIMESTAMP_SNAPSHOT TIMESTAMP NOT NULL,
 		            RECIPE_REMOVE_TIMESTAMP_SNAPSHOT TIMESTAMP NULL,
-		            RECIPE_STATUS_SNAPSHOT ENUM('Active', 'Deleted', 'Banned') NOT NULL,
 		            INSTRUCTIONS_SNAPSHOT TEXT NOT NULL,
 		            TOTAL_MINUTES_SNAPSHOT INT NULL,
 		            MINUTES_AI_GENERATED_SNAPSHOT BOOLEAN NOT NULL,
@@ -228,7 +227,6 @@ public class Starter {
 		            REVIEW_DESCRIPTION_SNAPSHOT TEXT NOT NULL,
 		            REVIEW_ACTIVE_TIMESTAMP_SNAPSHOT TIMESTAMP NOT NULL,
 		            REVIEW_REMOVE_TIMESTAMP_SNAPSHOT TIMESTAMP NULL,
-		            REVIEW_STATUS_SNAPSHOT ENUM('Active', 'Deleted', 'Banned') NOT NULL,
 		            RATING_SNAPSHOT INT NOT NULL,
 		            REF_RECIPE_ID_SNAPSHOT INT NOT NULL,
 		        	REVIEWER_ID_SNAPSHOT INT NULL
@@ -239,14 +237,21 @@ public class Starter {
 			        VIOLATION_ID INT PRIMARY KEY AUTO_INCREMENT,
 			        VIOLATION_DESCRIPTION TEXT NOT NULL,
 			        VIOLATION_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+			        VIOLATION_STATUS ENUM('Active', 'Expired', 'Reversed', 'Appealed', 'Permanent') NOT NULL,
 				    SEVERITY ENUM('Minor', 'Moderate', 'Severe') NOT NULL,
-				    IS_PERMANENT BOOLEAN NOT NULL,
+				    SUSPENSION_STATUS ENUM('Review', 'Recipe', 'All', 'N/A'),
+				    CAN_APPEAL BOOLEAN NOT NULL DEFAULT TRUE,
+					EXPIRE_TIMESTAMP TIMESTAMP NULL,
 				    VIOLATOR_ID INT NOT NULL,
 				    FOREIGN KEY (VIOLATOR_ID) REFERENCES USERS (USER_ID),
+				    MODERATOR_ID INT NULL,
+				    FOREIGN KEY (MODERATOR_ID) REFERENCES USERS (USER_ID),
+				    AUDITOR_ID INT NULL,
+				    FOREIGN KEY (AUDITOR_ID) REFERENCES USERS (USER_ID),
 				    REPORT_ID INT NULL,
 				    FOREIGN KEY (REPORT_ID) REFERENCES REPORTS (REPORT_ID)
 				)
-		        """ // 'Minor' and 'Moderate' expire unless violator banned
+		        """ // Never deleted
 		};
 		
 		executeAll(codeblocks);
