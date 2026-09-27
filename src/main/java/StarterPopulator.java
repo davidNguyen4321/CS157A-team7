@@ -1,11 +1,9 @@
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
-import java.time.OffsetDateTime;
 
 public class StarterPopulator {
 	Starter starter;
@@ -33,6 +31,8 @@ public class StarterPopulator {
 		populateIngredients();
 		populateRecipes();
 		populateReviews();
+		populateReports();
+		populateViolations();
 	}
 	
 	public void populateRelationships() throws SQLException {
@@ -69,24 +69,29 @@ public class StarterPopulator {
 		addDishType("pizza", "Italian dish, typically with a flatbread base, covered with tomato sauce, and topped by cheese.", "flatbread");
 	}
 	
+	
 	public void populateReviews() throws SQLException {
 		String[] codeblocks = {
-				 
+				 formatReview("images/reviews/Sunshine-Fruit-Salad-review.jpg", "I loved this! I drizzled some honey, and it was the best thing ever!", 5, 1, "Tom")
 		};
 		starter.executeAll(codeblocks);
 	}
 	
 	public void populateUsers() throws SQLException {
 		String[] codeblocks = {
-				formatUser("Bob", "images/avatars/Bob.jpg", "Professional chef with 10 years of experience", "UTC-2", "Bob@gmail.com", null, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"),
-				formatUser("Tom", null, null, "UTC+8", null, "+1 1234567890", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33")
+				formatUser("Bob", "images/avatars/Bob.jpg", "Professional chef with 10 years of experience", "UTC-2", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "Bob@gmail.com", null),
+				formatUser("Tom", null, null, "UTC+8", "1c45f6c7abc8cb3d379ed1cad8344a40aa4a5e8a2f615a480580160b33d0fd33", null, "+1 1234567890"),
+				formatUser("UpToNoGood", "images/avatars/evilhacker.webp", null, "UTC+8", "54208633d444549e359b09c53e3496b32d57974ab566d16400ef6e32f096bde4", "malicious@gmail.com", null)
+
 		};
 		starter.executeAll(codeblocks);
 	}
+	
 	public void populateIngredients() throws SQLException {
 		String[] restrictions = {"vegatarian", "vegan", "gluten-free", "dairy-free", "pescetarian", "shellfish-free", "palaeo"};
 		addIngredient("pineapple", "images/ingredients/Pineapple.webp", "Tropical fruit with a tough, spiky skin.", null, restrictions);
 		addIngredient("orange", "images/ingredients/Ambersweet_oranges.jpg", "Citric berry known for its distinctive color.", null, restrictions);
+		addIngredient("mandarin orange", "images/ingredients/mandarinorange.jpg", "Small and oblate species of orange", "orange", restrictions);
 		addIngredient("strawberry", "images/ingredients/Strawberries.jpg", "Sweet summer aggregate accessory fruit.", null, restrictions);
 		addIngredient("banana", "images/ingredients/bananas.avif", "Elongated, yellow fruit.", null, restrictions);
 		addIngredient("blueberry", "images/ingredients/blueberries.avif", "Small, round, dark blue berries.", null, restrictions);
@@ -122,14 +127,49 @@ public class StarterPopulator {
 				+ "4. Keep refrigerated until served.\n"
 				+ "5. Add bananas and blueberries"; // bananas and blueberries are a little more fragile
 		Integer totalminutes = 30; // minutes
-		String whentoeat = "Dinner";
+		boolean minutesaigenerated = false;
 		String course = "Dessert";
 		String author = "Bob";
-		String cuisine = "italian";
+		String cuisine = null;
 		String[] appliances = new String[]{};
-		String[] ingredients = {"pineapple", "orange", "vanilla pudding", "strawberry", "banana", "blueberry"};
 		String[] dishtypes = {"fruit salad"};
-		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, whentoeat, course, author, cuisine, appliances, dishtypes, ingredients);
+		ArrayList<RecipeIngredient> ingredients = new ArrayList<RecipeIngredient>();
+		ingredients.add(new RecipeIngredient("pineapple", 20, "oz"));
+		ingredients.add(new RecipeIngredient("madarin orange", 11, "oz"));
+		ingredients.add(new RecipeIngredient("vanilla pudding", 3.4, "oz"));
+		ingredients.add(new RecipeIngredient("strawberry", 1, "cup"));
+		ingredients.add(new RecipeIngredient("banana", 1, "cup"));
+		ingredients.add(new RecipeIngredient("blueberries", 1, "cup"));
+
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
+		
+		recipename = "Sinister Stew";
+		recipeimagepath = "images/recipes/sinisterstew.jpg";
+		recipedescription = "You should try it.";
+		instructions = "1. Eat it";
+		totalminutes = -10;
+		minutesaigenerated = false;
+		course = "Entrée";
+		author = "UpToNoGood";
+		cuisine = null;
+		appliances = new String[]{};
+		ingredients = new ArrayList<RecipeIngredient>();
+		dishtypes = new String[]{};
+		addrecipe.addRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, author, cuisine, appliances, dishtypes, ingredients);
+	}
+	public void populateReports() throws SQLException{
+		AddReport addreport = new AddReport(connection, this);
+		String reportdescription = "Someone may get seriously hurt if they make this recipe!";
+		String contenttype = "Recipe";
+		String reason = "Spam";
+		int offendingmaterialid = 2; //it is bad practice to hardcode the ids.
+		int reportedid = 3;
+		int reporterid = 2;
+		addreport.addReport(reportdescription, contenttype, reason, offendingmaterialid, offendingmaterialid, reportedid, reporterid);
+	}
+	
+	public void populateViolations() {
+		
 	}
 	
 	public String formatAppliance(String appliancename, String applianceimagepath, String appliancedescription) throws SQLException {
@@ -171,28 +211,27 @@ public class StarterPopulator {
 		}
 		String adddishtype = MessageFormat.format(doubleSingleQuote("""
 		        INSERT INTO DISH_TYPES (DISH_TYPE_NAME, DISH_TYPE_DESCRIPTION, BASE_DISH_TYPE_ID)
-	        	VALUES ('{0}', '{1}', {2})"""), dishtypename, dishtypedescription, basedishtypeid);
+	        	VALUES ('{0}', '{1}', {2})"""), dishtypename.toLowerCase(), dishtypedescription, basedishtypeid);
 		execute(adddishtype);
 	}
 	
-	public String formatReview(int rating, String content, String photopath, int recipeid, String username) throws SQLException{ // DO NOT USE SINGLE QUOTES IN THE REVIEW basecuisineids.
-		String contentcleaned = clean(content);
-		String photopathcleaned = clean(photopath);
-		int userid = this.starterselector.selectUserIds(new String[]{username}).get(0);
+	public String formatReview(String reviewimagepath, String reviewdescription, int rating, int refrecipeid, String reviewer) throws SQLException{ // DO NOT USE SINGLE QUOTES IN THE REVIEW basecuisineids.
+		String reviewimagepathcleaned = clean(reviewimagepath);
+		int reviewerid = this.starterselector.selectUserIds(new String[]{reviewer}).get(0);
 		return MessageFormat.format(doubleSingleQuote("""
-		        INSERT INTO REVIEWS (RATING, CONTENT, PHOTO_PATH, RECIPE_ID, USER_ID)
-	        	VALUES ()"""), rating, contentcleaned, photopathcleaned, recipeid, userid);
+		        INSERT INTO REVIEWS (REVIEW_IMAGE_PATH, REVIEW_DESCRIPTION, RATING, REF_RECIPE_ID, REVIEWER_ID)
+	        	VALUES ({0}, '{1}', {2}, {3}, {4})"""), reviewimagepathcleaned, reviewdescription, rating, refrecipeid, refrecipeid, reviewerid);
 	}
 	
-	public String formatUser(String username, String userimagepath, String userdescription, String usertimedisplay, String emailaddress, String phonenumber, String passwordhash) throws SQLException {
+	public String formatUser(String username, String userimagepath, String userdescription, String timezone,  String passwordhash, String emailaddress, String phonenumber) throws SQLException {
 		String userimagepathcleaned = clean(userimagepath);
 		String userdescriptioncleaned = clean(userdescription);
 		String emailaddresscleaned = clean(emailaddress);
 		String phonenumbercleaned = clean(phonenumber);
 
 		return 	MessageFormat.format(doubleSingleQuote("""
-		        INSERT INTO USERS (USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, USER_TIME_DISPLAY, EMAIL_ADDRESS, PHONE_NUMBER, PASSWORD_HASH)
-	        	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, '{6}')"""), username, userimagepathcleaned, userdescriptioncleaned, usertimedisplay, emailaddresscleaned, phonenumbercleaned, passwordhash);
+		        INSERT INTO USERS (USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, TIMEZONE, PASSWORD_HASH, EMAIL_ADDRESS, PHONE_NUMBER)
+	        	VALUES ('{0}', {1}, {2}, '{3}', '{4}', {5}, {6})"""), username, userimagepathcleaned, userdescriptioncleaned, timezone, passwordhash, emailaddresscleaned, phonenumbercleaned);
 	}
 	
 	public void addIngredient(String ingredientname, String ingredientimagepath, String ingredientdescription, String baseingredientname, String[] dietaryrestrictions) throws SQLException {
@@ -213,8 +252,6 @@ public class StarterPopulator {
 		starter.executeAll(codeblocks);
 	}
 	
-	
-	
 	public int createIngredient(String ingredientname, String ingredientimagepath, String ingredientdescription, String baseingredientname) throws SQLException {
 		Integer baseingredientid = null;
 		ArrayList<Integer> baseingredientids = this.starterselector.selectIngredientIds(new String[]{baseingredientname});
@@ -227,6 +264,20 @@ public class StarterPopulator {
     	ingredientname.toLowerCase(), ingredientimagepath, ingredientdescription, baseingredientid);
 		String[] key = {"INGREDIENT_ID"};
 		return createAndQueryId(addingredient, key);
+	}
+	
+	public void addViolation(String violationdescription, String severity, boolean ispermanent, int violatorid, int reportid) throws SQLException{
+		String[] codeblocks = {
+				MessageFormat.format(doubleSingleQuote("""
+		        INSERT INTO VIOLATIONS (VIOLATION_DESCRIPTION, SEVERITY, IS_PERMANENT, VIOLATOR_ID, REPORT_ID)
+		    	VALUES ('{0}', '{1}', {2}, {3}, {4})"""), violationdescription, severity, ispermanent, violatorid, reportid),
+				MessageFormat.format(doubleSingleQuote("""
+		        UPDATE REPORTS SET REPORT_STATUS='Resolved' WHERE REPORT_ID={0})"""), reportid),
+				MessageFormat.format(doubleSingleQuote("""
+				UPDATE USERS SET USER_STATUS='MODERATED' WHERE USER_ID={0})"""), violatorid)
+				}; //TODO: Update the offending material
+		starter.executeAll(codeblocks);
+		
 	}
 	
 	public void execute(String query) throws SQLException{//intended for singular executions

@@ -153,7 +153,8 @@ public class Starter {
 		            COURSE ENUM('Entrée', 'Appetizer / Side', 'Dessert', 'Other') NOT NULL,
 		            COURSE_AI_GENERATED BOOLEAN NOT NULL,
 		            AUTHOR_ID INT NULL,
-		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID)
+		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID),
+		            UNIQUE (RECIPE_NAME, AUTHOR_ID)
 		        )
 		        """, // Hard delete for 'Deleted' after 30 days, for 'Banned' after violation expires
 		        """

@@ -26,13 +26,13 @@ public class AddRecipe {
 			String recipedescription,
 			String instructions,
 			Integer totalminutes,
-			String whentoeat,
+			boolean minutesaigenerated,
 			String course,
 			String author,
 			String cuisine,
 			String[] appliances,
 			String[] dishtypes,
-			String[] ingredients
+			ArrayList<RecipeIngredient> ingredients
 	) throws SQLException {
 		
 		int authorid = this.starterselector.selectUserIds(new String[]{author}).get(0);
@@ -42,36 +42,35 @@ public class AddRecipe {
 			cuisineid = cuisineids.get(0);
 		}
 		
-		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, whentoeat, course, authorid);
+		int recipeid = createRecipe(recipename, recipeimagepath, recipedescription, instructions, totalminutes, minutesaigenerated, course, cuisineid, authorid);
 		
-		addRecipeRelationships(this.starterselector.selectApplianceIds(appliances), "APPLIANCE_ID", recipeid, "RECIPES_APPLIANCES");
-		addRecipeRelationships(this.starterselector.selectDishTypeIds(dishtypes), "DISH_TYPE_ID", recipeid, "RECIPES_DISH_TYPES");
-		addRecipeRelationships(this.starterselector.selectIngredientIds(ingredients), "INGREDIENT_ID", recipeid, "RECIPES_INGREDIENTS");
+		addRecipeRelationshipsBasic(this.starterselector.selectApplianceIds(appliances), "APPLIANCE_ID", recipeid, "RECIPES_APPLIANCES");
+		addRecipeRelationshipsBasic(this.starterselector.selectDishTypeIds(dishtypes), "DISH_TYPE_ID", recipeid, "RECIPES_DISH_TYPES");
+//		addRecipeRelationshipsBasic(this.starterselector.selectIngredientIds(ingredients), "INGREDIENT_ID", recipeid, "RECIPES_INGREDIENTS");
 	}
 	
-	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, String whentoeat, String course, Integer authorid) throws SQLException {
+	public int createRecipe(String recipename, String recipeimagepath, String recipedescription, String instructions, Integer totalminutes, boolean minutesaigenerated, String course, Integer cuisineid, Integer authorid) throws SQLException {
 		String recipeimagepathcleaned = this.starterpopulator.clean(recipeimagepath);
 		String recipedescriptioncleaned = this.starterpopulator.clean(recipedescription);
-		String whentoeatcleaned = this.starterpopulator.clean(whentoeat);
 		String coursecleaned = this.starterpopulator.clean(course);
 		
-		String addRecipe = MessageFormat.format(this.starterpopulator.doubleSingleQuote("""
-        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, WHEN_TO_EAT, COURSE, AUTHOR_ID)
-    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutes, whentoeatcleaned, coursecleaned, authorid);
+		String addrecipe = MessageFormat.format(this.starterpopulator.doubleSingleQuote("""
+        INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, MINUTES_AI_GENERATED, COURSE, CUISINE_ID, AUTHOR_ID)
+    	VALUES ('{0}', {1}, {2}, '{3}', {4}, {5}, {6}, {7}, {8})"""), recipename, recipeimagepathcleaned, recipedescriptioncleaned, instructions, totalminutes, minutesaigenerated, coursecleaned, cuisineid, authorid);
 		String[] key = {"ID_RECIPE"};
-		return this.starterpopulator.createAndQueryId(addRecipe, key);
+		return this.starterpopulator.createAndQueryId(addrecipe, key);
 	}
-
-	public void addRecipeRelationships(ArrayList<Integer> manyids, String manyidcolumnname, int recipeid, String tablename) throws SQLException {
+	
+	public void addRecipeRelationshipsBasic(ArrayList<Integer> manyids, String manyidcolumnname, int recipeid, String tablename) throws SQLException {
 		String[] codeblocks = new String[manyids.size()];
 		for (int i = 0; i<manyids.size(); i++) {
-			codeblocks[i] = formatRecipeRelationship(manyids.get(i), manyidcolumnname, recipeid, tablename);
+			codeblocks[i] = formatRecipeRelationshipBasic(manyids.get(i), manyidcolumnname, recipeid, tablename);
 		}
 		starter.executeAll(codeblocks);
 
 	}
 	
-	public String formatRecipeRelationship(int manyid, String manyidcolumnname, int recipeid, String tablename) {
+	public String formatRecipeRelationshipBasic(int manyid, String manyidcolumnname, int recipeid, String tablename) {
 		return MessageFormat.format(starterpopulator.doubleSingleQuote("""
 		        INSERT INTO {0} ({1}, RECIPE_ID)
 	        	VALUES ({2}, {3})"""), tablename, manyidcolumnname, manyid, recipeid);
