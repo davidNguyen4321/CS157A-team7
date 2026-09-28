@@ -26,13 +26,32 @@
     <%
         String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
         String dbUser = "root";
-        String dbPassword = "";
+        String dbPassword = request.getParameter("dbPassword");
+        
+        Connection dbConnection = null;
+        boolean isConnected = false;
 
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection dbConnection = DriverManager.getConnection(
-            dbURL, dbUser, dbPassword
-        );
+        if (dbPassword != null) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                dbConnection = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+                isConnected = true;
+            } catch (Exception e) {
+                // Connection failed (wrong password, etc.)
+            }
+        }
     %>
+
+    <!-- Temporary Password Prompt Box (if not connected yet) -->
+    <% if (!isConnected) { %>
+        <div style="background: #f8d7da; padding: 15px; text-align: center; border-bottom: 1px solid #f5c6cb;">
+            <form method="post" action="index.jsp?tab=<%= currentTab %>">
+                <label for="dbPassword"><strong>Enter MySQL Root Password to Connect:</strong></label>
+                <input type="password" id="dbPassword" name="dbPassword" required>
+                <button type="submit">Connect Database</button>
+            </form>
+        </div>
+    <% } %>
 
     <!--
       =========================================================================
@@ -153,7 +172,8 @@
                     <p class="section-subtitle">Latest recipes from your favorite creators</p>
                 </div>
                 <div class="horizontal-scroll-row">
-					    <%
+					 <%
+					 if (dbConnection != null) {
 					    try {
 					    	String sql = 
 					    				"SELECT RECIPE_NAME, TOTAL_MINUTES, RECIPE_ACTIVE_TIMESTAMP, "+
@@ -208,7 +228,7 @@
 					    }catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
-					    %>
+					 }%>
                 </div>
             </section>
 
@@ -220,6 +240,7 @@
                 </div>
                 <div class="horizontal-scroll-row">
                     <%
+                    if (dbConnection != null) {
                         String reviewSql =
                             "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
                             "v.REVIEW_DESCRIPTION, v.RATING, " +
@@ -280,6 +301,7 @@
                     <%
                             }
                         }
+                    }
                     %>
                 </div>
             </section>
@@ -292,6 +314,7 @@
                 </div>
                 <div class="horizontal-scroll-row">
                     <%
+                    if (dbConnection != null) {
                         String popularSql =
                             "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
                             "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
@@ -351,6 +374,7 @@
                                 rank++;
                             }
                         }
+                    }
                     %>
                 </div>
             </section>
