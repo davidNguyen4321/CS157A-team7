@@ -158,7 +158,6 @@ public class Starter {
 		            AI_GEN_COURSE BOOLEAN NOT NULL,
 		            AUTHOR_ID INT NULL,
 		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID)
-
 		        )
 		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option 
 		        """

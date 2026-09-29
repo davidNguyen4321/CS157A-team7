@@ -186,6 +186,7 @@
 					    	
 					    	while(recipes.next()){
 					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
+					    		System.out.println(imagePath);
 					    		if(imagePath == null || imagePath.isEmpty()){
 					    			imagePath = "images/recipe-placeholder.jpg";	
 					    		}
@@ -246,7 +247,7 @@
                             "v.REVIEW_DESCRIPTION, v.RATING, " +
                             "v.REVIEW_ACTIVE_TIMESTAMP, u.USER_NAME " +
                             "FROM REVIEWS v " +
-                            "JOIN RECIPES r ON v.REF_RECIPE_ID = r.RECIPE_ID " +
+                            "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID " +
                             "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
                             "WHERE v.REVIEW_STATUS = 'Active' " +
                             "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC";

@@ -1,0 +1,16 @@
+INSERT INTO FOLLOWED (FOLLOWER_ID, FOLLOWING_ID) VALUES
+(1, 2),  -- chef_john follows mary_bakes
+(1, 3),  -- chef_john follows spicy_pete
+(2, 1),  -- mary_bakes follows chef_john
+(2, 9),  -- mary_bakes follows baker_bob
+(3, 5),  -- spicy_pete follows grillmaster
+(4, 10), -- vegan_val follows healthy_helen
+(5, 3),  -- grillmaster follows spicy_pete
+(6, 8),  -- sushi_sue follows curry_carl
+(7, 5),  -- keto_kyle follows grillmaster
+(8, 4),  -- curry_carl follows vegan_val
+(9, 2),  -- baker_bob follows mary_bakes
+(10, 1), -- healthy_helen follows chef_john
+(10, 4), -- healthy_helen follows vegan_val
+(1, 9),  -- chef_john follows baker_bob
+(9, 1);  -- baker_bob follows chef_john
