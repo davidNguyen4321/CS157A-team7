@@ -1,0 +1,22 @@
+-- Not human-made
+INSERT INTO REPORTS (REPORT_ID, REPORT_DESCRIPTION, REPORT_STATUS, REASON, SNAPSHOT_NAME, SNAPSHOT_IMAGE_PATH, SNAPSHOT_DESCRIPTION, SNAPSHOT_ACTIVE_TIMESTAMP, ACCUSED_ID, REPORTER_ID) VALUES
+(1, 'This recipe is just a scam link.', 'Approved', 'Scam', 'FREE IPHONE RECIPE', NULL, 'Click here for a free phone', '2023-10-01 10:00:00', 12, 1),
+(2, 'Telling people to drink bleach is extremely dangerous!', 'Approved', 'Health Concerns', 'Bleach Cleanse Smoothie', NULL, 'Cure everything with this smoothie.', '2023-10-02 11:00:00', 11, 2),
+(3, 'This user is claiming to post stolen corporate secrets.', 'Approved', 'Copyright', 'KFC 11 Herbs Secret', NULL, 'This is the exact stolen proprietary recipe.', '2023-10-03 12:00:00', 13, 6),
+(4, 'False report, just didn''t like the chicken.', 'Dismissed', 'Harassment', 'Garlic Chicken', NULL, 'Juicy pan-seared chicken with garlic.', '2023-10-04 13:00:00', 3, 11),
+(5, 'Spam link in description', 'Approved', 'Malicious Links', 'FREE IPHONE RECIPE', NULL, 'Click here for a free phone', '2023-10-05 14:00:00', 12, 4),
+(6, 'Dangerous cleaning chemical recipe', 'Approved', 'Health Concerns', 'Bleach Cleanse Smoothie', NULL, 'Cure everything with this smoothie.', '2023-10-06 15:00:00', 11, 5),
+(7, 'Not a real recipe', 'Approved', 'Spam', 'FREE IPHONE RECIPE', NULL, 'Click here for a free phone', '2023-10-07 16:00:00', 12, 7),
+(8, 'I think this bread recipe is stolen from a book.', 'Dismissed', 'Copyright', 'Homemade Bread', NULL, 'Simple baked artisan loaf.', '2023-10-08 17:00:00', 9, 13),
+(9, 'Spam', 'Approved', 'Spam', 'FREE IPHONE RECIPE', NULL, 'Click here for a free phone', '2023-10-09 18:00:00', 12, 8),
+(10, 'Health hazard!', 'Approved', 'Health Concerns', 'Bleach Cleanse Smoothie', NULL, 'Cure everything with this smoothie.', '2023-10-10 19:00:00', 11, 9),
+(11, 'User is attacking the author personally.', 'Approved', 'Harassment', 'YOU SUCK', NULL, 'This is the worst recipe ever, quit cooking you idiot.', '2023-10-11 10:00:00', 11, 1),
+(12, 'Spam bot posting links in reviews.', 'Approved', 'Spam', 'MAKE $5000 A DAY', NULL, 'Work from home! Visit www.spam123.com', '2023-10-12 11:00:00', 12, 3),
+(13, 'Bullying the recipe creator.', 'Approved', 'Harassment', 'Gross', NULL, 'The author is ugly and their food is poison.', '2023-10-13 12:00:00', 11, 1),
+(14, 'False claims about me stealing my own family recipe.', 'Approved', 'Misinformation', 'Stolen!', NULL, 'I own this recipe, take it down now or I will sue.', '2023-10-14 13:00:00', 13, 5),
+(15, 'More crypto spam.', 'Approved', 'Scam', 'BUY CRYPTO', NULL, 'Invest in Bitcoin now at www.cryptoscam.net', '2023-10-15 14:00:00', 12, 8),
+(16, 'User is spamming again.', 'Approved', 'Malicious Links', 'MAKE $5000 A DAY', NULL, 'Work from home! Visit www.spam123.com', '2023-10-16 15:00:00', 12, 2),
+(17, 'Just mean', 'Approved', 'Harassment', 'YOU SUCK', NULL, 'This is the worst recipe ever...', '2023-10-17 16:00:00', 11, 4),
+(18, 'False report, they just said the cookies were too sweet.', 'Dismissed', 'Harassment', 'Too sweet', NULL, 'Cookies had way too much sugar for my diet.', '2023-10-18 17:00:00', 6, 2),
+(19, 'Crypto scam link.', 'Approved', 'Scam', 'BUY CRYPTO', NULL, 'Invest in Bitcoin now', '2023-10-19 18:00:00', 12, 9),
+(20, 'Threatening lawsuit falsely.', 'Approved', 'Harassment', 'Stolen!', NULL, 'Take it down or I sue.', '2023-10-20 19:00:00', 13, 1);

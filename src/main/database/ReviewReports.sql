@@ -1,0 +1,12 @@
+-- Content was AI-generated
+INSERT INTO REVIEW_REPORTS (REPORT_ID, SNAPSHOT_REVIEW_ID, SNAPSHOT_RATING, SNAPSHOT_RECIPE_ID) VALUES
+(11, 11, 1, 1),
+(12, 12, 5, 2),
+(13, 13, 1, 3),
+(14, 14, 1, 4),
+(15, 15, 5, 5),
+(16, 12, 5, 2),
+(17, 11, 1, 1),
+(18, 10, 3, 10),
+(19, 15, 5, 5),
+(20, 14, 1, 4);
