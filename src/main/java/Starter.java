@@ -158,7 +158,6 @@ public class Starter {
 		            AI_GEN_COURSE BOOLEAN NOT NULL,
 		            AUTHOR_ID INT NULL,
 		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID)
-
 		        )
 		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option 
 		        """
@@ -185,6 +184,7 @@ public class Starter {
 				    REPORT_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
 				    REPORT_STATUS ENUM('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
 				    REASON ENUM('Spam', 'Inappropriate Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Health Concerns') NOT NULL,
+				    REJECTION_DESCRIPTION TEXT NULL,
 				    SNAPSHOT_NAME VARCHAR(100) NOT NULL,
 				    SNAPSHOT_IMAGE_PATH VARCHAR(500) NULL,
 				    SNAPSHOT_DESCRIPTION TEXT NULL,
@@ -195,7 +195,7 @@ public class Starter {
 				    FOREIGN KEY (ACCUSED_ID) REFERENCES USERS (USER_ID),
 				    FOREIGN KEY (REPORTER_ID) REFERENCES USERS (USER_ID)
 				)		
-		        """, // Never deleted
+		        """, // Never deleted unless spam
 		        """
 		        CREATE TABLE IF NOT EXISTS RECIPE_REPORTS (
 				    SNAPSHOT_RECIPE_ID INT NOT NULL,
