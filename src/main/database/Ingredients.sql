@@ -25,4 +25,7 @@ INSERT INTO INGREDIENTS (INGREDIENT_ID, INGREDIENT_NAME, INGREDIENT_IMAGE_PATH, 
 (23, 'Mozzarella', 'images/ingredients/mozzarella.jpg', 'Semi-soft non-aged cheese prepared using the pasta filatas method.'),
 (24, 'Olives', 'images/ingredients/Olives.webp', 'A staple in Mediterranean diets.'),
 (25, 'Pepperoncini', 'images/ingredients/Pepperoncini.jpg', 'Small, delicate peppers usually found in pickled jars.'),
-(26, 'Vinaigrette', 'images/ingredients/Vinaigrette.jpg', 'Dressing made from mixing oil with acid.');
+(26, 'Vinaigrette', 'images/ingredients/Vinaigrette.jpg', 'Dressing made from mixing oil with acid.'),
+(27, 'Canola Oil', 'images/ingredients/canolaoil.jpg', 'Light flavor, high smoke point, and smooth texture.'),
+(28, 'Yeast', 'images/ingredients/yeast.jpg', 'Used for fermentation and leavening.'),
+(29, 'Thyme', 'images/ingredients/thyme.jpg', 'Aromatic evergreen herb from the mint family.');

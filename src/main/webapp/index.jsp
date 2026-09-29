@@ -186,7 +186,6 @@
 					    	
 					    	while(recipes.next()){
 					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
-					    		System.out.println(imagePath);
 					    		if(imagePath == null || imagePath.isEmpty()){
 					    			imagePath = "images/recipe-placeholder.jpg";	
 					    		}
