@@ -402,9 +402,6 @@
         </div>
     </footer>
 
-    <%
-        dbConnection.close();
-    %>
 
 </body>
 </html>
