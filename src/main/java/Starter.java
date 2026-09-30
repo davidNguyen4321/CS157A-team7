@@ -298,7 +298,7 @@ public class Starter {
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_DISH_TYPES (
+		        CREATE TABLE IF NOT EXISTS RECIPES_HAS_DISH_TYPES (
 		            RECIPE_ID INT, DISH_TYPE_ID INT,
 		            PRIMARY KEY (RECIPE_ID, DISH_TYPE_ID),
 		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
@@ -306,7 +306,7 @@ public class Starter {
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS BOOKMARKED (
+		        CREATE TABLE IF NOT EXISTS BOOKMARK (
 		            USER_ID INT, RECIPE_ID INT, 
 		            PRIMARY KEY (USER_ID, RECIPE_ID),
 		            FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID),
@@ -314,7 +314,7 @@ public class Starter {
 		        )
 		        """,
 		        """
-		        CREATE TABLE IF NOT EXISTS FOLLOWED (
+		        CREATE TABLE IF NOT EXISTS FOLLOW (
 		            FOLLOWER_ID INT, FOLLOWING_ID INT,
 		            PRIMARY KEY (FOLLOWER_ID, FOLLOWING_ID),
 		            FOREIGN KEY (FOLLOWER_ID) REFERENCES USERS (USER_ID),
