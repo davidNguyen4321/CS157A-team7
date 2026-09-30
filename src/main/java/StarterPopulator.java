@@ -48,11 +48,11 @@ public class StarterPopulator {
 		String[] setpaths = {
 				"src/main/database/IngredientsFitDietaryRestrictions.sql",
 				"src/main/database/RecipesCookIngredients.sql",
-				"src/main/database/RecipesDishTypes.sql",
+				"src/main/database/RecipesHasDishTypes.sql",
 				"src/main/database/RecipesFeatureCuisines.sql",
 				"src/main/database/RecipesUseAppliances.sql",
-				"src/main/database/Followed.sql",
-				"src/main/database/Bookmarked.sql"
+				"src/main/database/Follow.sql",
+				"src/main/database/Bookmark.sql"
 				};
 		for (String setpath : setpaths) {
 			SqlReader.rExecute(connection, setpath);
