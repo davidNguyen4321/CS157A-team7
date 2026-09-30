@@ -320,7 +320,7 @@
                             "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
                             "COUNT(b.USER_ID) AS BOOKMARK_COUNT " +
                             "FROM RECIPES r " +
-                            "LEFT JOIN BOOKMARKED b ON r.RECIPE_ID = b.RECIPE_ID " +
+                            "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
                             "WHERE r.RECIPE_STATUS = 'Active' " +
                             "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
                             "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
