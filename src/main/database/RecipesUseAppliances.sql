@@ -16,4 +16,5 @@ INSERT INTO RECIPES_USE_APPLIANCES (RECIPE_ID, APPLIANCE_ID) VALUES
 (9, 9), -- Fried Rice uses Rice Cooker
 (10, 1), -- Cookies use Oven
 (10, 6), -- Cookies use Stand Mixer
-(12, 4); -- Smoothie (even malicious) uses blender
+(12, 4), -- Smoothie (even malicious) uses blender
+(14, 2); -- BLT uses Stovetop
