@@ -1,4 +1,4 @@
-INSERT INTO FOLLOWED (FOLLOWER_ID, FOLLOWING_ID) VALUES
+INSERT INTO FOLLOW (FOLLOWER_ID, FOLLOWING_ID) VALUES
 (1, 2),  -- chef_john follows mary_bakes
 (1, 3),  -- chef_john follows spicy_pete
 (2, 1),  -- mary_bakes follows chef_john

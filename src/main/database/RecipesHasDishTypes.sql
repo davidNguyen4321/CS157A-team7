@@ -1,5 +1,5 @@
 -- Entries were not man-made
-INSERT INTO RECIPES_DISH_TYPES (RECIPE_ID, DISH_TYPE_ID) VALUES
+INSERT INTO RECIPES_HAS_DISH_TYPES (RECIPE_ID, DISH_TYPE_ID) VALUES
 (1, 7), -- Pomodoro: Noodles
 (2, 11), -- Garlic Chicken: Pan-Sear	
 (5, 4), -- Tomato Soup: Soup

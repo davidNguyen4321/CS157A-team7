@@ -1,4 +1,5 @@
--- Not human-made
+-- Not human-made 
+-- Rejection description
 INSERT INTO REPORTS (REPORT_ID, REPORT_DESCRIPTION, REPORT_STATUS, REASON, SNAPSHOT_NAME, SNAPSHOT_IMAGE_PATH, SNAPSHOT_DESCRIPTION, SNAPSHOT_ACTIVE_TIMESTAMP, ACCUSED_ID, REPORTER_ID) VALUES
 (1, 'This recipe is just a scam link.', 'Approved', 'Scam', 'FREE IPHONE RECIPE', NULL, 'Click here for a free phone', '2023-10-01 10:00:00', 12, 1),
 (2, 'Telling people to drink bleach is extremely dangerous!', 'Approved', 'Health Concerns', 'Bleach Cleanse Smoothie', NULL, 'Cure everything with this smoothie.', '2023-10-02 11:00:00', 11, 2),

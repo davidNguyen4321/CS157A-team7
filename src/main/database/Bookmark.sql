@@ -1,5 +1,5 @@
 -- Not by humans
-INSERT INTO BOOKMARKED (USER_ID, RECIPE_ID) VALUES
+INSERT INTO BOOKMARK (USER_ID, RECIPE_ID) VALUES
 (1, 2),  -- chef_john bookmarks Garlic Chicken
 (1, 5),  -- chef_john bookmarks Tomato Soup
 (2, 7),  -- mary_bakes bookmarks Homemade Bread
