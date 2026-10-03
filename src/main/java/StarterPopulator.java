@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.MessageFormat;
-import java.io.*;
 
 public class StarterPopulator {
 	Starter starter;

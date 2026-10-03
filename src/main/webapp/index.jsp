@@ -363,9 +363,9 @@
                             <div class="recipe-card-footer">
                                 <div class="card-stats">
                                     <span class="card-bookmark">
-                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
-                                        <%= popularRecipes.getInt("BOOKMARK_COUNT") %>
-                                    </span>
+									    <img src="images/bookmark_icon.svg" alt="Bookmark icon" width="16" height="16" style="vertical-align: middle; stroke: currentColor;" />
+									    <%= popularRecipes.getInt("BOOKMARK_COUNT") %>
+									</span>
                                 </div>
                             </div>
                         </div>
