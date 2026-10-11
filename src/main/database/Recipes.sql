@@ -1,4 +1,3 @@
--- Recipes are AI generated. Try at your own risk.
 INSERT INTO RECIPES (RECIPE_ID, RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, COURSE, AI_GEN_DESCRIPTION, AI_GEN_APPLIANCES, AI_GEN_CUISINES, AI_GEN_DISH_TYPES, AI_GEN_TOTAL_MINUTES, AI_GEN_COURSE, AUTHOR_ID, RECIPE_STATUS) VALUES
 (1, 'Spaghetti Pomodoro', 'images/recipes/pomodoro.webp', 'A simple classic Italian pasta dish.', '1. Boil pasta. 2. Sauté garlic in olive oil. 3. Add tomatoes. 4. Mix with pasta.', 30, 'Entrée', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 1, 'Active'),
 (2, 'Garlic Chicken', 'images/recipes/garlic_chicken.jpg', 'Juicy pan-seared chicken with garlic.', '1. Season chicken. 2. Heat oil in pan. 3. Cook chicken for 4-5 minutes. 4. Flip and cook for 3-4 more minutes 5. Add garlic until fragrant. 6. Add rice.', 25, 'Entrée', TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, 3, 'Active'),

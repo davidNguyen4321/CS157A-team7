@@ -134,8 +134,7 @@ public class Starter {
 		        	ROLE ENUM('User', 'Moderator', 'Admin') NOT NULL,
 		        	TIMEZONE VARCHAR(30) NOT NULL,
 		            PASSWORD_HASH VARCHAR(254) NOT NULL,
-		        	EMAIL VARCHAR(254) NOT NULL UNIQUE,
-		        	PHONE VARCHAR(15) NULL UNIQUE
+		        	EMAIL VARCHAR(254) NOT NULL UNIQUE
 		        )
 		        """, // Soft delete only
 		        """
@@ -149,7 +148,7 @@ public class Starter {
 		            RECIPE_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
 		            INSTRUCTIONS TEXT NOT NULL,
 		            TOTAL_MINUTES INT NULL,
-		            COURSE ENUM('Entrée', 'Appetizer / Side', 'Dessert') NULL,
+		            COURSE ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
 		            AI_GEN_DESCRIPTION BOOLEAN NOT NULL,
 				    AI_GEN_APPLIANCES BOOLEAN NOT NULL,
 				    AI_GEN_CUISINES BOOLEAN NOT NULL,
@@ -205,7 +204,7 @@ public class Starter {
 				    SNAPSHOT_DISH_TYPES TEXT NOT NULL,
 				    SNAPSHOT_INSTRUCTIONS TEXT NOT NULL,
 				    SNAPSHOT_TOTAL_MINUTES INT NULL,
-				    SNAPSHOT_COURSE ENUM('Entrée', 'Appetizer / Side', 'Dessert') NULL,
+				    SNAPSHOT_COURSE ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
 				    SNAPSHOT_AI_GEN_DESCRIPTION BOOLEAN NOT NULL,
 				    SNAPSHOT_AI_GEN_APPLIANCES BOOLEAN NOT NULL,
 				    SNAPSHOT_AI_GEN_CUISINES BOOLEAN NOT NULL,
