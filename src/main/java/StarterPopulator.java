@@ -284,6 +284,20 @@ public class StarterPopulator {
 				    ('Italian', 'Featuring pasta, tomatoes, olive oil, and more.', 10);
 				""",
 				"""
+				INSERT INTO DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_NAME, DIETARY_RESTRICTION_DESCRIPTION, BASE_DIETARY_RESTRICTION_ID) VALUES
+				    ('Pescatarian', 'Diets that include plant-based foods, dairy, eggs, and fish/seafood, but exclude meat and poultry.', NULL),
+				    ('Vegetarian', 'Diets that exclude meat, poultry, and seafood, but may include dairy and eggs.', 1),
+				    ('Vegan', 'Strict plant-based diets that exclude all animal products including dairy, eggs, and honey.', 2),
+				    ('Gluten-Free', 'Diets that exclude the protein gluten found in wheat, barley, rye, and triticale.', NULL),
+				    ('Dairy-Free', 'Diets that avoid all milk-based dairy products and lactose.', NULL),
+				    ('Nut-Free', 'Diets that exclude tree nuts and peanuts to prevent allergic reactions.', NULL),
+				    ('Sodium-Free', 'Diets that completely eliminate added salt and high-sodium components.', NULL),
+				    ('Sugar-Free', 'Diets that exclude all refined sugars, artificial sweeteners, and added syrups.', NULL),
+				    ('Egg-Free', 'Diets that exclude eggs and any ingredients derived from eggs to accommodate allergies or personal choices.', NULL),
+				    ('Low-Carb', 'Diets that restrict carbohydrate consumption in favor of proteins and fats.', NULL),
+				    ('Paleo', 'A low-carb diet based on whole foods presumed to have been eaten by early humans, excluding grains, legumes, and dairy.', 10);
+				""",
+				"""
 				INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, RECIPE_ACTIVE_TIMESTAMP, RECIPE_REMOVE_TIMESTAMP, RECIPE_STATUS, INSTRUCTIONS, TOTAL_MINUTES, COURSE, AI_GEN_DESCRIPTION, AI_GEN_APPLIANCES, AI_GEN_CUISINES, AI_GEN_DISH_TYPES, AI_GEN_TOTAL_MINUTES, AI_GEN_COURSE, AUTHOR_ID) VALUES
 					( 
 						'Comforting Vegan Congee for Stomach Relief',
@@ -395,13 +409,15 @@ public class StarterPopulator {
 						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
 						30, 'Main Course', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 9
 					);
+				""",
+				"""
+				
 				"""
 		};
 		
 		starter.executeAll(codeblocks);
 		
 		String[] setpaths = {
-				"src/main/database/DietaryRestrictions.sql",
 				"src/main/database/Reviews.sql",
 				"src/main/database/Reports.sql",
 				"src/main/database/RecipeReports.sql",
@@ -585,15 +601,44 @@ public class StarterPopulator {
 				    (10, 3),     -- Toaster
 				    (11, 4);     -- Stovetop
 				""",
+				"""
+				INSERT INTO INGREDIENTS_VIOLATE_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID) VALUES
+				    (27, 1),     -- Silkworm Pupae (Pescatarian violation)
+				    (28, 1),     -- Steak (Pescatarian violation)
+				    (29, 2),     -- Sashimi Salmon (Vegetarian violation)
+				    (24, 3),     -- Eggs (Vegan violation)
+				    (25, 3),     -- Cheese (Vegan violation)
+				    (26, 3),     -- American Cheese (Vegan violation)
+				    (34, 3),     -- Milk (Vegan violation)
+				    (45, 3),     -- Butter (Vegan violation)
+				    (3, 4),      -- Flour (Gluten-Free violation)
+				    (4, 4),      -- Bread (Gluten-Free violation)
+				    (5, 4),      -- Pasta (Gluten-Free violation)
+				    (6, 4),      -- Rigatoni (Gluten-Free violation)
+				    (40, 4),     -- Soy Sauce (Gluten-Free violation)
+				    (25, 5),     -- Cheese (Dairy-Free violation)
+				    (26, 5),     -- American Cheese (Dairy-Free violation)
+				    (34, 5),     -- Milk (Dairy-Free violation)
+				    (45, 5),     -- Butter (Dairy-Free violation)
+				    (36, 6),     -- Almond Milk (Nut-Free violation)
+				    (40, 7),     -- Soy Sauce (Sodium-Free violation)
+				    (46, 8),     -- Sugar (Sugar-Free violation)
+				    (47, 8),     -- White Sugar (Sugar-Free violation)
+				    (48, 8),     -- Brown Sugar (Sugar-Free violation)
+				    (24, 9),     -- Eggs (Egg-Free violation)
+				    (1, 10),     -- Rice (Low-Carb violation)
+				    (2, 10),     -- White Rice (Low-Carb violation)
+				    (3, 10),     -- Flour (Low-Carb violation)
+				    (4, 10),     -- Bread (Low-Carb violation)
+				    (5, 10),     -- Pasta (Low-Carb violation)
+				    (6, 10),     -- Rigatoni (Low-Carb violation)
+				    (46, 10),    -- Sugar (Low-Carb violation)
+				    (47, 10),    -- White Sugar (Low-Carb violation)
+				    (48, 10),    -- Brown Sugar (Low-Carb violation)
+				    (23, 11);    -- Tofu (Paleo violation)
+				"""
 		};
 		
 		starter.executeAll(codeblocks);
-		
-		String[] setpaths = {
-				"src/main/database/IngredientsFitDietaryRestrictions.sql",
-				};
-		for (String setpath : setpaths) {
-			SqlReader.rExecute(starter.connection, setpath);
-		}
 	}
 }
