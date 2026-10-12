@@ -136,6 +136,30 @@ public class StarterPopulator {
 				        'America/Los_Angeles',
 				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9hdXN0aW5zdGFtcDEyMw$UoYEPZr6Al854O5789QrIgCvsUVrVsUdedqUQ5kMAy4=',
 				        '1e89g4r63fydcwuo@gmail.com'
+				    ),
+				    (
+				        'Timothy32613',
+				        NULL,
+				        'I love cooking apps!',
+				        '2026-11-12 06:06:06',
+				        '2026-11-12 06:08:08',
+				        'Banned',
+				        'User',
+				        'America/Los_Angeles',
+				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9hdXN0aW5zdGFtcDEyMw$UoYEPZr6Al854O5789QrIgCvsUVrVsUdedqUQ5kMAy4=',
+				        'ewfegt8y@gmail.com'
+				    ),
+				    (
+				        'Timothy32614',
+				        NULL,
+				        'I love cooking apps!',
+				        '2026-11-13 06:06:06',
+				        '2026-11-13 06:07:07',
+				        'Banned',
+				        'User',
+				        'America/Los_Angeles',
+				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9hdXN0aW5zdGFtcDEyMw$UoYEPZr6Al854O5789QrIgCvsUVrVsUdedqUQ5kMAy4=',
+				        'h3efdsjefwieru@gmail.com'
 				    );
 				""",
 				"""
@@ -322,7 +346,7 @@ public class StarterPopulator {
 					(
 						'Air-Fried Crispy Korean Beondegi',
 						'/images/recipes/air_fried_insects.jpg',
-						'A modern twist on a beloved South Korean street food staple. Silkworm pupae are air-fried to a satisfying crunch. Rich, nutty, and bursting with umami flavor—it's street food made effortlessly modern',
+						'A modern twist on a beloved South Korean street food staple. Silkworm pupae are air-fried to a satisfying crunch. Rich, nutty, and bursting with umami flavor—it''s street food made effortlessly modern',
 						'2024-03-03 23:23:23',
 				        NULL,
 				        'Active',
@@ -372,7 +396,7 @@ public class StarterPopulator {
 					(
 						'Sashimi Salad',
 						'/images/recipes/sashimi_salad.jpg',
-						'For all my fellow predators out there, I shall introduce to you my Japanese Western fusion dish. Have you ever eaten salad and felt there was something missing. Eating vegetables by itself is such a pain. But don't worry, with this dish, you won't have to hate eating vegetables ever again.',
+						'For all my fellow predators out there, I shall introduce to you my Japanese Western fusion dish. Have you ever eaten salad and felt there was something missing. Eating vegetables by itself is such a pain. But don''t worry, with this dish, you won''t have to hate eating vegetables ever again.',
 						'2025-06-16 16:16:16',
 				        NULL,
 				        'Active',
@@ -382,11 +406,11 @@ public class StarterPopulator {
 					(
 						'Curry Rigatoni',
 						'/images/recipes/curry_rigatoni.jpg',
-						'Fusion dish featuring ridged, hollow rigatoni tubes coated in a rich, velvety curry cream sauce. The inner chambers hold onto every drop of sauce for a flavorful bite.', 
+						'Fusion dish featuring ridged, hollow rigatoni tubes coated in a rich, velvety curry cream sauce. The inner chambers hold onto every drop of sauce for a flavorful bite.',
 						'2025-07-17 17:17:17',
 				        NULL,
 				        'Active',
-						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
+						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.',
 						30, 'Main Course', TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, 7
 					),
 					(
@@ -402,11 +426,11 @@ public class StarterPopulator {
 					(
 						'Next Level Fusion: Curry Pasta!!!',
 						'/images/recipes/curry_rigatoni.jpg',
-						'Combining Indian and Italian Cuisine for a super modern, extremely trendy, and most delicious dish!!!', 
+						'Combining Indian and Italian Cuisine for a super modern, extremely trendy, and most delicious dish!!!',
 						'2026-09-05 09:05:09',
 						'2026-09-08 19:19:19',
 				        'Banned',
-						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
+						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.',
 						30, 'Main Course', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 9
 					);
 				""",
@@ -704,7 +728,202 @@ public class StarterPopulator {
 				    (2, 1, 8, 8),  -- Sue mei reporting 67_67's hostile review (Report ID 8)
 				    (5, 2, 3, 10); -- Peter Parker reporting Jeremy Lin's review (Report ID 10)
 				""",
-				
+				"""
+				INSERT INTO VIOLATIONS (VIOLATION_DESCRIPTION, VIOLATION_ACTIVE_TIMESTAMP, VIOLATION_STATUS, SEVERITY, SUSPENSION_STATUS, EXPIRE_TIMESTAMP, VIOLATOR_ID, REPORT_ID) VALUES
+				    (
+				        'Abuse of report feature by submitting frivolous reports based on personal taste preferences.',
+				        '2024-04-08 14:00:00', -- Created 3 days after her April 5, 2024 report
+				        'Expired',
+				        'Minor',
+				        'N/A',
+				        '2024-05-08 14:00:00',
+				        4, -- VIOLATOR_ID: Valerie Vance
+				        1  -- REPORT_ID: Valerie Vance's report on insect recipe
+				    ),
+				    (
+				        'Explicit / inappropriate avatar and text in user bio.',
+				        '2025-06-12 09:30:00',
+				        'Reversed',
+				        'Severe',
+				        'N/A',
+				        NULL,
+				        6, -- VIOLATOR_ID: Sue mei
+				        2  -- REPORT_ID: Valerie Vance reporting Sue mei''s bio
+				    ),
+				    (
+				        'Copyright infringement regarding Classic American Breakfast Sandwich recipe.',
+				        '2026-09-07 10:15:00',
+				        'Permanent',
+				        'Moderate',
+				        'Recipe',
+				        '2026-10-07 10:15:00',
+				        9, -- VIOLATOR_ID: RealGordanRamsay
+				        5  -- REPORT_ID: Jeremy Lin reporting RealGordanRamsay
+				    ),
+				    (
+				        'Copyright infringement regarding Curry Rigatoni recipe.',
+				        '2026-09-08 19:19:19',
+				        'Permanent',
+				        'Moderate',
+				        'N/A',
+				        '2026-10-08 19:19:19',
+				        9, -- VIOLATOR_ID: RealGordanRamsay
+				        6  -- REPORT_ID: Steph Curry reporting RealGordanRamsay
+				    ),
+				    (
+				        'Abusive, hateful, and harassing language left on recipe review.',
+				        '2026-09-13 11:20:00',
+				        'Permanent',
+				        'Minor',
+				        'N/A',
+				        '2026-10-13 11:20:00',
+				        8, -- VIOLATOR_ID: 67_67
+				        7  -- REPORT_ID: Peter Parker reporting 67_67
+				    ),
+				    (
+				        'Hostile and inappropriate language left on recipe review.',
+				        '2026-09-14 16:45:00',
+				        'Permanent',
+				        'Moderate',
+				        'All',
+				        '2026-11-14 16:45:00',
+				        8, -- VIOLATOR_ID: 67_67
+				        8  -- REPORT_ID: Sue mei reporting 67_67
+				    ),
+				    (
+				        'Toxic biography description.',
+				        '2026-10-09 10:10:10',
+				        'Permanent',
+				        'Minor',
+				        'N/A',
+				        NULL,
+				        8, -- VIOLATOR_ID: 67_67
+				        9  -- REPORT_ID: Grill Boss reporting 67_67
+				    ),
+				    (
+				        'Automated spam recipe creation and platform manipulation.',
+				        '2026-11-11 06:09:09',
+				        'Permanent',
+				        'Severe',
+				        'N/A',
+				        NULL,
+				        10, -- VIOLATOR_ID: Timothy32612
+				        NULL -- Standalone violation detected by system
+				    ),
+				    (
+				        'Unauthorized automated web scraping and bulk extraction of platform recipe data.',
+				        '2026-11-12 06:08:08',
+				        'Permanent',
+				        'Severe',
+				        'N/A',
+				        NULL,
+				        11, -- VIOLATOR_ID: Timothy32613
+				        NULL -- Standalone violation detected by system
+				    ),
+				    (
+				        'Automated spamming of reports.',
+				        '2026-11-11 06:07:07',
+				        'Permanent',
+				        'Severe',
+				        'N/A',
+				        NULL,
+				        12, -- VIOLATOR_ID: Timothy32614
+				        NULL -- Standalone violation detected by system
+				    );
+				""",
+				"""
+				INSERT INTO APPEALS (APPEAL_DESCRIPTION, APPEAL_ACTIVE_TIMESTAMP, APPEAL_STATUS, DECISION_DESCRIPTION, RESOLVED_TIMESTAMP, AUDITOR_ID, VIOLATION_ID) VALUES
+				    (
+				        'My avatar was me when I was little. "I am a predator" meant I like raw meat, not children',
+				        '2025-06-13 10:00:00',
+				        'Approved',
+				        'Verified the account holder''s image was herself when she was little. The phrasing meant something else and does not strongly imply sexual attraction to children.',
+				        '2025-06-14 14:20:00',
+				        1, 
+				        1  
+				    ),
+				    (
+				        'Breakfast sandwiches are universal culinary concepts. Nobody owns the trademark or copyright to putting egg, cheese, and bacon between toasted bread.',
+				        '2026-09-08 09:00:00',
+				        'Dismissed',
+				        'The instructions were copied word for word, that is a copyright violation.',
+				        '2026-09-09 11:30:00',
+				        1, 
+				        2  
+				    ),
+				    (
+				        'I adapted this recipe from my own private restaurant notes. Fusion pasta dishes are common and this was an independent creation.',
+				        '2026-09-09 12:00:00',
+				        'Dismissed',
+				        NULL,
+				        '2026-09-10 16:00:00',
+				        1, 
+				        3  
+				    ),
+				    (
+				        'I was merely giving an honest culinary critique. The review reflected my genuine reaction to the ingredients listed.',
+				        '2026-09-14 08:30:00',
+				        'Dismissed',
+				        'Review contained explicit profanity and direct personal attacks against other platform members, violating community standards.',
+				        '2026-09-15 10:15:00',
+				        1, 
+				        4  
+				    ),
+				    (
+				        'I was frustrated and emotionally exaggerated my disappointment with the recipe. It was not meant to be taken literally.',
+				        '2026-09-15 12:00:00',
+				        'Dismissed',
+				        NULL,
+				        '2026-09-16 09:45:00',
+				        1,
+				        5 
+				    ),
+				    (
+				        'My bio is satire aimed at hyper-sensitive reviewers. I did not single out any specific user by name.',
+				        '2026-10-09 11:00:00',
+				        'Dismissed',
+				        NULL,
+				        '2026-10-10 15:30:00',
+				        1, 
+				        6 
+				    ),
+				    (
+				        'I submitted the report in good faith believing the dish violated basic health and safety standards for consumer recipes.',
+				        '2024-04-09 09:15:00',
+				        'Dismissed',
+				        'You did not say it was for health concern, rather you said it was because of personal dislike, reports of which are disruptive for moderation.',
+				        '2024-04-10 13:00:00',
+				        1,
+				        7 
+				    ),
+				    (
+				        'I am a human user testing an automated recipe publishing assistant script to share quick home meals.',
+				        '2026-11-11 06:15:00',
+				        'Dismissed',
+				        NULL,
+				        '2026-11-11 07:00:00',
+				        1,
+				        8  
+				    ),
+				    (
+				        'My account was accessing public recipe pages for personal educational research and nutritional data indexing.',
+				        '2026-11-12 06:15:00',
+				        'Dismissed',
+				        NULL,
+				        '2026-11-12 07:00:00',
+				        1,
+				        9 
+				    ),
+				    (
+				        'I noticed platform bugs and used automated reporting scripts to flag suspicious recipes for the support team.',
+				        '2026-11-11 06:15:00',
+				        'Dismissed',
+				        NULL,
+				        '2026-11-11 07:00:00',
+				        1,
+				        10 
+				    );
+				"""
 		};
 		
 		starter.executeAll(codeblocks);
@@ -867,18 +1086,20 @@ public class StarterPopulator {
 				""",
 				"""
 				INSERT INTO RECIPES_USE_APPLIANCES (RECIPE_ID, APPLIANCE_ID) VALUES
-				    (1, 1),      -- Rice Cooker
-				    (2, 2),      -- Oven
-				    (2, 9),      -- Mixer
-				    (3, 5),      -- Air Fryer
-				    (4, 3),      -- Toaster
-				    (5, 6),      -- Blender
-				    (6, 7),      -- Microwave
-				    (7, 10),     -- Grill
-				    (8, 8),      -- Food Processor
-				    (9, 4),      -- Stovetop
-				    (10, 3),     -- Toaster
-				    (11, 4);     -- Stovetop
+				    (1, 1),      -- Rice Cooker
+				    (2, 2),      -- Oven
+				    (2, 9),      -- Mixer
+				    (3, 5),      -- Air Fryer
+				    (4, 3),      -- Toaster
+				    (4, 4),      -- Stovetop
+				    (5, 6),      -- Blender
+				    (6, 7),      -- Microwave
+				    (7, 10),     -- Grill
+				    (8, 8),      -- Food Processor
+				    (9, 4),      -- Stovetop
+				    (10, 3),     -- Toaster
+				    (10, 4),     -- Stovetop
+				    (11, 4);     -- Stovetop
 				""",
 				"""
 				INSERT INTO INGREDIENTS_VIOLATE_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID) VALUES

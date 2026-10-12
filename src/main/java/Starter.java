@@ -193,7 +193,7 @@ public class Starter {
 				    MODERATOR_ID INT NULL,
 				    FOREIGN KEY (ACCUSED_ID) REFERENCES USERS (USER_ID),
 				    FOREIGN KEY (REPORTER_ID) REFERENCES USERS (USER_ID),
-				    FOREIGN KEY (MODERATOR_ID) REFERENCES USERS (USER_ID),
+				    FOREIGN KEY (MODERATOR_ID) REFERENCES USERS (USER_ID)
 				)		
 		        """, // Never deleted unless spam
 		        """
