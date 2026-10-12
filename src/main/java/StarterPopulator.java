@@ -412,7 +412,7 @@ public class StarterPopulator {
 				""",
 				"""
 				INSERT INTO REVIEWS (REVIEW_NAME, REVIEW_IMAGE_PATH, REVIEW_DESCRIPTION, REVIEW_ACTIVE_TIMESTAMP, REVIEW_REMOVE_TIMESTAMP, REVIEW_STATUS, RATING, RECIPE_ID, REVIEWER_ID) VALUES
-					(
+				    (
 				        'Anyone who eats this is out of their mind',
 				        NULL,
 				        'Who in their right mind eats bugs?! Fucking crazy.',
@@ -430,8 +430,8 @@ public class StarterPopulator {
 				        'Banned',
 				        1, 8, 8
 				    ),
-					(
-						'Absolute Life Saver',
+				    (
+				        'Absolute Life Saver',
 				        '/images/reviews/comforting_congee.jpg',
 				        'When my stomach was acting up, this congee really brought me back to life. So easy and soothing!',
 				        '2026-11-01 10:00:00', 
@@ -502,7 +502,209 @@ public class StarterPopulator {
 				        'Active',
 				        4, 7, 7
 				    );	    
+				""",
 				"""
+			    INSERT INTO REPORTS (REPORT_DESCRIPTION, REPORT_ACTIVE_TIMESTAMP, REPORT_STATUS, REASON, REJECTION_DESCRIPTION, SNAPSHOT_NAME, SNAPSHOT_IMAGE_PATH, SNAPSHOT_DESCRIPTION, SNAPSHOT_ACTIVE_TIMESTAMP, ACCUSED_ID, REPORTER_ID, MODERATOR_ID) VALUES
+				    (
+				        'Insects shouldnt be on the website because it is disgusting.',
+				        '2024-04-05 11:00:00',
+				        'Dismissed',
+				        'Inappropriate Content',
+				        'Personal preferences do not constitute a violation of platform guidelines.',
+				        'Air-Fried Crispy Korean Beondegi',
+				        '/images/recipes/air_fried_insects.jpg',
+				        'A modern twist on a beloved South Korean street food staple. Silkworm pupae are air-fried to a satisfying crunch. Rich, nutty, and bursting with umami flavor—it is street food made effortlessly modern',
+				        '2024-03-03 23:23:23',
+				        3, 
+				        4, 
+				        2  
+				    ),
+				    (
+				        'Sue''s profile shows that she is a pedophile.',
+				        '2025-06-10 14:00:00',
+				        'Approved',
+				        'Inappropriate Content',
+				        NULL,
+				        'Sue mei',
+				        '/images/users/sue_mei.jpg',
+				        'I am a predator and I like to eat things raw. What are you going to do? Sue me? Ha, good luck!',
+				        '2025-06-06 16:09:16',
+				        6, 
+				        4, 
+				        3  
+				    ),
+				    (
+				        'Worried about the diseases that might spread from eating raw fish.',
+				        '2025-06-18 13:00:00',
+				        'Dismissed',
+				        'Health Concerns',
+				        'Recipe specifies sashimi-grade fish handled safely under normal culinary standards.',
+				        'Sashimi Salad',
+				        '/images/recipes/sashimi_salad.jpg',
+				        'For all my fellow predators out there, I shall introduce to you my Japanese Western fusion dish. Have you ever eaten salad and felt there was something missing. Eating vegetables by itself is such a pain. But don''t worry, with this dish, you won''t have to hate eating vegetables ever again.',
+				        '2025-06-16 16:16:16',
+				        6, 
+				        4, 
+				        3  
+				    ),
+				    (
+				        'This 5-star review is totally misleading and feels like a fake promotional bot boosting the score.',
+				        '2025-06-20 15:00:00',
+				        'Dismissed',
+				        'Scam',
+				        'Investigation shows the reviewer has organic bookmark and platform activity. Rating is genuine.',
+				        'Fresh and Delicious',
+				        '/images/reviews/sashimi_salad.jpg',
+				        'As the grill boss, I usually love my meats charred, but this sashimi salad is surprisingly refreshing and top tier!',
+				        '2025-06-20 12:00:00',
+				        5, 
+				        4, 
+				        2  
+				    ),
+				    (
+				        'This fake copied my Classic American Breakfast Sandwich recipe.',
+				        '2026-09-05 16:00:00',
+				        'Approved',
+				        'Copyright',
+				        NULL,
+				        'Classic American Breakfast Sandwich',
+				        '/images/recipes/sandwich.jpg',
+				        'If you got the skills, simple ingredients can transform into heavenly taste!',
+				        '2026-09-04 14:04:04',
+				        9, 
+				        1, 
+				        2  
+				    ),
+				    (
+				        'I don''t even know who this guy is but he copied by Curry Rigatoni recipe.',
+				        '2026-09-06 11:00:00',
+				        'Approved',
+				        'Copyright',
+				        NULL,
+				        'Next Level Fusion: Curry Pasta!!!',
+				        '/images/recipes/curry_rigatoni.jpg',
+				        'Combining Indian and Italian Cuisine for a super modern, extremely trendy, and most delicious dish!!!',
+				        '2026-09-05 09:05:09',
+				        9, 
+				        7, 
+				        3  
+				    ),
+				    (
+				        'Abusive and hateful comments left on insect recipe.',
+				        '2026-09-11 14:00:00',
+				        'Approved',
+				        'Harassment',
+				        NULL,
+				        'Anyone who eats this is out of their mind',
+				        NULL,
+				        'Who in their right mind eats bugs?! Fucking crazy.',
+				        '2026-09-15 11:00:00',
+				        8, 
+				        3, 
+				        2  
+				    ),
+				    (
+				        'Malicious and hostile review text left on sashimi salad recipe.',
+				        '2026-09-12 16:00:00',
+				        'Approved',
+				        'Inappropriate Content',
+				        NULL,
+				        'GO TO HELL',
+				        NULL,
+				        'For your absolutely disgusting garbage of a dish, go kill your fucking self!',
+				        '2026-10-01 14:00:00',
+				        8, 
+				        6, 
+				        3  
+				    ),
+				    (
+				        'Toxic and abusive biography description.',
+				        '2026-10-05 10:00:00',
+				        'Approved',
+				        'Harassment',
+				        NULL,
+				        '67_67',
+				        NULL,
+				        'Your dishes all fucking suck! If you take offense, that is your problem!',
+				        '2026-09-10 09:09:09',
+				        8, 
+				        5, 
+				        2  
+				    ),
+				    (
+				        'Reporting low rating review because personal preference shouldn''t dictate a low score.',
+				        '2026-11-11 10:00:00',
+				        'Dismissed',
+				        'Inappropriate Content',
+				        'Reviewer provided constructive criticism regarding the taste and texture. Low ratings based on personal culinary experience are permitted.',
+				        'Not For Me',
+				        '/images/reviews/air_fried_insect.jpg',
+				        'I really wanted to give insect-based dishes a fair try, but the taste and texture just were not pleasant at all. Too earthy and fishy for my liking.',
+				        '2026-11-05 14:25:00',
+				        1, 
+				        3, 
+				        2  
+				    );
+				""",
+				"""
+				INSERT INTO RECIPE_REPORTS (SNAPSHOT_RECIPE_ID, SNAPSHOT_APPLIANCES, SNAPSHOT_INGREDIENTS, SNAPSHOT_CUISINES, SNAPSHOT_DISH_TYPES, SNAPSHOT_INSTRUCTIONS, SNAPSHOT_TOTAL_MINUTES, SNAPSHOT_COURSE, SNAPSHOT_AI_GEN_DESCRIPTION, SNAPSHOT_AI_GEN_APPLIANCES, SNAPSHOT_AI_GEN_CUISINES, SNAPSHOT_AI_GEN_DISH_TYPES, SNAPSHOT_AI_GEN_TOTAL_MINUTES, SNAPSHOT_AI_GEN_COURSE, REPORT_ID) VALUES
+				    (
+				        3, 
+				        'Air Fryer', 
+				        'Silkworm Pupae, Sesame Oil, Soy Sauce, Gochugaru, Garlic Powder, Sugar, Salt', 
+				        'Korean', 
+				        'Meat', 
+				        '1. Drain canned silkworm pupae. \n2. In a small bowl, evenly coat pupae with mixture of sesame oil, soy sauce, gochugaru, garlic powder, sugar, and salt. \n3. Preheat air fryer to 375°F (190°C) for 3 minutes. \n4. Spread the seasoned pupae in a single layer in the air fryer basket. \n5. Air fry for 9 minutes, shaking the basket every 3 minutes. \n6. Cool for a minute before serving. Enjoy!', 
+				        15, 
+				        'Appetizer / Side', 
+				        TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, 
+				        1 
+				    ),
+				    (
+				        8, 
+				        'Food Processor', 
+				        'Romaine Lettuce, Grape Tomato, Soy Sauce, Rice Vinegar, Sesame Oil, Wasabi Paste, Sashimi Salmon, Sesame, Green Onion, Seaweed', 
+				        'Japanese, Western', 
+				        'Salad, Meat', 
+				        '1. Wash and halve crisp romaine lettuce and grape tomatoes. Discard lettuce stem. \n2. In a small bowl, whisk soy sauce, rice vinegar, sesame oil, and wasabi paste until smooth. \n3. Toss the chopped romaine and grape tomatoes in a bowl and mix in half of dressing. \n4. Arrange thinly sliced sashimi-grade raw salmon on top of the greens. \n5. Drizzle remaining dressing over the fish and garnish with sesame seeds, green onion, and seaweed.', 
+				        10, 
+				        'Main Course', 
+				        FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, 
+				        3 
+				    ),
+				    (
+				        10, 
+				        'Toaster', 
+				        'Bread, Lettuce, Tomato, Eggs, Cheese, Black Pepper', 
+				        'Western', 
+				        'Sandwich', 
+				        '1. Toast 2 slices of bread until golden. \n2. Wash lettuce leaves, slice tomatoes, season with pinch of salt and black pepper. \n3. Whisk eggs with pinch of salt in small bowl. \n4. Medium-heat skillet with oil, pour in whisked eggs, gently push with spatula to form soft curds. \n5. Gather cooked eggs, turn off heat, lay cheese slice on top to melt. \n6. Lay 1 toast slice on plate, top with lettuce, cheesy scrambled eggs, and tomatoes, and close with remaining toast slice.', 
+				        10, 
+				        'Main Course', 
+				        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 
+				        5
+				    ),
+				    (
+				        11, 
+				        'Stovetop', 
+				        'Rigatoni, Onion, Garlic, Curry, Chili, Coconut Milk, Black Pepper, Basil', 
+				        'Indian, Italian', 
+				        'Pasta & Noodles', 
+				        '1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
+				        30, 
+				        'Main Course', 
+				        FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 
+				        6
+				    );
+				""",
+				"""
+				INSERT INTO REVIEW_REPORTS (SNAPSHOT_REVIEW_ID, SNAPSHOT_RATING, SNAPSHOT_RECIPE_ID, REPORT_ID) VALUES
+				    (6, 5, 8, 4),  -- Valerie Vance reporting Grill Boss's 5-star review (Report ID 4)
+				    (1, 1, 3, 7),  -- Peter Parker reporting 67_67's abusive review (Report ID 7)
+				    (2, 1, 8, 8),  -- Sue mei reporting 67_67's hostile review (Report ID 8)
+				    (5, 2, 3, 10); -- Peter Parker reporting Jeremy Lin's review (Report ID 10)
+				""",
+				
 		};
 		
 		starter.executeAll(codeblocks);
