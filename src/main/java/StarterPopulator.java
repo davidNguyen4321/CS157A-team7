@@ -78,16 +78,16 @@ public class StarterPopulator {
 				        'grilldaddy2132@gmail.com'
 				    ),
 				    (
-				        'Sue Sushi',
-				        '/images/users/sue_sushi.jpg',
-				        'I am a predator who only eats sushi. What are you going to do? Sue me? Ha, dream on!',
+				        'Sue mei',
+				        '/images/users/sue_mei.jpg',
+				        'I am a predator and I like to eat things raw. What are you going to do? Sue me? Ha, good luck!',
 				        '2025-06-06 16:09:16',
 				        NULL,
 				        'Active',
 				        'User',
 				        'Asia/Tokyo',
 				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9qZkllajQzag$D76tBiqd93gScqfEnjSKcEA1nsv252ZuWfPic/Lbj34=',
-				        'suesushi8375@gmail.com'
+				        'suemei8375@gmail.com'
 				    ),
 				    (
 				        'Steph Curry',
@@ -157,29 +157,101 @@ public class StarterPopulator {
 					),
 					(
 						'Stovetop',
-						'images/appliances/stovetop.jpg',
+						'/images/appliances/stovetop.jpg',
 						'Gas or electric range for boiling and frying'
 					),
 					(
 						'Air Fryer', 
-						'images/appliances/airfryer.jpg', 
-						'Circulate super-heated air at high speeds, delivering crispy food using little to no oil.'
+						'/images/appliances/air_fryer.jpg', 
+						'Circulate super-heated air at high speeds, delivering crispy food using little to no oil'
 					),
-					
-					('Microwave', 'images/appliances/microwave.jpg', 'Quick heating appliance.'),
-					('Blender', 'images/appliances/blender.jpg', 'Used for pureeing and mixing liquids.'),
-					('Food Processor', 'images/appliances/processor.jpg', 'Used for chopping, slicing, and dicing.'),
-					('Stand Mixer', 'images/appliances/mixer.jpg', 'Heavy duty mixer for dough and batter.'),
-					('Slow Cooker', 'images/appliances/slowcooker.jpg', 'Simmers food at low temperatures.'),
+					(
+						'Blender',
+						'/images/appliances/blender.jpg',
+						'Blend fruits, vegetables, ice, and more into smooth drinks and purées'
+					),
+					(
+						'Microwave',
+						'/images/appliances/microwave.jpg',
+						'Uses radio waves to rapidly heat and cook food'
+					),
+					(
+						'Food Processor', 
+						'images/appliances/food_processor.jpg', 
+						'Used for chopping, slicing, and dicing'
+					),
+					(
+						'Stand Mixer', 
+						'images/appliances/mixer.jpg', 
+						'Heavy duty mixer for dough and batter'
+					),
+					(
+						'Grill', 
+						'images/appliances/grill.jpg', 
+						'Uses burning charcoal to grill food over high, smoky heat'
+					);
 				""",
 				"""
-				INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, INSTRUCTIONS, TOTAL_MINUTES, COURSE, AI_GEN_DESCRIPTION, AI_GEN_APPLIANCES, AI_GEN_CUISINES, AI_GEN_DISH_TYPES, AI_GEN_TOTAL_MINUTES, AI_GEN_COURSE, AUTHOR_ID) VALUES
-					('Garlic Chicken', 'images/recipes/garlic_chicken.jpg', 'Juicy pan-seared chicken with garlic.', '1. Season chicken. 2. Heat oil in pan. 3. Cook chicken for 4-5 minutes. 4. Flip and cook for 3-4 more minutes 5. Add garlic until fragrant. 6. Add rice.', 25, 'Entrée', TRUE, FALSE, TRUE, FALSE, FALSE, FALSE, 3, 'Active'),
-					('Tomato Soup', 'images/recipes/tomatosoup.jpg', 'Warm and comforting tomato soup.', '1. Roast cut tomato 2. Lightly mix cut tomatoes, diced onion, chopped garlic, salt, pepper, and olive oil. 3. Roast again, for 15 minutes. 4. Stir. 5. Bake for 15 minutes (again).  6. Blend on high speed until smooth. 7. Melt butter over medium-high heat. 8. Add flour to melted butter and mix. 9. Cook until mixture is bubbly and slightly thickened. 10. Add broth and sugar and mix. 11. Add blended mixure from earlier. 12. Add milk. 13. Cook on medium-low for 15 minutes, adding salt and pepper as needed. 14. Serve.', 120, 'Appetizer / Side', TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, 2, 'Active'),
-					('Pasta Salad', 'images/recipes/pastasalad.jpg', 'Cold pasta mixed with vegetables.', '1. Boil and cool pasta. 2. Chop vegetables and mozzarella. 3. Mix all ingredients. 4. Let set for 30 minutes so flavors can meld.', 60, 'Appetizer / Side', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 1, 'Active'),
-					('Caramelized Onions', 'images/recipes/caramelizedonions.jpg', 'Sweet and savory slow-cooked onions.', '1. Slice onions and thyme. 2. Heat oil on skillet over medium heat. 3. Add onions and cook, tossing and stir occasionally for 15-20 minutes, or until softened. 4. Reduce heat to low and toss/stir occasionally for 50-60 minutes, or until onions are completely soft and caramelized. 5. Remove onions from skillet and add salt, pepper, and thyme.', 90, 'Appetizer / Side', TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, 1, 'Active'),
-					('Chicken Fried Rice', 'images/recipes/chickenfriedrice.webp', 'Rice stir-fried with chicken.', '1. Cook rice. 2. Dice carrots and chicken. 3. Add oils and chicken to large nonstick skillet or wok. 4. Cook on medium-high heat for 5 minutes. 5. Move chicken to a plate. 6. Move peas, carrot, corn to the skillet/wok. 7. Once the veggies are softened, add garlic. 8. Push the veggies to one side, and add eggs to the other. 9. Scramble the eggs. 10. Add chicken then rice to the pan. 11. Drizzle in soy sauce. 12. Cook until everything is heated. 13. Season and mix.', 40, 'Entrée', FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, 4, 'Active'),
-					('Bleach Cleanse Smoothie', NULL, 'Cure everything with this smoothie.', '1. Mix bleach and ammonia. 2. Drink.', 10, 'Appetizer / Side', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 11, 'Banned'),
+				INSERT INTO INGREDIENTS (INGREDIENT_NAME, INGREDIENT_IMAGE_PATH, INGREDIENT_DESCRIPTION, BASE_INGREDIENT_ID) VALUES
+				    ('Rice', '/images/ingredients/rice.jpg', 'Food grain cultivated predominantly in flooded paddies.', NULL),
+				    ('White Rice', '/images/ingredients/white_rice.jpg', 'Rice refined to remove outer fibrous layers, leaving only the starchy inside.', 1),
+				    ('Flour', '/images/ingredients/flour.jpg', 'Powder made by grinding raw grains, used in baking and thickening.', NULL),
+				    ('Bread', '/images/ingredients/bread.jpg', 'Baked staple food made from flour dough and water.', NULL),
+				    ('Pasta', '/images/ingredients/pasta.jpg', 'Uncooked shaped dough made from flour and water.', NULL),
+				    ('Rigatoni', '/images/ingredients/rigatoni.jpg', 'Tube-shaped pasta with ridges along its length.', 5),
+				    ('Cabbage', '/images/ingredients/cabbage.jpg', 'Vegetables with leaves wrapped into a core.', NULL),
+				    ('Taiwanese Cabbage', '/images/ingredients/taiwanese_cabbage.jpg', 'Extra large leaves, light green in color.', 7),
+				    ('Yam', '/images/ingredients/yam.jpg', 'Starchy edible root vegetable.', NULL),
+				    ('Nagaimo', '/images/ingredients/nagaimo.jpg', 'Chinese yam with a slimy texture when peeled, mild and digestive.', 9),
+				    ('Ginger', '/images/ingredients/ginger.jpg', 'Pungent root used as a spice and ingredient in cooking.', NULL),
+				    ('Spinach', '/images/ingredients/spinach.jpg', 'Nutritious green leafy vegetable rich in iron.', NULL),
+				    ('Lettuce', '/images/ingredients/lettuce.jpg', 'Crisp leafy vegetable used primary in salads and sandwiches.', NULL),
+				    ('Butterleaf Lettuce', '/images/ingredients/butterleaf_lettuce.jpg', 'A variety of lettuce with wide, soft, wavy leaves.', 13),
+				    ('Romaine Lettuce', '/images/ingredients/romaine_lettuce.jpg', 'A variety of lettuce with long, sturdy, crisp leaves.', 13),
+				    ('Tomato', '/images/ingredients/tomato.jpg', 'Juicy, savory red fruit cooked widely as a vegetable.', NULL),
+				    ('Beefsteak Tomato', '/images/ingredients/beefsteak_tomato.jpg', 'Softball-sized, flattened tomato variety known for meaty flesh and minimal seed jelly.', 16),
+				    ('Grape Tomato', '/images/ingredients/grape_tomato.jpg', 'Grape-sized, oblong tomato variety known for sweet flavor.', 16),
+				    ('Onion', '/images/ingredients/onion.jpg', 'Pungent bulb vegetable used as an aromatic in cooking.', NULL),
+				    ('Green Onion', '/images/ingredients/green_onion.jpg', 'Mild scallion/spring onion used as garnish and aromatic.', 19),
+				    ('Garlic', '/images/ingredients/garlic.jpg', 'Pungent bulb used as a seasoning and aromatic.', NULL),
+				    ('Garlic Powder', '/images/ingredients/garlic_powder.jpg', 'Dehydrated ground garlic used as a seasoning.', 21),
+				    ('Tofu', '/images/ingredients/tofu.jpg', 'Bean curd made from condensed soy milk.', NULL),
+				    ('Eggs', '/images/ingredients/eggs.jpg', 'Protein source laid by farm animals (e.g., chickens) commonly cooked or used in baking.', NULL),
+				    ('Cheese', '/images/ingredients/cheese.jpg', 'Dairy product made from milk in a wide range of flavors, textures, and forms.', NULL),
+				    ('American Cheese', '/images/ingredients/american_cheese.jpg', 'Processed cheese product with high meltability.', 25),
+				    ('Silkworm Pupae', '/images/ingredients/silkworm_pupae.jpg', 'Edible insect delicacy commonly sold canned in Korea.', NULL),
+				    ('Steak', '/images/ingredients/steak.jpg', 'High-quality cut of beef, typically grilled or pan-seared.', NULL),
+				    ('Sashimi Salmon', '/images/ingredients/sashimi_salmon.jpg', 'Fresh, high-grade raw salmon suitable for raw consumption.', NULL),
+				    ('Avocado', '/images/ingredients/avocado.jpg', 'Creamy, nutrient-rich green fruit high in healthy fats.', NULL),
+				    ('Berries', '/images/ingredients/berries.jpg', 'Assorted fresh berries.', NULL),
+				    ('Blueberries', '/images/ingredients/blueberries.jpg', 'Sweet, antioxidant-rich dark blue berries.', 31),
+				    ('Banana', '/images/ingredients/banana.jpg', 'Sweet, tropical fruit providing texture and natural sweetness.', NULL),
+				    ('Milk', '/images/ingredients/milk.jpg', 'Nutrient-rich liquid produced by mammals or plant alternatives.', NULL),
+				    ('Coconut Milk', '/images/ingredients/coconut_milk.jpg', 'Rich, creamy liquid extracted from grated mature coconut meat.', 34),
+				    ('Almond Milk', '/images/ingredients/almond_milk.jpg', 'Plant-based milk alternative made from ground almonds.', 34),
+				    ('Vegetable Broth', '/images/ingredients/vegetable_broth.jpg', 'Savory liquid made by simmering vegetables in water.', NULL),		
+				    ('Sesame', '/images/ingredients/sesame.jpg', 'Small nutty seeds used for flavor and garnish.', NULL), 
+				    ('Sesame Oil', '/images/ingredients/sesame_oil.jpg', 'Aromatic oil derived from sesame seeds, rich in nutty flavor.', NULL),
+				    ('Soy Sauce', '/images/ingredients/soy_sauce.jpg', 'Fermented savory condiment made from soybeans and wheat.', NULL),
+				    ('Vinegar', '/images/ingredients/vinegar.jpg', 'Acidic liquid made from fermented liquids.', NULL),
+				    ('Rice Vinegar', '/images/ingredients/rice_vinegar.jpg', 'Mild, slightly sweet vinegar made from fermented rice.', 41),
+				    ('Puree', '/images/ingredients/puree.jpg', 'Smooth, creamy substance made of crushed fruits or vegetables.', NULL),
+				    ('Tomato Puree', '/images/ingredients/tomato_puree.jpg', 'Blended, strained cooked tomatoes used as a thick base.', 43),
+				    ('Butter', '/images/ingredients/butter.jpg', 'Rich dairy fat product used in baking and cooking.', NULL),
+				    ('Sugar', '/images/ingredients/sugar.jpg', 'Sweet crystalline carbohydrate used in food and baking.', NULL),
+				    ('White Sugar', '/images/ingredients/white_sugar.jpg', 'Granulated refined sugar.', 46),
+				    ('Brown Sugar', '/images/ingredients/brown_sugar.jpg', 'Sugar containing molasses, adding moisture and deep flavor.', 46),
+				    ('Vanilla Extract', '/images/ingredients/vanilla_extract.jpg', 'Flavoring solution made from vanilla beans.', NULL),
+				    ('Chocolate', '/images/ingredients/chocolate.jpg', 'Food product made from roasted and ground cacao pods.', NULL),
+				    ('Baking Soda', '/images/ingredients/baking_soda.jpg', 'Leavening agent used in baking.', NULL),
+				    ('Pepper', '/images/ingredients/pepper.jpg', 'Pungent or spicy seasoning spice.', NULL),
+				    ('Black Pepper', '/images/ingredients/black_pepper.jpg', 'Ground black peppercorns used for heat and aroma.', 52),
+				    ('Gochugaru', '/images/ingredients/gochugaru.jpg', 'Coarsely ground Korean chili powder with smoky, sweet heat.', NULL),
+				    ('Curry', '/images/ingredients/curry.jpg', 'Blend of aromatic spices including turmeric, coriander, and cumin.', NULL),
+				    ('Chili', '/images/ingredients/chili.jpg', 'Crushed red pepper flakes adding spicy kick.', NULL),
+				    ('Wasabi Paste', '/images/ingredients/wasabi_paste.jpg', 'Pungent green Japanese horseradish condiment.', NULL),
+				    ('Seaweed', '/images/ingredients/seaweed.jpg', 'Edible marine algae used for umami flavor and garnish.', NULL),
+				    ('Basil', '/images/ingredients/basil.jpg', 'Aromatic herb with sweet, herbal pepper notes.', NULL);
 				""",
 				"""
 				INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, RECIPE_ACTIVE_TIMESTAMP, RECIPE_REMOVE_TIMESTAMP, RECIPE_STATUS, INSTRUCTIONS, TOTAL_MINUTES, COURSE, AI_GEN_DESCRIPTION, AI_GEN_APPLIANCES, AI_GEN_CUISINES, AI_GEN_DISH_TYPES, AI_GEN_TOTAL_MINUTES, AI_GEN_COURSE, AUTHOR_ID) VALUES
@@ -216,7 +288,7 @@ public class StarterPopulator {
 					(
 						'Toasted Sandwich with Egg, Cheese, and Veggies!',
 						'/images/recipes/sandwich.jpg',
-						'Elevate your morning routine with this rich, fresh, and quick breakfast sandwich. Fluffy scrambled eggs, gooey melted American cheese, tender butterleaf lettuce, and juicy cherry tomatoes stacked high between golden crispy toast. The ultimate balanced breakfast sandwich!',
+						'Elevate your morning routine with this rich, fresh, and quick breakfast sandwich. Fluffy scrambled eggs, gooey melted American cheese, tender butterleaf lettuce, and juicy beefsteak tomatoes stacked high between golden crispy toast. The ultimate balanced breakfast sandwich!',
 						'2024-03-15 15:15:15',
 				        NULL,
 				        'Active',
@@ -224,47 +296,84 @@ public class StarterPopulator {
 						10, 'Main Course', TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, 1
 					),
 					(
+						'Deep Forest Smoothie',
+						'/images/recipes/smoothie.jpg',
+						'Fuel your morning with plant-based goodness. This thick green smoothie is as nourishing as it is delicious.',
+						'2024-04-08 12:16:20',
+				        NULL,
+				        'Active',
+						'1. Pour almond milk and avocado into bottom of blender pitcher. \n2. Layer in fresh spinach, berries and banana, ice. \n3. Start on low speed, gradually increasing to high until completely smooth and thick. \n4. Scoop into cup. Enjoy!',
+						5, NULL, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, NULL
+					),
+					(
+						'Microwave Tomato Soup', 
+						'/images/recipes/tomato_soup.jpg', 
+						'Super easy, simple, and quick to make. Quantities proportioned just right!', 
+						'2024-09-09 18:27:36',
+				        NULL,
+				        'Active',
+						'1. Mix tomato puree and vegetable broth (1:2 ratio) together in a bowl \n2. Lightly mix diced onion, chopped garlic, salt, pepper, and olive oil. \n3. Microwave 2 minutes per cup.', 
+						NULL, 'Appetizer / Side', TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, NULL
+					),
+					(
+						'Grilled Steak',
+						'/images/recipes/grilled_steak.jpg',
+						'Classic American Recipe. Tender juicy steak with that smokey flavor. Can''t live without it.',
+						'2025-06-06 16:16:16',
+				        NULL,
+				        'Active',
+				        '1. Pat strip of steak completely dry with paper towels. \n2. Rub all over with a tiny bit of oil and season generously with salt and black pepper. \n3. Preheat your grill until coals are glowing hot with medium-high heat. \n4. Place the steak on the hot grill. Grill for about 3 minutes per side for medium-rare. \n5. Transfer from grill to plate, let it rest for 5 minutes before slicing and serving.',
+				        NULL, 'Main Course', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 5
+				    ),
+					(
+						'Sashimi Salad',
+						'/images/recipes/sashimi_salad.jpg',
+						'For all my fellow predators out there, I shall introduce to you my Japanese Western fusion dish. Have you ever eaten salad and felt there was something missing. Eating vegetables by itself is such a pain. But don't worry, with this dish, you won't have to hate eating vegetables ever again.',
+						'2025-06-16 16:16:16',
+				        NULL,
+				        'Active',
+						'1. Wash and halve crisp romaine lettuce and grape tomatoes. Discard lettuce stem. \n2. In a small bowl, whisk soy sauce, rice vinegar, sesame oil, and wasabi paste until smooth. \n3. Toss the chopped romaine and grape tomatoes in a bowl and mix in half of dressing. \n4. Arrange thinly sliced sashimi-grade raw salmon on top of the greens. \n5. Drizzle remaining dressing over the fish and garnish with sesame seeds, green onion, and seaweed.',
+						10, 'Main Course', FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, 6
+					),
+					(
 						'Curry Rigatoni',
 						'/images/recipes/curry_rigatoni.jpg',
-						'Global fusion dish featuring ridged, hollow rigatoni tubes coated in a rich, velvety curry cream sauce. The inner chambers hold onto every drop of sauce for a flavorful bite.', 
+						'Fusion dish featuring ridged, hollow rigatoni tubes coated in a rich, velvety curry cream sauce. The inner chambers hold onto every drop of sauce for a flavorful bite.', 
 						'2025-07-17 17:17:17',
 				        NULL,
 				        'Active',
-						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry powder, cumin, and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
+						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
 						30, 'Main Course', TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, 7
 					),
 					(
 						'Classic American Breakfast Sandwich',
 						'/images/recipes/sandwich.jpg',
 						'If you got the skills, simple ingredients can transform into heavenly taste!',
-						'2026-08-15 08:15:08',
-						'2026-08-18 18:18:18',
+						'2026-09-04 14:04:04',
+						'2026-09-07 17:17:17',
 				        'Banned',
 						'1. Toast 2 slices of bread until golden. \n2. Wash lettuce leaves, slice tomatoes, season with pinch of salt and black pepper. \n3. Whisk eggs with pinch of salt in small bowl. \n4. Medium-heat skillet with oil, pour in whisked eggs, gently push with spatula to form soft curds. \n5. Gather cooked eggs, turn off heat, lay cheese slice on top to melt. \n6. Lay 1 toast slice on plate, top with lettuce, cheesy scrambled eggs, and tomatoes, and close with remaining toast slice.',
 						10, 'Main Course', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 9
 					),
 					(
-						'Next Level Global Fusion: Curry Pasta!!!',
+						'Next Level Fusion: Curry Pasta!!!',
 						'/images/recipes/curry_rigatoni.jpg',
 						'Combining Indian and Italian Cuisine for a super modern, extremely trendy, and most delicious dish!!!', 
 						'2026-09-05 09:05:09',
 						'2026-09-08 19:19:19',
 				        'Banned',
-						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry powder, cumin, and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
+						'1. Boil 5 quarts of water with 1.5 tablespoons of salt, then add rigatoni and cook for 10 minutes, reserving 1/2 cup of starchy pasta water before draining. \n2. Heat oil in a deep skillet over medium heat and sauté diced onions and minced garlic until translucent. \n3. Stir in curry and chili flakes, toasting the spices for 30 seconds. \n4. Pour in coconut milk, simmering gently for 3 to 5 minutes until thickened. \n5. Add drained rigatoni and a splash of reserved pasta water, stirring until sauce fills the hollow tubes. \n6. Season with salt and pepper, garnish with fresh basil.', 
 						30, 'Main Course', FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, 9
-					)	
+					);
 				"""
 		};
 		
 		starter.executeAll(codeblocks);
 		
 		String[] setpaths = {
-				"src/main/database/Appliances.sql",
 				"src/main/database/Cuisines.sql",
 				"src/main/database/DietaryRestrictions.sql",
 				"src/main/database/DishTypes.sql",
-				"src/main/database/Ingredients.sql",
-				"src/main/database/Recipes.sql",
 				"src/main/database/Reviews.sql",
 				"src/main/database/Reports.sql",
 				"src/main/database/RecipeReports.sql",
@@ -275,17 +384,142 @@ public class StarterPopulator {
 		for (String setpath : setpaths) {
 			SqlReader.rExecute(starter.connection, setpath);
 		}
+		
 	}
 	
 	public void populateRelationships() throws SQLException {
+		String[] codeblocks = {
+				"""
+				INSERT INTO BOOKMARK (USER_ID, RECIPE_ID) VALUES
+				    (1, 5), -- Jeremy Lin -> Deep Forest Smoothie
+				    (1, 6), -- Jeremy Lin -> Microwave Tomato Soup
+				    (2, 1), -- Mary Baker -> Comforting Vegan Congee for Stomach Relief
+				    (2, 4), -- Mary Baker -> Toasted Sandwich with Egg, Cheese, and Veggies!
+				    (3, 7), -- Peter Parker -> Grilled Steak
+				    (3, 8), -- Peter Parker -> Sashimi Salad
+				    (5, 3), -- Grill Boss -> Air-Fried Crispy Korean Beondegi
+				    (5, 4), -- Grill Boss -> Toasted Sandwich with Egg, Cheese, and Veggies!
+				    (5, 8), -- Grill Boss -> Sashimi Salad
+				    (6, 3), -- Sue mei -> Air-Fried Crispy Korean Beondegi
+				    (6, 7), -- Sue mei -> Grilled Steak
+				    (7, 4), -- Steph Curry -> Toasted Sandwich with Egg, Cheese, and Veggies!
+				    (7, 7); -- Steph Curry -> Grilled Steak
+				""",
+				"""
+				INSERT INTO FOLLOW (FOLLOWER_ID, FOLLOWING_ID) VALUES
+				    (2, 1), -- Mary Baker follows Jeremy Lin
+				    (3, 5), -- Peter Parker follows Grill Boss
+				    (3, 6), -- Peter Parker follows Sue mei
+				    (5, 1), -- Grill Boss follows Jeremy Lin
+				    (5, 3), -- Grill Boss follows Peter Parker
+				    (5, 6), -- Grill Boss follows Sue mei
+				    (6, 3), -- Sue mei follows Peter Parker
+				    (6, 5), -- Sue mei follows Grill Boss
+				    (7, 1), -- Steph Curry follows Jeremy Lin
+				    (7, 5); -- Steph Curry follows Grill Boss
+				""",
+				"""
+				INSERT INTO RECIPES_COOK_INGREDIENTS (RECIPE_ID, INGREDIENT_ID, AMOUNT, AMOUNT_UNIT) VALUES
+				    -- 1. Comforting Vegan Congee for Stomach Relief
+				    (1, 1, 1.00, 'cup'),        -- Rice
+				    (1, 7, 2.00, 'leaves'),     -- Cabbage
+				    (1, 10, 0.50, 'root'),      -- Nagaimo
+				    (1, 11, 1.00, 'piece'),     -- Ginger
+				    (1, 23, 1.00, 'block'),     -- Tofu
+				    
+				    -- 2. Homemade Chocolate Chip Cookies
+				    (2, 3, 2.25, 'cups'),       -- Flour
+				    (2, 45, 1.00, 'cup'),       -- Butter
+				    (2, 47, 0.75, 'cup'),       -- White Sugar
+				    (2, 48, 0.75, 'cup'),       -- Brown Sugar
+				    (2, 24, 2.00, NULL),        -- Eggs
+				    (2, 49, 1.00, 'teaspoon'),  -- Vanilla Extract
+				    (2, 50, 2.00, 'cups'),      -- Chocolate
+				    (2, 51, 1.00, 'teaspoon'),  -- Baking Soda
+				    
+				    -- 3. Air-Fried Crispy Korean Beondegi
+				    (3, 27, 1.00, 'can'),       -- Silkworm Pupae
+				    (3, 39, 1.00, 'tablespoon'),-- Sesame Oil
+				    (3, 40, 1.00, 'tablespoon'),-- Soy Sauce
+				    (3, 54, 1.00, 'teaspoon'),  -- Gochugaru
+				    (3, 22, 0.50, 'teaspoon'),  -- Garlic Powder
+				    (3, 46, 0.50, 'teaspoon'),  -- Sugar
+				    
+				    -- 4. Toasted Sandwich with Egg, Cheese, and Veggies!
+				    (4, 4, 2.00, 'slices'),     -- Bread
+				    (4, 14, 2.00, 'leaves'),    -- Butterleaf Lettuce
+				    (4, 17, 0.50, NULL),        -- Beefsteak Tomato
+				    (4, 24, 2.00, NULL),        -- Eggs
+				    (4, 26, 1.00, 'slice'),     -- American Cheese
+				    (4, 53, 0.25, 'teaspoon'),  -- Black Pepper
+				    
+				    -- 5. Deep Forest Smoothie
+				    (5, 36, 1.00, 'cup'),       -- Almond Milk
+				    (5, 30, 0.50, NULL),        -- Avocado
+				    (5, 12, 1.00, 'cup'),       -- Spinach
+				    (5, 31, 0.50, 'cup'),       -- Berries
+				    (5, 33, 1.00, NULL),        -- Banana
+				    
+				    -- 6. Microwave Tomato Soup
+				    (6, 44, 1.00, 'cup'),       -- Tomato Puree
+				    (6, 37, 2.00, 'cups'),      -- Vegetable Broth
+				    (6, 19, 0.25, NULL),        -- Onion
+				    (6, 21, 1.00, 'clove'),     -- Garlic
+				    (6, 53, 0.25, 'teaspoon'),  -- Black Pepper
+				    
+				    -- 7. Grilled Steak
+				    (7, 28, 1.00, 'strip'),     -- Steak
+				    (7, 53, 0.50, 'teaspoon'),  -- Black Pepper
+				    
+				    -- 8. Sashimi Salad
+				    (8, 15, 1.00, 'head'),      -- Romaine Lettuce
+				    (8, 18, 1.00, 'cup'),       -- Grape Tomato
+				    (8, 40, 2.00, 'tablespoons'),-- Soy Sauce
+				    (8, 42, 1.00, 'tablespoon'),-- Rice Vinegar
+				    (8, 39, 1.00, 'tablespoon'),-- Sesame Oil
+				    (8, 57, 1.00, 'teaspoon'),  -- Wasabi Paste
+				    (8, 29, 0.50, 'pound'),     -- Sashimi Salmon
+				    (8, 38, 1.00, 'teaspoon'),  -- Sesame
+				    (8, 20, 1.00, 'stalk'),     -- Green Onion
+				    (8, 58, 0.25, 'cup'),       -- Seaweed
+				    
+				    -- 9. Curry Rigatoni
+				    (9, 6, 1.00, 'pound'),      -- Rigatoni
+				    (9, 19, 1.00, NULL),        -- Onion
+				    (9, 21, 2.00, 'cloves'),    -- Garlic
+				    (9, 55, 2.00, 'tablespoons'),-- Curry
+				    (9, 56, 1.00, 'teaspoon'),  -- Chili
+				    (9, 35, 1.00, 'can'),       -- Coconut Milk
+				    (9, 53, 0.25, 'teaspoon'),  -- Black Pepper
+				    (9, 59, 0.25, 'cup'),       -- Basil
+				    
+				    -- 10. Classic American Breakfast Sandwich
+				    (10, 4, 2.00, 'slices'),    -- Bread
+				    (10, 14, 2.00, 'leaves'),   -- Butterleaf Lettuce
+				    (10, 17, 0.50, NULL),       -- Beefsteak Tomato
+				    (10, 24, 2.00, NULL),       -- Eggs
+				    (10, 26, 1.00, 'slice'),    -- American Cheese
+				    (10, 53, 0.25, 'teaspoon'), -- Black Pepper
+				    
+				    -- 11. Next Level Fusion: Curry Pasta!!!
+				    (11, 6, 1.00, 'pound'),     -- Rigatoni
+				    (11, 19, 1.00, NULL),       -- Onion
+				    (11, 21, 2.00, 'cloves'),   -- Garlic
+				    (11, 55, 2.00, 'tablespoons'),-- Curry
+				    (11, 56, 1.00, 'teaspoon'), -- Chili
+				    (11, 35, 1.00, 'can'),      -- Coconut Milk
+				    (11, 53, 0.25, 'teaspoon'), -- Black Pepper
+				    (11, 59, 0.25, 'cup');      -- Basil
+				"""
+		};
+		
+		starter.executeAll(codeblocks);
+		
 		String[] setpaths = {
 				"src/main/database/IngredientsFitDietaryRestrictions.sql",
-				"src/main/database/RecipesCookIngredients.sql",
 				"src/main/database/RecipesHasDishTypes.sql",
 				"src/main/database/RecipesFeatureCuisines.sql",
 				"src/main/database/RecipesUseAppliances.sql",
-				"src/main/database/Follow.sql",
-				"src/main/database/Bookmark.sql"
 				};
 		for (String setpath : setpaths) {
 			SqlReader.rExecute(starter.connection, setpath);
