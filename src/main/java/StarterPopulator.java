@@ -416,19 +416,6 @@ public class StarterPopulator {
 		};
 		
 		starter.executeAll(codeblocks);
-		
-		String[] setpaths = {
-				"src/main/database/Reviews.sql",
-				"src/main/database/Reports.sql",
-				"src/main/database/RecipeReports.sql",
-				"src/main/database/ReviewReports.sql",
-				"src/main/database/Violations.sql",
-				"src/main/database/Appeals.sql",
-				};
-		for (String setpath : setpaths) {
-			SqlReader.rExecute(starter.connection, setpath);
-		}
-		
 	}
 	
 	public void populateRelationships() throws SQLException {
