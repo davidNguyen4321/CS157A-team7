@@ -181,7 +181,7 @@ public class StarterPopulator {
 						'Used for chopping, slicing, and dicing'
 					),
 					(
-						'Stand Mixer', 
+						'Mixer', 
 						'images/appliances/mixer.jpg', 
 						'Heavy duty mixer for dough and batter'
 					),
@@ -252,6 +252,36 @@ public class StarterPopulator {
 				    ('Wasabi Paste', '/images/ingredients/wasabi_paste.jpg', 'Pungent green Japanese horseradish condiment.', NULL),
 				    ('Seaweed', '/images/ingredients/seaweed.jpg', 'Edible marine algae used for umami flavor and garnish.', NULL),
 				    ('Basil', '/images/ingredients/basil.jpg', 'Aromatic herb with sweet, herbal pepper notes.', NULL);
+				""",
+				"""
+				INSERT INTO DISH_TYPES (DISH_TYPE_NAME, DISH_TYPE_DESCRIPTION, BASE_DISH_TYPE_ID) VALUES
+				    ('Beverage', 'Drinks and liquid refreshments.', NULL),
+				    ('Smoothie', 'A thick, creamy beverage made from blended fruit, vegetables, and liquids.', 1),
+				    ('Soup', 'A primarily liquid food, served warm or hot, made by combining ingredients.', NULL),
+				    ('Stew', 'A dish featuring a higher solid to liquid ratio.', 3),
+				    ('Broth', 'A savory liquid food featuring a higher liquid to solid ratio.', 3),
+				    ('Salad', 'A dish of mixed ingredients, typically including vegetables, served with a dressing.', NULL),
+				    ('Handheld', 'Portable food items that can be easily eaten by hand.', NULL),
+				    ('Sandwich', 'Food consisting of fillings placed on or between slices of bread.', 7),
+				    ('Pasta & Noodles', 'Dishes featuring shaped or ribbon-cut dough cooked and coated in sauce.', NULL),
+				    ('Rice', 'Dishes where rice is the foundational component or cooked into a dish.', NULL),
+				    ('Baked Goods', 'Items baked in an oven, including cookies and pastries.', NULL),
+				    ('Cookie', 'A small, flat, sweet baked good.', 11),
+				    ('Meat', 'Dishes centered around primary cuts of meat like grilled steak.', NULL);
+				""",
+				"""
+				INSERT INTO CUISINES (CUISINE_NAME, CUISINE_DESCRIPTION, BASE_CUISINE_ID) VALUES
+				    ('Asian', 'Include China, India, Philippines, and other parts of Asia.', NULL),
+				    ('East Asian', 'Include Japan, Korea, China, and other parts of East Asia.', 1),
+				    ('South Asian', 'Include India, Pakistan, and other parts of South Asia.', 1),
+				    ('Chinese', 'Featuring comforting staples like congee.', 2),
+				    ('Korean', 'Known for bold spices and umami flavors.', 2),
+				    ('Japanese', 'Focusing on fresh, high-grade components.', 2),
+				    ('Indian', 'Defined by aromatic spice blends like curry.', 3),
+				    ('Western', 'Include Europe, US, Canada, Australia, and more.', NULL),
+				    ('American', 'Featuring baked goods, grilled meats, burgers, and more.', 8),
+				    ('Mediterranean', 'Include Italy, Greece, and other countries bordering the Mediterranean.', 8),
+				    ('Italian', 'Featuring pasta, tomatoes, olive oil, and more.', 10);
 				""",
 				"""
 				INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, RECIPE_ACTIVE_TIMESTAMP, RECIPE_REMOVE_TIMESTAMP, RECIPE_STATUS, INSTRUCTIONS, TOTAL_MINUTES, COURSE, AI_GEN_DESCRIPTION, AI_GEN_APPLIANCES, AI_GEN_CUISINES, AI_GEN_DISH_TYPES, AI_GEN_TOTAL_MINUTES, AI_GEN_COURSE, AUTHOR_ID) VALUES
@@ -371,9 +401,7 @@ public class StarterPopulator {
 		starter.executeAll(codeblocks);
 		
 		String[] setpaths = {
-				"src/main/database/Cuisines.sql",
 				"src/main/database/DietaryRestrictions.sql",
-				"src/main/database/DishTypes.sql",
 				"src/main/database/Reviews.sql",
 				"src/main/database/Reports.sql",
 				"src/main/database/RecipeReports.sql",
@@ -510,16 +538,59 @@ public class StarterPopulator {
 				    (11, 35, 1.00, 'can'),      -- Coconut Milk
 				    (11, 53, 0.25, 'teaspoon'), -- Black Pepper
 				    (11, 59, 0.25, 'cup');      -- Basil
+				""",
 				"""
+				INSERT INTO RECIPES_HAS_DISH_TYPES (RECIPE_ID, DISH_TYPE_ID) VALUES
+				    (1, 10),     -- Rice
+				    (2, 12),     -- Cookie
+				    (3, 13),     -- Meat
+				    (4, 8),      -- Sandwich
+				    (5, 2),      -- Smoothie
+				    (6, 3),      -- Soup
+				    (7, 13),     -- Meat
+				    (8, 6),      -- Salad
+				    (8, 13),     -- Meat
+				    (9, 9),      -- Pasta & Noodles
+				    (10, 8),     -- Sandwich
+				    (11, 9);     -- Pasta & Noodles
+				""",
+				"""
+				INSERT INTO RECIPES_FEATURE_CUISINES (RECIPE_ID, CUISINE_ID) VALUES
+				    (1, 4),      -- Chinese
+				    (2, 8),      -- Western
+				    (3, 5),      -- Korean
+				    (4, 8),      -- Western
+				    (6, 8),      -- Western
+				    (7, 9),      -- American
+				    (8, 6),      -- Japanese
+				    (8, 8),      -- Western
+				    (9, 7),      -- Indian
+				    (9, 11),     -- Italian
+				    (10, 8),     -- Western
+				    (11, 7),     -- Indian
+				    (11, 11);    -- Italian
+				""",
+				"""
+				INSERT INTO RECIPES_USE_APPLIANCES (RECIPE_ID, APPLIANCE_ID) VALUES
+				    (1, 1),      -- Rice Cooker
+				    (2, 2),      -- Oven
+				    (2, 9),      -- Mixer
+				    (3, 5),      -- Air Fryer
+				    (4, 3),      -- Toaster
+				    (5, 6),      -- Blender
+				    (6, 7),      -- Microwave
+				    (7, 10),     -- Grill
+				    (8, 8),      -- Food Processor
+				    (9, 4),      -- Stovetop
+				    (10, 3),     -- Toaster
+				    (11, 4);     -- Stovetop
+				""",
 		};
 		
 		starter.executeAll(codeblocks);
 		
 		String[] setpaths = {
 				"src/main/database/IngredientsFitDietaryRestrictions.sql",
-				"src/main/database/RecipesHasDishTypes.sql",
-				"src/main/database/RecipesFeatureCuisines.sql",
-				"src/main/database/RecipesUseAppliances.sql",
 				};
 		for (String setpath : setpaths) {
 			SqlReader.rExecute(starter.connection, setpath);
