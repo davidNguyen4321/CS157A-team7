@@ -411,7 +411,97 @@ public class StarterPopulator {
 					);
 				""",
 				"""
-				
+				INSERT INTO REVIEWS (REVIEW_NAME, REVIEW_IMAGE_PATH, REVIEW_DESCRIPTION, REVIEW_ACTIVE_TIMESTAMP, REVIEW_REMOVE_TIMESTAMP, REVIEW_STATUS, RATING, RECIPE_ID, REVIEWER_ID) VALUES
+					(
+				        'Anyone who eats this is out of their mind',
+				        NULL,
+				        'Who in their right mind eats bugs?! Fucking crazy.',
+				        '2026-09-15 11:00:00',
+				        '2026-09-18 10:10:10',
+				        'Banned',
+				        1, 3, 8
+				    ),
+				    (
+				        'GO TO HELL',
+				        NULL,
+				        'For your absolutely disgusting garbage of a dish, go kill your fucking self!',
+				        '2026-10-01 14:00:00',
+				        '2026-10-03 11:11:11',
+				        'Banned',
+				        1, 8, 8
+				    ),
+					(
+						'Absolute Life Saver',
+				        '/images/reviews/comforting_congee.jpg',
+				        'When my stomach was acting up, this congee really brought me back to life. So easy and soothing!',
+				        '2026-11-01 10:00:00', 
+				        NULL, 
+				        'Active', 
+				        5, 1, 2
+				    ),
+				    (
+				        'Crunchy and Unique',
+				        '/images/reviews/air_fried_insect.jpg',
+				        'Never thought I would eat insects, but air-frying them gives them a decent texture. Quite savory!',
+				        '2026-11-03 16:45:00',
+				        NULL,
+				        'Active',
+				        4, 3, 5
+				    ),
+				    (
+				        'Not For Me',
+				        '/images/reviews/air_fried_insect.jpg',
+				        'I really wanted to give insect-based dishes a fair try, but the taste and texture just were not pleasant at all. Too earthy and fishy for my liking.',
+				        '2026-11-05 14:25:00',
+				        NULL,
+				        'Active',
+				        2, 3, 1
+				    ),
+				    (
+				        'Fresh and Delicious',
+				        '/images/reviews/sashimi_salad.jpg',
+				        'As the grill boss, I usually love my meats charred, but this sashimi salad is surprisingly refreshing and top tier!',
+				        '2025-11-06 12:00:00',
+				        NULL,
+				        'Active',
+				        5, 8, 5
+				    ),
+				    (
+				        'Raw Perfection',
+				        '/images/reviews/air_fried_insect.jpg',
+				        'As a predator who loves raw and wild food, these air-fried silkworm pupae hit the exact right spot. Delicious!',
+				        '2024-11-07 15:00:00',
+				        NULL,
+				        'Active',
+				        5, 3, 6
+				    ),
+				    (
+				        'Meaty and Juicy',
+				        '/images/reviews/grilled_steak.jpg',
+				        'Nothing beats a good carnivorous meal. Cooked it right up and it satisfies my predator cravings completely.',
+				        '2025-11-08 18:30:00',
+				        NULL,
+				        'Active',
+				        5, 7, 6
+				    ),
+				    (
+				        'Champion Breakfast',
+				        '/images/reviews/sandwich.jpg',
+				        'Athletes need a great start to the day. This loaded toast sandwich gives me all the energy I need before practice!',
+				        '2025-11-09 09:00:00',
+				        NULL,
+				        'Active',
+				        5, 4, 7
+				    ),
+				    (
+				        'Solid Post-Workout Protein',
+				        '/images/reviews/grilled_steak.jpg',
+				        'Great source of protein after a hard workout session on the court. Simple, smokey, and hits the spot.',
+				        '2025-11-10 20:00:00',
+				        NULL,
+				        'Active',
+				        4, 7, 7
+				    );	    
 				"""
 		};
 		
