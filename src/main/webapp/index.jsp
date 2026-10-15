@@ -1,4 +1,6 @@
-<%@ page import="java.sql.*" %>
+<%@ page import="java.sql.*"
+import="Search.*"
+%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,12 +32,12 @@
         
         Connection dbConnection = null;
         boolean isConnected = false;
-
         if (dbPassword != null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 dbConnection = DriverManager.getConnection(dbURL, dbUser, dbPassword);
                 isConnected = true;
+                DatabaseAccess.setConnection(dbConnection);
             } catch (Exception e) {
                 // Connection failed (wrong password, etc.)
             }
@@ -134,29 +136,130 @@
                         </div>
 
                         <div class="search-bottom-row">
-                            <div class="search-filter-col">
-                                <div class="filter-icon-box">🥚</div>
-                                <div>
-                                    <div class="filter-label">Ingredients</div>
-                                    <div class="filter-sub">What do you have?</div>
-                                </div>
-                            </div>
-                            <div class="search-filter-col">
-                                <div class="filter-icon-box">🍳</div>
-                                <div>
-                                    <div class="filter-label">Appliances</div>
-                                    <div class="filter-sub">What can you use?</div>
-                                </div>
-                            </div>
-                            <div class="search-filter-col">
-                                <div class="filter-icon-box">👤</div>
-                                <div>
-                                    <div class="filter-label">Authors</div>
-                                    <div class="filter-sub">Who to learn from?</div>
-                                </div>
-                            </div>
-                            <button type="submit" class="find-recipes-submit">Find Recipes</button>
-                        </div>
+                           <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterClick('IngredientsPanel', this)">
+                               <div class="filter-icon-box">🥚</div>
+                               <div>
+                                   <div class="filter-label">Ingredients</div>
+                                   <div class="filter-sub">What do you have?</div>
+                               </div>
+                           </button>
+                           <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterClick('AppliancesPanel', this)">
+                               <div class="filter-icon-box">🍳</div>
+                               <div>
+                                   <div class="filter-label">Appliances</div>
+                                   <div class="filter-sub">What can you use?</div>
+                               </div>
+                           </button>
+                           <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterClick('AuthorsPanel', this)">
+                               <div class="filter-icon-box">👤</div>
+                               <div>
+                                   <div class="filter-label">Authors</div>
+                                   <div class="filter-sub">Who to learn from?</div>
+                               </div>
+                           </button>
+                           <button type="submit" class="find-recipes-submit">Find Recipes</button>
+                       </div>
+						<div id= "GeneralPanel" class="filter-panel">
+                       	<span class="badge-pill">
+                           	General Filters
+                           </span>
+                       </div>
+                       <div id= "IngredientsPanel" class="filter-panel">
+                       	<div style="color: #F5F5DC" class="search-top-bar">
+                           <span class="search-icon-fixed">🔍</span>
+                           <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+                       	</div>
+                       </div>
+                       <script>
+   						let ingredientInput = document.getElementById('IngredientsSearch');
+   						let ingredientTimeout = null;
+   						ingredientInput.addEventListener('keyup', function (e) {
+   						    clearTimeout(ingredientTimeout);
+   						    ingredientTimeout = setTimeout(function () {
+   						        console.log('Input Value:', ingredientInput.value);
+   						    }, 100);
+   						});
+                       </script>
+						<div id= "AppliancesPanel" class="filter-panel">
+                       	<span class="badge-pill">
+                           	Appliances
+                           </span>
+                       </div>
+						<div id= "AuthorsPanel" class="filter-panel">
+                       	<div style="color: #F5F5DC" class="search-top-bar">
+                           <span class="search-icon-fixed">🔍</span>
+                           <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+                       	</div>
+                       	<button type="button" class="filter-panel-search-result"></button>
+                       </div>
+						<script>
+						let authorInput = document.getElementById('AuthorsSearch');
+						let authorTimeout = null;
+						authorInput.addEventListener('keyup', function (e) {
+						    clearTimeout(authorTimeout);
+						    authorTimeout = setTimeout(function () {
+						    	let searchTerm = authorInput.value;
+						    	if(!searchTerm||!searchTerm.trim()){
+						    		console.log('Empty');
+						    	}
+						    	else{
+									searchUsers(searchTerm);
+						    	}
+						    }, 100);
+						});
+						
+						async function searchUsers(searchTerm){
+				    		searchTerm = searchTerm.trim();
+					        console.log('Input Value:', searchTerm);
+					        const parameters = new URLSearchParams();
+					        parameters.append('searchValue', searchTerm);
+					        
+					        fetch("/RecipeGenie/Users/Search?" + parameters.toString(), {
+					        	method:'GET',
+					        	headers:{
+					                "Content-Type": "application/json",
+					                "Accept": "application/json",
+					        	},
+					        }).then(response => {if (response.ok) {
+					        	const responseJson = response.json();
+					        	console.log(responseJson);
+					            return responseJson; 
+					        } else {
+					            throw new Error('Network response was not ok'); 
+					        }})
+						}
+						
+						const filterPanels = document.querySelectorAll('.filter-panel');
+					    const filterColumns = document.querySelectorAll('.search-filter-col, .filter-btn');
+					   
+						function handleFilterClick(type, column) {
+					    	const currentPanel = document.getElementById(type);
+					    	const isActive = currentPanel && currentPanel.classList.contains('active');
+					    	
+					    	for (let panel of filterPanels) {
+					    		panel.classList.remove('active');
+					    	}
+					    	for (let col of filterColumns){
+					    		col.classList.remove('active');
+					    	}
+					       
+					        if (currentPanel && !isActive) {
+					            currentPanel.classList.add('active');
+					            column.classList.add('active');
+					        }
+					    }
+						
+						function toggleActive(element){
+							const isActive = element && element.classList.contains('active');
+							if(isActive){
+								element.classList.remove('active');
+							}
+							else{
+								element.classList.add('active');
+							}
+						}
+						</script>
+
                     </form>
                 </div>
             </div>
