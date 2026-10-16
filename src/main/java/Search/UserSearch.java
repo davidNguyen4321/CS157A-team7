@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 @WebServlet("/Users/Search")
 public class UserSearch extends HttpServlet {
 	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
@@ -33,7 +36,7 @@ public class UserSearch extends HttpServlet {
 			return;
 		}
 		
-		String sql = "SELECT USER_ID, USER_NAME FROM USERS "
+		String sql = "SELECT USER_ID, USER_NAME, USER_IMAGE_PATH FROM USERS "
 				+ "WHERE USER_STATUS = 'Active' "
 				+ "AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) LIMIT 3";
 		try {
@@ -41,21 +44,22 @@ public class UserSearch extends HttpServlet {
     		statement.setString(1, searchTerm + "%");
     		statement.setString(2, "% "+ searchTerm + "%");
     		ResultSet users = statement.executeQuery();
-    		
-    		StringBuilder sb = new StringBuilder();
-    		sb.append("[");
+    		ObjectMapper mapper = new ObjectMapper();
+			ObjectNode outerNode = mapper.createObjectNode();
+
     		while(users.next()) {
     			String userName = users.getString("user_name");
     			Integer userId = users.getInt("user_id");
-    			sb.append("{\""+userId+"\":\""+userName+"\"}, ");
+    			String userImage = users.getString("user_image_path");
+    			ObjectNode innerNode = mapper.createObjectNode();
+    			innerNode.put("userName",userName);
+    			innerNode.put("userImage",userImage);
+    			innerNode.put("userId", userId);
+    			outerNode.put(userId.toString(), mapper.writeValueAsString(innerNode));
     		}
-    		if(sb.length()>1) {
-    			sb.setLength(sb.length()-2); //remove the last comma and space
-    		}
-    		sb.append("]");
     		
     		PrintWriter pw = response.getWriter();
-    		pw.write(sb.toString());
+    		pw.write(mapper.writeValueAsString(outerNode));
     		pw.close();
     		users.close();
     		statement.close();
@@ -66,5 +70,4 @@ public class UserSearch extends HttpServlet {
 			response.getWriter().write("{}");
 		}
 	}
-	
 }
