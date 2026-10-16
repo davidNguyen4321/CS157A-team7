@@ -45,17 +45,20 @@ public class UserSearch extends HttpServlet {
     		statement.setString(2, "% "+ searchTerm + "%");
     		ResultSet users = statement.executeQuery();
     		ObjectMapper mapper = new ObjectMapper();
-			ObjectNode outerNode = mapper.createObjectNode();
-
+    		ObjectNode outerNode = mapper.createObjectNode();
+    		Integer counter = 0;
+    		
     		while(users.next()) {
-    			String userName = users.getString("user_name");
     			Integer userId = users.getInt("user_id");
+    			String userName = users.getString("user_name");
     			String userImage = users.getString("user_image_path");
     			ObjectNode innerNode = mapper.createObjectNode();
+    			
+    			innerNode.put("userId",userId);
     			innerNode.put("userName",userName);
     			innerNode.put("userImage",userImage);
-    			innerNode.put("userId", userId);
-    			outerNode.put(userId.toString(), mapper.writeValueAsString(innerNode));
+    			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
+    			counter++;
     		}
     		
     		PrintWriter pw = response.getWriter();
