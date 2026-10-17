@@ -345,7 +345,7 @@ public class StarterPopulator {
 					),
 					(
 						'Air-Fried Crispy Korean Beondegi',
-						'/images/recipes/air_fried_insects.jpg',
+						'/images/recipes/air_fried_insect.jpg',
 						'A modern twist on a beloved South Korean street food staple. Silkworm pupae are air-fried to a satisfying crunch. Rich, nutty, and bursting with umami flavor—it''s street food made effortlessly modern',
 						'2024-03-03 23:23:23',
 				        NULL,

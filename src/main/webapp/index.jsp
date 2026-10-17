@@ -1,5 +1,6 @@
 <%@ page import="java.sql.*"
 import="Search.*"
+import="java.io.File"
 %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -130,27 +131,27 @@ import="Search.*"
                             <input type="text" name="search" placeholder="Search recipe name..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 
                             <!-- Filters button next to the search bar -->
-                            <button type="button" class="filter-btn">
+                            <button type="button" class="filter-btn" onclick="handleFilterTypeClick('GeneralPanel', this)">
                                 ⚙️ Filters
                             </button>
                         </div>
 
                         <div class="search-bottom-row">
-                           <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterClick('IngredientsPanel', this)">
+                           <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterTypeClick('IngredientsPanel', this)">
                                <div class="filter-icon-box">🥚</div>
                                <div>
                                    <div class="filter-label">Ingredients</div>
                                    <div class="filter-sub">What do you have?</div>
                                </div>
                            </button>
-                           <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterClick('AppliancesPanel', this)">
+                           <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterTypeClick('AppliancesPanel', this)">
                                <div class="filter-icon-box">🍳</div>
                                <div>
                                    <div class="filter-label">Appliances</div>
                                    <div class="filter-sub">What can you use?</div>
                                </div>
                            </button>
-                           <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterClick('AuthorsPanel', this)">
+                           <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterTypeClick('AuthorsPanel', this)">
                                <div class="filter-icon-box">👤</div>
                                <div>
                                    <div class="filter-label">Authors</div>
@@ -159,12 +160,12 @@ import="Search.*"
                            </button>
                            <button type="submit" class="find-recipes-submit">Find Recipes</button>
                        </div>
-						<div id= "GeneralPanel" class="filter-panel">
+						<div id="GeneralPanel" class="filter-panel">
                        	<span class="badge-pill">
                            	General Filters
                            </span>
                        </div>
-                       <div id= "IngredientsPanel" class="filter-panel">
+                       <div id="IngredientsPanel" class="filter-panel">
                        	<div style="color: #F5F5DC" class="search-top-bar">
                            <span class="search-icon-fixed">🔍</span>
                            <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
@@ -173,84 +174,165 @@ import="Search.*"
                        <script>
    						let ingredientInput = document.getElementById('IngredientsSearch');
    						let ingredientTimeout = null;
-   						ingredientInput.addEventListener('keyup', function (e) {
+   						ingredientInput.addEventListener('keyup', function (e) {//tracking keyboard input
    						    clearTimeout(ingredientTimeout);
-   						    ingredientTimeout = setTimeout(function () {
+   						    ingredientTimeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
    						        console.log('Input Value:', ingredientInput.value);
    						    }, 100);
    						});
                        </script>
-						<div id= "AppliancesPanel" class="filter-panel">
+						<div id="AppliancesPanel" class="filter-panel">
                        	<span class="badge-pill">
                            	Appliances
                            </span>
                        </div>
-						<div id= "AuthorsPanel" class="filter-panel">
-                       	<div style="color: #F5F5DC" class="search-top-bar">
-                           <span class="search-icon-fixed">🔍</span>
-                           <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
-                       	</div>
-                       	<button type="button" class="filter-panel-search-result"></button>
+						<div id="AuthorsPanel" class="filter-panel">
+							<div id="AuthorsContainer" class="filter-panel-container">
+							</div>
+	                       	<div style="color: #F5F5DC" class="search-top-bar">
+	                           <span class="search-icon-fixed">🔍</span>
+	                           <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+	                       	</div>
                        </div>
 						<script>
+						const authorIdsInFilter = [];
 						let authorInput = document.getElementById('AuthorsSearch');
 						let authorTimeout = null;
-						authorInput.addEventListener('keyup', function (e) {
+						authorInput.addEventListener('keyup', function (e) {//tracking keyboard input
 						    clearTimeout(authorTimeout);
-						    authorTimeout = setTimeout(function () {
+						    authorTimeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
 						    	let searchTerm = authorInput.value;
-						    	if(!searchTerm||!searchTerm.trim()){
-						    		console.log('Empty');
+						    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
+						    		searchUsers(searchTerm);
 						    	}
 						    	else{
-									searchUsers(searchTerm);
+						        	removeFilterPanelSearchResults();
 						    	}
 						    }, 100);
 						});
 						
 						async function searchUsers(searchTerm){
 				    		searchTerm = searchTerm.trim();
-					        console.log('Input Value:', searchTerm);
-					        const parameters = new URLSearchParams();
+					        let parameters = new URLSearchParams();
 					        parameters.append('searchValue', searchTerm);
+					        parameters.append('excludeString', JSON.stringify(authorIdsInFilter));
 					        
-					        fetch("/RecipeGenie/Users/Search?" + parameters.toString(), {
+					        //connect to web server
+							let response = await fetch("/RecipeGenie/Users/Search?" + parameters.toString(), {
 					        	method:'GET',
 					        	headers:{
 					                "Content-Type": "application/json",
 					                "Accept": "application/json",
 					        	},
-					        }).then(response => {if (response.ok) {
-					        	const responseJson = response.json();
-					        	console.log(responseJson);
-					            return responseJson; 
-					        } else {
-					            throw new Error('Network response was not ok'); 
-					        }})
+					        });
+							
+							if (!response.ok) {
+					        	removeFilterPanelSearchResults(); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
+					        	throw new Error('Network response was not ok');
+					        }
+				        	let users = await response.json(); // Creates a JSON object
+				        	removeFilterPanelSearchResults();
+				        	newFilterPanelUserSearchResults(users);
 						}
 						
-						const filterPanels = document.querySelectorAll('.filter-panel');
-					    const filterColumns = document.querySelectorAll('.search-filter-col, .filter-btn');
-					   
-						function handleFilterClick(type, column) {
-					    	const currentPanel = document.getElementById(type);
-					    	const isActive = currentPanel && currentPanel.classList.contains('active');
-					    	
-					    	for (let panel of filterPanels) {
-					    		panel.classList.remove('active');
-					    	}
-					    	for (let col of filterColumns){
-					    		col.classList.remove('active');
-					    	}
-					       
-					        if (currentPanel && !isActive) {
-					            currentPanel.classList.add('active');
-					            column.classList.add('active');
-					        }
+						function removeFilterPanelSearchResults(){ //clear results to make way for an updated version
+							let FPSRs = document.querySelectorAll('.filter-panel-search-autocomplete');
+							for (FPSR of FPSRs){
+								FPSR.remove();
+							}
+						}
+						
+						function newFilterPanelUserSearchResults(users){
+			            	let container = document.getElementById("AuthorsPanel");
+			            	//create a result for each user
+							for (userString of Object.values(users)){
+								//initialization
+				            	let user = JSON.parse(userString);
+				            	let userId = user["userId"];
+				            	let userName = user["userName"];
+				            	let userImage = user["userImage"];
+				            	
+								//the base element
+				            	let newUser = document.createElement("button");
+				            	newUser.classList.add("filter-panel-search-autocomplete");
+				            	newUser.setAttribute('type','button');
+				            	newUser.setAttribute('onclick', "addUserFromSearch(this, " + userId + ", '" + userName + "', '" + userImage + "' )");
+				            	
+				            	//the picture element
+				            	let newUserProfilePic = document.createElement("img");
+				            	newUserProfilePic.classList.add("mini-pic");
+				            	newUserProfilePic.setAttribute('src', "${pageContext.request.contextPath}"+userImage);
+				            	newUserProfilePic.setAttribute('alt', 'Author');
+				            	
+				            	//the text element
+				            	let newUserName = document.createElement("p");
+				            	newUserName.classList.add("mini-text");
+				            	newUserName.textContent=userName;	
+				            	
+				            	//connecting elements
+				            	newUser.append(newUserProfilePic);
+				            	newUser.append(newUserName);
+				            	container.append(newUser);
+				            }
+						}
+						
+						function addUserFromSearch(self, userId, userName, userImage){							
+			            	let filter = document.createElement("button");
+			            	filter.classList.add("mini-container");
+			            	filter.setAttribute('type','button');
+			            	filter.setAttribute("onclick", "removeUserFilter(this, " + userId + " )");
+			            	
+			            	let filterPic = document.createElement("img");
+			            	filterPic.classList.add("mini-pic");
+			            	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+userImage);
+			            	filterPic.setAttribute('alt', 'Author');
+			            	
+			            	let filterText = document.createElement("p");
+			            	filterText.classList.add("mini-text");
+			            	filterText.textContent=userName;
+
+			            	//connecting elements
+			            	authorIdsInFilter.push(userId);
+			            	let container = document.getElementById("AuthorsContainer");
+			            	filter.append(filterPic);
+			            	filter.append(filterText);
+			            	container.append(filter);
+							self.remove();
+						}
+						
+						function removeUserFilter(self, userId){
+							const index = authorIdsInFilter.indexOf(userId);
+							if (index !== -1){
+								authorIdsInFilter.splice(index, 1);
+							}
+							self.remove();
+						}
+					    
+						function handleFilterTypeClick(type, button) {
+							//toggling both the filter panel and the button
+					    	toggleActiveExclusive(document.getElementById(type), '.filter-panel');
+					    	toggleActiveExclusive(button, '.search-filter-col, .filter-btn');
 					    }
 						
-						function toggleActive(element){
-							const isActive = element && element.classList.contains('active');
+						function toggleActiveExclusive(element, classname){
+							//initialization
+							let classInstances = document.querySelectorAll(classname);
+							let wasActive = element && element.classList.contains('active');
+							
+							//removing other activity
+					    	for (let classInstance of classInstances) {
+					    		classInstance.classList.remove('active');
+					    	}
+					    	
+							//toggle
+							if (!wasActive) {
+					            element.classList.add('active');
+					        }
+							
+						}
+						
+						function toggleActiveInclusive(element){ //for elements that are not mutually exclusive in activity
+							let isActive = element && element.classList.contains('active');
 							if(isActive){
 								element.classList.remove('active');
 							}
@@ -290,13 +372,13 @@ import="Search.*"
 					    	while(recipes.next()){
 					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
 					    		if(imagePath == null || imagePath.isEmpty()){
-					    			imagePath = "images/recipe-placeholder.jpg";	
+					    			imagePath = "/images/recipe-placeholder.jpg";	
 					    		}
 					    		%>
 
 					    		<article class="recipe-card">
 					    		    <div class="recipe-card-img">
-					    		        <img src="<%= imagePath %>" alt="Recipe">
+					    		        <img src="${pageContext.request.contextPath}<%=imagePath%>" alt="Recipe">
 
 					    		        <div class="recipe-card-badges">
 					    		            <span class="badge-pill">
@@ -347,7 +429,7 @@ import="Search.*"
                         String reviewSql =
                             "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
                             "v.REVIEW_DESCRIPTION, v.RATING, " +
-                            "v.REVIEW_ACTIVE_TIMESTAMP, u.USER_NAME " +
+                            "v.REVIEW_ACTIVE_TIMESTAMP, u.USER_NAME, u.USER_IMAGE_PATH " +
                             "FROM REVIEWS v " +
                             "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID " +
                             "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
@@ -363,17 +445,21 @@ import="Search.*"
                                 String reviewImage =
                                     reviews.getString("RECIPE_IMAGE_PATH");
                                 if (reviewImage == null || reviewImage.isEmpty()) {
-                                    reviewImage = "images/recipe-placeholder.jpg";
+                                    reviewImage = "/images/recipe-placeholder.jpg";
                                 }
 
                                 String reviewer = reviews.getString("USER_NAME");
                                 if (reviewer == null) {
                                     reviewer = "Anonymous";
                                 }
+                                String reviewerAvatar = reviews.getString("USER_IMAGE_PATH");
+                                if (reviewerAvatar == null || reviewerAvatar.isEmpty()){
+                                	reviewerAvatar = "/images/users/user-placeholder.png";
+                                }
                     %>
                     <article class="review-card">
                         <div class="review-thumb">
-                            <img src="<%= reviewImage %>" alt="Recipe thumbnail" />
+                            <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
                         </div>
                         <div class="review-body">
                             <p class="review-title">
@@ -384,7 +470,7 @@ import="Search.*"
                             </p>
                             <div class="review-footer">
                                 <div class="card-author">
-                                    <span class="card-avatar">👤</span>
+                                    <img class="mini-pic" src="${pageContext.request.contextPath}<%=reviewerAvatar%>" alt="Author"/>
                                     <span><%= reviewer %></span>
                                 </div>
                                 <div class="review-meta">
@@ -439,14 +525,14 @@ import="Search.*"
                             int rank = 1;
                             while (popularRecipes.next()) {
                                 String popularImage =
-                                    popularRecipes.getString("RECIPE_IMAGE_PATH");
+                                	popularRecipes.getString("RECIPE_IMAGE_PATH");
                                 if (popularImage == null || popularImage.isEmpty()) {
-                                    popularImage = "images/recipe-placeholder.jpg";
+                                    popularImage = "/images/recipes/recipe-placeholder.jpg";
                                 }
                     %>
                     <article class="recipe-card">
                         <div class="recipe-card-img">
-                            <img src="<%= popularImage %>" alt="Recipe" />
+                            <img src="${pageContext.request.contextPath}<%=popularImage%>" alt="Recipe" />
                             <div class="rank-badge">#<%= rank %></div>
                             <div class="recipe-card-badges">
                                 <div class="card-badge-group">

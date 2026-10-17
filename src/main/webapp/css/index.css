@@ -299,6 +299,7 @@ nav.main-nav {
 .find-recipes-submit:hover { opacity: 0.9; }
 
 .filter-panel {
+	align-items: center;
 	background-color: #FFF7D9;
 	display: none;
 }
@@ -307,10 +308,81 @@ nav.main-nav {
 	display: block;
 }
 
+.filter-panel-container {
+	max-width: 100%;
+	align-items: left;
+	background-color: #FFF7D9;
+	display: flex;
+	flex-direction: row;
+	padding: 5px;
+	gap: 0.75rem;
+}
+
 .filter-panel-search-autocomplete {
 	background-color: #FFF7D9;
-	display: none;
+	display: flex;
+	flex-direction: row;
+	max-width: 100%;
+	min-width: 100%;
+	background-color: #FFF7D9;
+	display: box;
+	align-items: center;
+	padding: 5px;
+	border-bottom: 1px solid var(--border);
+	gap: 0.75rem;
+	cursor: pointer;
 }
+
+.filter-panel-search-autocomplete:hover {
+	background-color: #FFE18C;
+}
+
+.mini-container {
+	align-items: center;
+	background-color: #FFE18C;
+	max-width: 500px;
+	height: 40px;
+	border-radius: 25px;
+	gap: 0.75rem;
+	padding: 5px;
+	display: flex;
+	flex-direction: row;
+}
+
+.mini-container:hover {
+	opacity: 0.9;
+}
+
+.mini-pic {
+	width: 1.75rem;
+	height: 1.75rem;
+	border-radius: 9999px;
+	background-color: var(--secondary);
+	border: 1px solid var(--border);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.875rem;
+	flex-shrink: 0;	
+	box-shadow: 0 4px 8px rgba (0,0,0,0.1);
+}
+.mini-pic img{
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+.mini-text{
+	gap: 0.5rem;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-webkit-line-clamp: 1;
+	line-clamp: 1;
+}
+
 
 /* Personalized Sections (Your Feed, Reviews for You, Your Most Popular) */
 .sections-container { padding-top: 2rem; display: flex; flex-direction: column; gap: 2.5rem; }
@@ -341,6 +413,7 @@ nav.main-nav {
 /* Shared card pieces (also used by review cards) */
 .card-author { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; font-weight: 500; color: var(--muted-foreground); min-width: 0; }
 .card-avatar { width: 1.75rem; height: 1.75rem; border-radius: 9999px; background-color: var(--secondary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0; }
+.card-avatar img {width: 100%; height: 100%; object-fit: contain;}
 .card-stats { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.75rem; font-size: 0.75rem; color: var(--muted-foreground); }
 .card-bookmark, .card-rating { display: inline-flex; align-items: center; gap: 0.25rem; }
 

@@ -16,19 +16,15 @@ public class UserSearch extends HttpServlet {
 	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
 	
 
-	@Override
+	@Override //Mandatory get method for fetch requests
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		//verification checks
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		Connection dbConnection = DatabaseAccess.getConnection();
-		if(dbConnection==null) {
-			log("No dbConnection available.");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().write("{}");
-			return;
-		}
-		
 		String searchTerm = request.getParameter("searchValue");
+		String excludeString = request.getParameter("excludeString");
+		ObjectMapper mapper = new ObjectMapper();
+		Connection dbConnection = DatabaseAccess.getConnection();
 		if(searchTerm==null || searchTerm.trim().isEmpty()){
 			log("No search term provided.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -36,18 +32,40 @@ public class UserSearch extends HttpServlet {
 			return;
 		}
 		
-		String sql = "SELECT USER_ID, USER_NAME, USER_IMAGE_PATH FROM USERS "
-				+ "WHERE USER_STATUS = 'Active' "
-				+ "AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) LIMIT 3";
+		if(dbConnection==null) {
+			log("No dbConnection available.");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().write("{}");
+			return;
+		}
+		
+
 		try {
-		PreparedStatement statement = dbConnection.prepareStatement(sql);
-    		statement.setString(1, searchTerm + "%");
-    		statement.setString(2, "% "+ searchTerm + "%");
+			//sql connection
+			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT USER_ID, USER_NAME, USER_IMAGE_PATH FROM USERS "
+					+ "WHERE USER_STATUS = 'Active' ");
+			if(excludeList.length>0) {
+				sb.append("AND NOT (USER_ID IN (");
+				for(int i = 0; i < excludeList.length; i++) {
+					sb.append("?, ");
+				}
+				sb.setLength(sb.length()-2);//remove the last comma and space
+				sb.append(")) ");
+			}
+			sb.append("AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) LIMIT 3");
+			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
+			for(int i = 0; i < excludeList.length; i++) {
+				statement.setInt(i+1, excludeList[i]);
+			}
+    		statement.setString(excludeList.length+1, searchTerm + "%");
+    		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
     		ResultSet users = statement.executeQuery();
-    		ObjectMapper mapper = new ObjectMapper();
     		ObjectNode outerNode = mapper.createObjectNode();
     		Integer counter = 0;
     		
+    		// formatting data into json
     		while(users.next()) {
     			Integer userId = users.getInt("user_id");
     			String userName = users.getString("user_name");
@@ -61,13 +79,14 @@ public class UserSearch extends HttpServlet {
     			counter++;
     		}
     		
+    		//writing response
     		PrintWriter pw = response.getWriter();
     		pw.write(mapper.writeValueAsString(outerNode));
     		pw.close();
     		users.close();
     		statement.close();
 		}
-		catch(SQLException ex) {
+		catch(SQLException ex) {//error checking
 			log("User search failed." + ex.getMessage());
 			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 			response.getWriter().write("{}");
