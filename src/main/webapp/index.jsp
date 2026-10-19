@@ -1,6 +1,5 @@
 <%@ page import="java.sql.*"
 import="Search.*"
-import="java.io.File"
 %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -165,149 +164,79 @@ import="java.io.File"
                            	General Filters
                            </span>
                        </div>
+                       
                        <div id="IngredientsPanel" class="filter-panel">
+							<h1 class="filter-panel-name">
+							Ingredients
+	                    	</h1>
+	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
                        	<div style="color: #F5F5DC" class="search-top-bar">
                            <span class="search-icon-fixed">🔍</span>
                            <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
                        	</div>
+                       <div id="IngredientsSearchContainer" class="filter-panel-search-container">
+						</div>
+	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+							Selected ingredients
+	                    	</h2>
+                       	<div id="IngredientsContainer" class="filter-panel-container">
+						</div>
+                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+                    	<h2 id="IngredientsToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
+							Allow up to 0 missing ingredients
+                    	</h2>
+						<div class="slidecontainer">
+						  <input id="IngredientsSlider" type="range" min="0" max="3" value="0" class="slider" id="IngredientsSlider">
+						</div>
                        </div>
-                       <script>
-   						let ingredientInput = document.getElementById('IngredientsSearch');
-   						let ingredientTimeout = null;
-   						ingredientInput.addEventListener('keyup', function (e) {//tracking keyboard input
-   						    clearTimeout(ingredientTimeout);
-   						    ingredientTimeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
-   						        console.log('Input Value:', ingredientInput.value);
-   						    }, 100);
-   						});
-                       </script>
+                       
 						<div id="AppliancesPanel" class="filter-panel">
-                       	<span class="badge-pill">
-                           	Appliances
-                           </span>
-                       </div>
+							<h1 class="filter-panel-name">
+							Appliances
+	                    	</h1>
+	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                       	<div style="color: #F5F5DC" class="search-top-bar">
+	                           <span class="search-icon-fixed">🔍</span>
+	                           <input id="AppliancesSearch" type="text" name="search" placeholder="Search appliances..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+	                       	</div>
+	                       <div id="AppliancesSearchContainer" class="filter-panel-search-container">
+						</div>
+	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+							Selected appliances
+	                    	</h2>
+	                    <div id="AppliancesContainer" class="filter-panel-container">
+						</div>
+	                    <hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+						<h2 id="AppliancesToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
+							Allow up to 0 missing appliances
+	                    </h2>
+						<div class="slidecontainer">
+						  <input id="AppliancesSlider" type="range" min="0" max="3" value="0" class="slider" id="AppliancesSlider">
+						</div>
+	                    </div>
+	                    
 						<div id="AuthorsPanel" class="filter-panel">
-							<div id="AuthorsContainer" class="filter-panel-container">
-							</div>
+							<h1 class="filter-panel-name">
+							Authors
+	                    	</h1>
+	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                       	<div style="color: #F5F5DC" class="search-top-bar">
 	                           <span class="search-icon-fixed">🔍</span>
 	                           <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 	                       	</div>
+	                       <div id="AuthorsSearchContainer" class="filter-panel-search-container">
+						</div>
+	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+							Selected authors
+	                    	</h2>
+	                    <div id="AuthorsContainer" class="filter-panel-container">
+						</div>
                        </div>
 						<script>
-						const authorIdsInFilter = [];
-						let authorInput = document.getElementById('AuthorsSearch');
-						let authorTimeout = null;
-						authorInput.addEventListener('keyup', function (e) {//tracking keyboard input
-						    clearTimeout(authorTimeout);
-						    authorTimeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
-						    	let searchTerm = authorInput.value;
-						    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
-						    		searchUsers(searchTerm);
-						    	}
-						    	else{
-						        	removeFilterPanelSearchResults();
-						    	}
-						    }, 100);
-						});
 						
-						async function searchUsers(searchTerm){
-				    		searchTerm = searchTerm.trim();
-					        let parameters = new URLSearchParams();
-					        parameters.append('searchValue', searchTerm);
-					        parameters.append('excludeString', JSON.stringify(authorIdsInFilter));
-					        
-					        //connect to web server
-							let response = await fetch("/RecipeGenie/Users/Search?" + parameters.toString(), {
-					        	method:'GET',
-					        	headers:{
-					                "Content-Type": "application/json",
-					                "Accept": "application/json",
-					        	},
-					        });
-							
-							if (!response.ok) {
-					        	removeFilterPanelSearchResults(); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
-					        	throw new Error('Network response was not ok');
-					        }
-				        	let users = await response.json(); // Creates a JSON object
-				        	removeFilterPanelSearchResults();
-				        	newFilterPanelUserSearchResults(users);
-						}
-						
-						function removeFilterPanelSearchResults(){ //clear results to make way for an updated version
-							let FPSRs = document.querySelectorAll('.filter-panel-search-autocomplete');
-							for (FPSR of FPSRs){
-								FPSR.remove();
-							}
-						}
-						
-						function newFilterPanelUserSearchResults(users){
-			            	let container = document.getElementById("AuthorsPanel");
-			            	//create a result for each user
-							for (userString of Object.values(users)){
-								//initialization
-				            	let user = JSON.parse(userString);
-				            	let userId = user["userId"];
-				            	let userName = user["userName"];
-				            	let userImage = user["userImage"];
-				            	
-								//the base element
-				            	let newUser = document.createElement("button");
-				            	newUser.classList.add("filter-panel-search-autocomplete");
-				            	newUser.setAttribute('type','button');
-				            	newUser.setAttribute('onclick', "addUserFromSearch(this, " + userId + ", '" + userName + "', '" + userImage + "' )");
-				            	
-				            	//the picture element
-				            	let newUserProfilePic = document.createElement("img");
-				            	newUserProfilePic.classList.add("mini-pic");
-				            	newUserProfilePic.setAttribute('src', "${pageContext.request.contextPath}"+userImage);
-				            	newUserProfilePic.setAttribute('alt', 'Author');
-				            	
-				            	//the text element
-				            	let newUserName = document.createElement("p");
-				            	newUserName.classList.add("mini-text");
-				            	newUserName.textContent=userName;	
-				            	
-				            	//connecting elements
-				            	newUser.append(newUserProfilePic);
-				            	newUser.append(newUserName);
-				            	container.append(newUser);
-				            }
-						}
-						
-						function addUserFromSearch(self, userId, userName, userImage){							
-			            	let filter = document.createElement("button");
-			            	filter.classList.add("mini-container");
-			            	filter.setAttribute('type','button');
-			            	filter.setAttribute("onclick", "removeUserFilter(this, " + userId + " )");
-			            	
-			            	let filterPic = document.createElement("img");
-			            	filterPic.classList.add("mini-pic");
-			            	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+userImage);
-			            	filterPic.setAttribute('alt', 'Author');
-			            	
-			            	let filterText = document.createElement("p");
-			            	filterText.classList.add("mini-text");
-			            	filterText.textContent=userName;
-
-			            	//connecting elements
-			            	authorIdsInFilter.push(userId);
-			            	let container = document.getElementById("AuthorsContainer");
-			            	filter.append(filterPic);
-			            	filter.append(filterText);
-			            	container.append(filter);
-							self.remove();
-						}
-						
-						function removeUserFilter(self, userId){
-							const index = authorIdsInFilter.indexOf(userId);
-							if (index !== -1){
-								authorIdsInFilter.splice(index, 1);
-							}
-							self.remove();
-						}
-					    
 						function handleFilterTypeClick(type, button) {
 							//toggling both the filter panel and the button
 					    	toggleActiveExclusive(document.getElementById(type), '.filter-panel');
@@ -328,7 +257,133 @@ import="java.io.File"
 							if (!wasActive) {
 					            element.classList.add('active');
 					        }
+						}
+						
+						const filterIds = new Map();
+						for (key of ["Ingredient", "Appliance", "Author", "Cuisine", "Dish Type", "Dietary Restriction"]){
+							filterIds.set(key, []);
+						}
+						
+						addSearchListener('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '/RecipeGenie/Ingredients/Search?');
+						addSearchListener('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '/RecipeGenie/Appliances/Search?');
+						addSearchListener('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '/RecipeGenie/Users/Search?');
+						
+						function addSearchListener(searchId, type, panelSearchContainerId, panelContainerId, url){
+							let input = document.getElementById(searchId);
+							let timeout = null;
+							input.addEventListener('keyup', function (e) {//tracking keyboard input
+								    clearTimeout(timeout);
+								    timeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
+								    	let searchTerm = input.value;
+								    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
+								    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url);
+								    	}
+								    	else{
+								        	removeFilterPanelSearchResults();
+								    	}
+								    }, 100);
+							});
+						}
+						
+						async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url){
+				    		searchTerm = searchTerm.trim();
+					        let parameters = new URLSearchParams();
+					        parameters.append('searchValue', searchTerm);
+					        parameters.append('excludeString', JSON.stringify(filterIds.get(type)));
+					        
+					        //connect to web server
+							let response = await fetch(url + parameters.toString(), {
+					        	method:'GET',
+					        	headers:{
+					                "Content-Type": "application/json",
+					                "Accept": "application/json",
+					        	},
+					        });
 							
+							if (!response.ok) {
+					        	removeFilterPanelSearchResults(); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
+					        	throw new Error('Network response was not ok');
+					        }
+				        	let users = await response.json(); // Creates a JSON object
+				        	removeFilterPanelSearchResults();
+				        	newFilterPanelSearchResults(searchId, users, type, panelSearchContainerId, panelContainerId);
+						}
+						
+						function removeFilterPanelSearchResults(){ //clear results to make way for an updated version
+							let FPSRs = document.querySelectorAll('.filter-panel-search-autocomplete');
+							for (FPSR of FPSRs){
+								FPSR.remove();
+							}
+						}
+						
+						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId){
+			            	let panel = document.getElementById(panelSearchContainerId);
+			            	//create a result for each object
+							for (objectString of Object.values(objects)){
+								//initialization
+				            	let object = JSON.parse(objectString);
+				            	let id = object["id"];
+				            	let name = object["name"];
+				            	let image = object["image"];
+				            	
+								//the base element
+				            	let newElement = document.createElement("button");
+				            	newElement.classList.add("filter-panel-search-autocomplete");
+				            	newElement.setAttribute('type','button');
+				            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', '" + image + "', '" + type + "', '" + panelContainerId + "' )");
+				            	
+				            	//the picture element
+				            	let newPic = document.createElement("img");
+				            	newPic.classList.add("mini-pic");
+				            	newPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
+				            	newPic.setAttribute('alt', "'" + type + "'");
+				            	
+				            	//the text element
+				            	let newName = document.createElement("p");
+				            	newName.classList.add("mini-text");
+				            	newName.textContent=name;	
+				            	
+				            	//connecting elements
+				            	newElement.append(newPic);
+				            	newElement.append(newName);
+				            	panel.append(newElement);
+				            }
+						}
+						
+						function addFromSearch(searchId, self, id, name, image, type, panelContainerId){	
+							// the base element
+			            	let filter = document.createElement("button");
+			            	filter.classList.add("mini-container");
+			            	filter.setAttribute('type','button');
+			            	filter.setAttribute("onclick", "removeFilter(this, " + id + ", '" + type + "' )");
+			            	
+			            	// the picture element
+			            	let filterPic = document.createElement("img");
+			            	filterPic.classList.add("mini-pic");
+			            	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
+			            	filterPic.setAttribute('alt', "'"+ type +"'");
+			            	
+			            	//the text element
+			            	let filterText = document.createElement("p");
+			            	filterText.classList.add("mini-text");
+			            	filterText.textContent=name;
+
+			            	//connecting elements
+			            	filterIds.get(type).push(id);
+			            	let panelContainer = document.getElementById(panelContainerId);
+			            	filter.append(filterPic);
+			            	filter.append(filterText);
+			            	panelContainer.append(filter);
+				        	removeFilterPanelSearchResults();
+							document.getElementById(searchId).value="";
+						}
+						
+						function removeFilter(self, id, type){
+							const index = filterIds.get(type).indexOf(id);
+							if (index !== -1){
+								filterIds.get(type).splice(index, 1);
+							}
+							self.remove();
 						}
 						
 						function toggleActiveInclusive(element){ //for elements that are not mutually exclusive in activity
@@ -339,6 +394,32 @@ import="java.io.File"
 							else{
 								element.classList.add('active');
 							}
+						}
+						
+						const tolerances = new Map();
+						for (key of ["Ingredients", "Appliances"]){
+							tolerances.set(key, 0);
+						}
+						
+						addSliderListener("IngredientsSlider", "IngredientsToleranceDisplay", "Ingredients")
+						addSliderListener("AppliancesSlider", "AppliancesToleranceDisplay", "Applianes")
+						
+						function addSliderListener(sliderId, toleranceDisplayId, name){
+							let slider = document.getElementById(sliderId);
+							let toleranceDisplay = document.getElementById(toleranceDisplayId);
+							updateSliderBackground(slider);
+							slider.oninput = function() {
+								toleranceDisplay.textContent="Allow up to "+ this.value + " missing " + name.toLowerCase();
+								tolerances[name]=this.value;
+								updateSliderBackground(sliderId);
+							} 
+						}
+						
+						function updateSliderBackground(slider){
+							const value = slider.value;
+							  const max = slider.max || 100;
+							  const percentage = (value / max) * 100;
+							  slider.style.background = `linear-gradient(to right, #04AA6D 0%, #04AA6D ${percentage}%, #d3d3d3 ${percentage}%, #d3d3d3 100%)`;
 						}
 						</script>
 

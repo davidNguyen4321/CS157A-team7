@@ -72,9 +72,9 @@ public class UserSearch extends HttpServlet {
     			String userImage = users.getString("user_image_path");
     			ObjectNode innerNode = mapper.createObjectNode();
     			
-    			innerNode.put("userId",userId);
-    			innerNode.put("userName",userName);
-    			innerNode.put("userImage",userImage);
+    			innerNode.put("id",userId);
+    			innerNode.put("name",userName);
+    			innerNode.put("image",userImage);
     			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
     			counter++;
     		}
@@ -87,7 +87,7 @@ public class UserSearch extends HttpServlet {
     		statement.close();
 		}
 		catch(SQLException ex) {//error checking
-			log("User search failed." + ex.getMessage());
+			log("User search failed: " + ex.getMessage());
 			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 			response.getWriter().write("{}");
 		}

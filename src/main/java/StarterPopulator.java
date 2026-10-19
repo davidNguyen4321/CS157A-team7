@@ -201,17 +201,17 @@ public class StarterPopulator {
 					),
 					(
 						'Food Processor', 
-						'images/appliances/food_processor.jpg', 
+						'/images/appliances/food_processor.jpg', 
 						'Used for chopping, slicing, and dicing'
 					),
 					(
 						'Mixer', 
-						'images/appliances/mixer.jpg', 
+						'/images/appliances/mixer.jpg', 
 						'Heavy duty mixer for dough and batter'
 					),
 					(
 						'Grill', 
-						'images/appliances/grill.jpg', 
+						'/images/appliances/grill.jpg', 
 						'Uses burning charcoal to grill food over high, smoky heat'
 					);
 				""",
