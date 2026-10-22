@@ -143,6 +143,7 @@ import="Search.*"
                                    <div class="filter-sub">What do you have?</div>
                                </div>
                            </button>
+                           
                            <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterTypeClick('AppliancesPanel', this)">
                                <div class="filter-icon-box">🍳</div>
                                <div>
@@ -150,6 +151,7 @@ import="Search.*"
                                    <div class="filter-sub">What can you use?</div>
                                </div>
                            </button>
+                           
                            <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterTypeClick('AuthorsPanel', this)">
                                <div class="filter-icon-box">👤</div>
                                <div>
@@ -159,30 +161,109 @@ import="Search.*"
                            </button>
                            <button type="submit" class="find-recipes-submit">Find Recipes</button>
                        </div>
+                       
 						<div id="GeneralPanel" class="filter-panel">
-                       	<span class="badge-pill">
-                           	General Filters
-                           </span>
+							<div class="filter-panel-container-no-grid" style="align-items: center;">
+								<h1 class="filter-panel-name">
+								General Filters
+		                    	</h1>
+		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
+		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date')">
+		                    		<p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Publication Date
+		                    	</button>
+		                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks')">
+									<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Bookmarks
+								</button>
+		                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews')">
+		                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Reviews
+		                    	</button>
+		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Ratings')">
+		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Ratings
+		                    	</button>
+	                    	</div>
+	                    	<div class="filter-panel-container-no-grid">
+	                    		<div class="filter-panel-mini" style="width:1rem;">
+				                    <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+										Dish Type
+			                    	</h2>
+			                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+			                    	<div style="color: #F5F5DC" class="search-top-bar">
+			                           <span class="search-icon-fixed">🔍</span>
+			                           <input id="DishTypesSearch" type="text" name="search" placeholder="Search appliances..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+			                       	</div>
+			                       	<div id="DishTypesSearchContainer" class="filter-panel-search-container">
+									</div>
+				                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+				                    	<h2 class="mini-text" style="color:#1F1800; font-size: 0.75rem;">
+										Selected Dish Types
+				                    	</h2>
+			                       	<div id="DishTypesContainer" class="filter-panel-container">
+									</div>
+	                    		</div>
+	                    		<div class="vrounded-divider" style="border-color:#1F1800; height:100%; opacity:0.6;"> </div>
+	                    		<div class="filter-panel-mini" style="width:1rem;">
+				                    <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+										Cuisine
+			                    	</h2>
+			                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+			                    	<div style="color: #F5F5DC" class="search-top-bar">
+			                           <span class="search-icon-fixed">🔍</span>
+			                           <input id="CuisinesSearch" type="text" name="search" placeholder="Search appliances..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+			                       	</div>
+			                       	<div id="CuisinesSearchContainer" class="filter-panel-search-container">
+									</div>
+				                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+				                    	<h2 class="mini-text" style="color:#1F1800; font-size: 0.75rem;">
+										Selected Cuisines
+				                    	</h2>
+			                       	<div id="CuisinesContainer" class="filter-panel-container">
+									</div>
+	                    		</div>
+	                    	</div>
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<div class="filter-panel-container-no-grid">
+	                    		<div class="filter-panel-mini"  style="width:1rem;">
+	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+										Dietary Restrictions
+			                    	</h2>
+			                    	<div id="DietaryRestrictionsContainer" class="filter-panel-container">
+									</div>
+	                    		</div>
+	                    		<div class="vrounded-divider" style="border-color:#1F1800; height:100%; opacity:0.6;"> </div>
+	                    		<div class="filter-panel-mini"  style="width:1rem;">
+	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+										Courses
+			                    	</h2>
+			                    	<div id="CoursesContainer" class="filter-panel-container">
+									</div>
+	                    		</div>
+	                    		<div class="vrounded-divider" style="border-color:#1F1800; height:100%; opacity:0.6;"> </div>
+	                    		<div class="filter-panel-mini"  style="width:1rem;">
+	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+										Ranges
+			                    	</h2>
+	                    		</div>
+	                    	</div>
                        </div>
                        
                        <div id="IngredientsPanel" class="filter-panel">
 							<h1 class="filter-panel-name">
 							Ingredients
 	                    	</h1>
-	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
                        	<div style="color: #F5F5DC" class="search-top-bar">
                            <span class="search-icon-fixed">🔍</span>
                            <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
                        	</div>
                        <div id="IngredientsSearchContainer" class="filter-panel-search-container">
 						</div>
-	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected ingredients
 	                    	</h2>
                        	<div id="IngredientsContainer" class="filter-panel-container">
 						</div>
-                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
                     	<h2 id="IngredientsToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Allow up to 0 missing ingredients
                     	</h2>
@@ -195,20 +276,20 @@ import="Search.*"
 							<h1 class="filter-panel-name">
 							Appliances
 	                    	</h1>
-	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                       	<div style="color: #F5F5DC" class="search-top-bar">
 	                           <span class="search-icon-fixed">🔍</span>
 	                           <input id="AppliancesSearch" type="text" name="search" placeholder="Search appliances..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 	                       	</div>
 	                       <div id="AppliancesSearchContainer" class="filter-panel-search-container">
 						</div>
-	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected appliances
 	                    	</h2>
 	                    <div id="AppliancesContainer" class="filter-panel-container">
 						</div>
-	                    <hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    <hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 						<h2 id="AppliancesToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Allow up to 0 missing appliances
 	                    </h2>
@@ -221,14 +302,14 @@ import="Search.*"
 							<h1 class="filter-panel-name">
 							Authors
 	                    	</h1>
-	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                       	<div style="color: #F5F5DC" class="search-top-bar">
 	                           <span class="search-icon-fixed">🔍</span>
 	                           <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 	                       	</div>
 	                       <div id="AuthorsSearchContainer" class="filter-panel-search-container">
 						</div>
-	                    	<hr class="rounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected authors
 	                    	</h2>
@@ -259,16 +340,75 @@ import="Search.*"
 					        }
 						}
 						
+						const sortOrder = [];
+						const sortOptions = new Map(); // use an array that is just the sort option AND a map that contains whether it ascends or not
+						for (key of ["Publication Date", "Bookmarks", "Reviews", "Ratings"]){
+							elementBaseId = key.replace(" ", "");
+							let object = {
+									sort: "ascending",
+									sortTextId: elementBaseId+"SortText"
+								}
+							sortOptions.set(key, object); //True or false refers to ascending (True) or descending (False)
+						}
+						sortSelect(document.getElementById("PublicationDateSortOption"), "PublicationDateSortText", "Publication Date")
+						
+						function sortSelect(self, textElement, type){
+							if (self.classList.contains('descending')){ // State 1: descending --> ascending
+								self.classList.remove('descending');
+								self.classList.add('ascending');
+								sortOptions.get(type).sort='ascending';
+								updateSortSelectIndex(type);
+							}
+							else if (self.classList.contains('ascending')){ // State 2: ascending --> not sorted
+								self.classList.remove('ascending');
+								sortOptions.get(type).sort=null;
+								let index = sortOrder.indexOf(type);
+								if (index !== -1){
+									sortOrder.splice(index, 1);
+								}
+							}
+							else{ // State 3: not sorted --> descending
+								self.classList.add('descending');
+								sortOptions.get(type).sort='descending';
+								updateSortSelectIndex(type);
+							}
+							updateSortTextElements();
+						}
+						
+						function updateSortSelectIndex(type){
+							let index = sortOrder.indexOf(type);
+							if (index !== -1){
+								sortOrder.splice(index, 1);
+							}
+							sortOrder.push(type);
+							updateSortTextElements();
+						}
+						
+						function updateSortTextElements(){
+							for (key of sortOptions.keys()){
+								let element = document.getElementById(sortOptions.get(key).sortTextId);
+								sortPosition = sortOrder.indexOf(key)+1;
+								if(sortPosition == 0){
+									element.textContent = key
+									continue;
+								}
+								element.textContent = sortPosition+ " " + key  +": " + sortOptions.get(key).sort;
+								element.innerHTML = element.innerHTML.replace(sortPosition, "<span style='color: #1E4E3B;'>"+sortPosition+"</span>");
+							}
+						}
+						
 						const filterIds = new Map();
 						for (key of ["Ingredient", "Appliance", "Author", "Cuisine", "Dish Type", "Dietary Restriction"]){
 							filterIds.set(key, []);
 						}
 						
-						addSearchListener('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '/RecipeGenie/Ingredients/Search?');
-						addSearchListener('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '/RecipeGenie/Appliances/Search?');
-						addSearchListener('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '/RecipeGenie/Users/Search?');
+						addSearchListenerWithImage('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '/RecipeGenie/DishTypes/Search?', false);
+						addSearchListenerWithImage('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '/RecipeGenie/Cuisines/Search?', false);
+						addSearchListenerWithImage('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '/RecipeGenie/Ingredients/Search?', true);
+						addSearchListenerWithImage('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '/RecipeGenie/Appliances/Search?', true);
+						addSearchListenerWithImage('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '/RecipeGenie/Users/Search?', true);
 						
-						function addSearchListener(searchId, type, panelSearchContainerId, panelContainerId, url){
+						function addSearchListenerWithImage(searchId, type, panelSearchContainerId, panelContainerId, url, imageBoolean){
 							let input = document.getElementById(searchId);
 							let timeout = null;
 							input.addEventListener('keyup', function (e) {//tracking keyboard input
@@ -276,19 +416,20 @@ import="Search.*"
 								    timeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
 								    	let searchTerm = input.value;
 								    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
-								    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url);
+								    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url, imageBoolean);
 								    	}
 								    	else{
-								        	removeFilterPanelSearchResults();
+								        	removeFilterPanelSearchResults(panelSearchContainerId);
 								    	}
 								    }, 100);
 							});
 						}
 						
-						async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url){
+						async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url, imageBoolean){
 				    		searchTerm = searchTerm.trim();
 					        let parameters = new URLSearchParams();
-					        parameters.append('searchValue', searchTerm);
+					        parameters.append('searchTerm', searchTerm);
+					        parameters.append('imageBoolean', imageBoolean);
 					        parameters.append('excludeString', JSON.stringify(filterIds.get(type)));
 					        
 					        //connect to web server
@@ -301,22 +442,23 @@ import="Search.*"
 					        });
 							
 							if (!response.ok) {
-					        	removeFilterPanelSearchResults(); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
+					        	removeFilterPanelSearchResults(panelSearchContainerId); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
 					        	throw new Error('Network response was not ok');
 					        }
-				        	let users = await response.json(); // Creates a JSON object
-				        	removeFilterPanelSearchResults();
-				        	newFilterPanelSearchResults(searchId, users, type, panelSearchContainerId, panelContainerId);
+				        	let objects = await response.json(); // Creates a JSON object
+				        	removeFilterPanelSearchResults(panelSearchContainerId);
+				        	newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId, imageBoolean);
 						}
 						
-						function removeFilterPanelSearchResults(){ //clear results to make way for an updated version
-							let FPSRs = document.querySelectorAll('.filter-panel-search-autocomplete');
+						function removeFilterPanelSearchResults(panelSearchContainerId){ //clear results to make way for an updated version
+			            	let panel = document.getElementById(panelSearchContainerId);
+							let FPSRs = panel.querySelectorAll('.filter-panel-search-autocomplete');
 							for (FPSR of FPSRs){
 								FPSR.remove();
 							}
 						}
 						
-						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId){
+						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId, imageBoolean){
 			            	let panel = document.getElementById(panelSearchContainerId);
 			            	//create a result for each object
 							for (objectString of Object.values(objects)){
@@ -324,61 +466,68 @@ import="Search.*"
 				            	let object = JSON.parse(objectString);
 				            	let id = object["id"];
 				            	let name = object["name"];
-				            	let image = object["image"];
 				            	
 								//the base element
 				            	let newElement = document.createElement("button");
 				            	newElement.classList.add("filter-panel-search-autocomplete");
 				            	newElement.setAttribute('type','button');
-				            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', '" + image + "', '" + type + "', '" + panelContainerId + "' )");
 				            	
-				            	//the picture element
-				            	let newPic = document.createElement("img");
-				            	newPic.classList.add("mini-pic");
-				            	newPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
-				            	newPic.setAttribute('alt', "'" + type + "'");
+				            					            	
+				            	if(imageBoolean){
+					            	image = object["image"];
+					            	let newPic = document.createElement("img");
+					            	newPic.classList.add("mini-pic");
+					            	newPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
+					            	newPic.setAttribute('alt', "'" + type + "'");
+					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', '" + image + "', '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"')");
+					            	newElement.append(newPic);
+				            	}
+				            	else{
+					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + false + ", '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"')");
+				            	}
 				            	
 				            	//the text element
 				            	let newName = document.createElement("p");
 				            	newName.classList.add("mini-text");
-				            	newName.textContent=name;	
-				            	
-				            	//connecting elements
-				            	newElement.append(newPic);
+				            	newName.textContent=name;
 				            	newElement.append(newName);
+				            	
+				            	//connecting element
 				            	panel.append(newElement);
 				            }
 						}
 						
-						function addFromSearch(searchId, self, id, name, image, type, panelContainerId){	
+						function addFromSearch(searchId, self, id, name, image, type, panelContainerId, panelSearchContainerId){	
 							// the base element
 			            	let filter = document.createElement("button");
 			            	filter.classList.add("mini-container");
 			            	filter.setAttribute('type','button');
-			            	filter.setAttribute("onclick", "removeFilter(this, " + id + ", '" + type + "' )");
-			            	
-			            	// the picture element
-			            	let filterPic = document.createElement("img");
-			            	filterPic.classList.add("mini-pic");
-			            	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
-			            	filterPic.setAttribute('alt', "'"+ type +"'");
+			            	filter.setAttribute("onclick", "removeFilterAndSelf(this, " + id + ", '" + type + "' )");
+
+			            	if(image){
+				            	// the picture element
+				            	let filterPic = document.createElement("img");
+				            	filterPic.classList.add("mini-pic");
+				            	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
+				            	filterPic.setAttribute('alt', "'"+ type +"'");
+				            	filter.append(filterPic);
+			            	}
 			            	
 			            	//the text element
 			            	let filterText = document.createElement("p");
 			            	filterText.classList.add("mini-text");
 			            	filterText.textContent=name;
-
-			            	//connecting elements
+			            	filter.append(filterText);
+			            	
+			            	//connecting element
 			            	filterIds.get(type).push(id);
 			            	let panelContainer = document.getElementById(panelContainerId);
-			            	filter.append(filterPic);
-			            	filter.append(filterText);
 			            	panelContainer.append(filter);
-				        	removeFilterPanelSearchResults();
+				        	removeFilterPanelSearchResults(panelSearchContainerId);
 							document.getElementById(searchId).value="";
 						}
 						
-						function removeFilter(self, id, type){
+						function removeFilterAndSelf(self, id, type){
 							const index = filterIds.get(type).indexOf(id);
 							if (index !== -1){
 								filterIds.get(type).splice(index, 1);

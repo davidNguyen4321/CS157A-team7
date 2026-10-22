@@ -51,20 +51,37 @@ body {
 }
 
 
-hr.dashed-divider {
+hr.hdashed-divider {
   border-top: 3px dashed #bbb;
 }
 
-hr.dotted-divider {
+hr.hdotted-divider {
   border-top: 3px dotted #bbb;
 }
 
-hr.solid-divider {
+hr.hsolid-divider {
   border-top: 3px solid #bbb;
 }
 
-hr.rounded-divider {
+hr.hrounded-divider {
   border-top: 3px solid #bbb;
+  border-radius: 3px;
+} 
+
+.vdashed-divider {
+  border-left: 3px dashed #bbb;
+}
+
+.vdotted-divider {
+  border-left: 3px dotted #bbb;
+}
+
+.vsolid-divider {
+  border-left: 3px solid #bbb;
+}
+
+.vrounded-divider {
+  border-left: 3px solid #bbb;
   border-radius: 3px;
 } 
 
@@ -329,14 +346,46 @@ nav.main-nav {
 	display: block;
 }
 
+.filter-panel-mini {
+	align-items: center;
+	background-color: #FFF7D9;
+	display: box;
+	width: 100%;
+	align-items: center;
+	padding: 10px;
+	flex: 1;
+}
+
 .filter-panel-name {
 	color: #1F1800;
 	font-family: Verdana, Geneva, Arial, sans-serif;
 	font-size: 1.25rem;
 	font-weight: 20;
 	line-height: 1.2;
-	margin: 0; }
+	margin: 0;
+}
 
+.filter-panel-sort-option {
+	border: 1px solid var(--border);
+	max-width: 100%;
+	width: fit-content;
+	height: 50px;
+	background-color: #FFE18C;
+	padding: 3px;
+	display: box;
+	cursor: pointer;
+	border-radius: 25px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.filter-panel-sort-option.ascending {
+	background-color: #FF5C17;
+}
+
+.filter-panel-sort-option.descending {
+	background-color: #FFF312;
+}
 
 .filter-panel-search-container {
 	max-width: 100%;
@@ -374,9 +423,19 @@ nav.main-nav {
 	background-color: #FFE18C;
 }
 
-.filter-panel-container {
+.filter-panel-container-no-grid {
 	max-width: 100%;
 	align-items: left;
+	flex-direction: row;
+	background-color: #FFF7D9;
+	display: flex;
+	padding: 5px;
+	gap: 0.75rem;
+}
+
+.filter-panel-container {
+	max-width: 100%;
+	align-items: center;
 	background-color: #FFF7D9;
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(150px, 1.5fr));
@@ -395,7 +454,7 @@ nav.main-nav {
 .mini-container {
 	align-items: center;
 	background-color: #FFE18C;
-	max-width: 500px;
+	max-width: 100%;
 	height: 40px;
 	border-radius: 25px;
 	gap: 0.75rem;
@@ -421,6 +480,7 @@ nav.main-nav {
 	flex-shrink: 0;	
 	box-shadow: 0 4px 8px rgba (0,0,0,0.1);
 }
+
 .mini-pic img{
 	width: 100%;
 	height: 100%;
@@ -469,7 +529,7 @@ nav.main-nav {
   -webkit-appearance: none;
   background: #FFBB00;
   border-radius: 50%;
-  box-shadow: -50%-10 0 0 50% #FFD966;
+  box-shadow: -50%-10px 0 0 50% #FFD966;
   cursor: pointer;
   height: 20px;
   width: 20px;
@@ -479,7 +539,7 @@ nav.main-nav {
 .slider::-moz-range-thumb {
   background: #FFBB00;
   border-radius: 50%;
-  box-shadow: -250%-10 0 0 250% #FFD966;
+  box-shadow: -250%-10px 0 0 250% #FFD966;
   cursor: pointer;
   height: 20px;
   width: 20px;

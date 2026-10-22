@@ -21,8 +21,16 @@ public class IngredientSearch extends HttpServlet {
 		//verification checks
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		String searchTerm = request.getParameter("searchValue");
+		String searchTerm = request.getParameter("searchTerm");
 		String excludeString = request.getParameter("excludeString");
+		Boolean imageBoolean;
+		if(request.getParameter("imageBoolean").equals("true")) {
+			imageBoolean=true;
+		}
+		else {
+			imageBoolean=false;
+		}
+		
 		ObjectMapper mapper = new ObjectMapper();
 		Connection dbConnection = DatabaseAccess.getConnection();
 		if(searchTerm==null || searchTerm.trim().isEmpty()){
@@ -44,7 +52,11 @@ public class IngredientSearch extends HttpServlet {
 			//sql connection
 			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
 			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT INGREDIENT_ID, INGREDIENT_NAME, INGREDIENT_IMAGE_PATH FROM INGREDIENTS WHERE ");
+			sb.append("SELECT INGREDIENT_ID, INGREDIENT_NAME");
+			if(imageBoolean) {
+				sb.append(", INGREDIENT_IMAGE_PATH");
+			}
+			sb.append(" FROM INGREDIENTS WHERE ");
 			if(excludeList.length>0) {
 				sb.append("NOT (INGREDIENT_ID IN (");
 				for(int i = 0; i < excludeList.length; i++) {
@@ -53,7 +65,7 @@ public class IngredientSearch extends HttpServlet {
 				sb.setLength(sb.length()-2);//remove the last comma and space
 				sb.append(")) AND");
 			}
-			sb.append(" (INGREDIENT_NAME LIKE ? OR INGREDIENT_NAME LIKE ?) LIMIT 3");
+			sb.append(" (INGREDIENT_NAME LIKE ? OR INGREDIENT_NAME LIKE ?) LIMIT 5");
 			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
@@ -68,12 +80,14 @@ public class IngredientSearch extends HttpServlet {
     		while(ingredients.next()) {
     			Integer ingredientId = ingredients.getInt("ingredient_id");
     			String ingredientName = ingredients.getString("ingredient_name");
-    			String ingredientImage = ingredients.getString("ingredient_image_path");
     			ObjectNode innerNode = mapper.createObjectNode();
     			
     			innerNode.put("id",ingredientId);
     			innerNode.put("name",ingredientName);
-    			innerNode.put("image",ingredientImage);
+    			if(imageBoolean) {
+        			String ingredientImage = ingredients.getString("ingredient_image_path");
+        			innerNode.put("image",ingredientImage);
+    			}
     			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
     			counter++;
     		}

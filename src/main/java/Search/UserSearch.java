@@ -21,8 +21,16 @@ public class UserSearch extends HttpServlet {
 		//verification checks
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		String searchTerm = request.getParameter("searchValue");
+		String searchTerm = request.getParameter("searchTerm");
 		String excludeString = request.getParameter("excludeString");
+		Boolean imageBoolean;
+		if(request.getParameter("imageBoolean").equals("true")) {
+			imageBoolean=true;
+		}
+		else {
+			imageBoolean=false;
+		}
+		
 		ObjectMapper mapper = new ObjectMapper();
 		Connection dbConnection = DatabaseAccess.getConnection();
 		if(searchTerm==null || searchTerm.trim().isEmpty()){
@@ -44,8 +52,11 @@ public class UserSearch extends HttpServlet {
 			//sql connection
 			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
 			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT USER_ID, USER_NAME, USER_IMAGE_PATH FROM USERS "
-					+ "WHERE USER_STATUS = 'Active' ");
+			sb.append("SELECT USER_ID, USER_NAME");
+			if(imageBoolean) {
+				sb.append(", USER_IMAGE_PATH");
+			}
+			sb.append(" FROM USERS WHERE USER_STATUS = 'Active' ");
 			if(excludeList.length>0) {
 				sb.append("AND NOT (USER_ID IN (");
 				for(int i = 0; i < excludeList.length; i++) {
@@ -54,7 +65,7 @@ public class UserSearch extends HttpServlet {
 				sb.setLength(sb.length()-2);//remove the last comma and space
 				sb.append(")) ");
 			}
-			sb.append("AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) LIMIT 3");
+			sb.append("AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) LIMIT 5");
 			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
@@ -66,15 +77,18 @@ public class UserSearch extends HttpServlet {
     		Integer counter = 0;
     		
     		// formatting data into json
+
     		while(users.next()) {
     			Integer userId = users.getInt("user_id");
     			String userName = users.getString("user_name");
-    			String userImage = users.getString("user_image_path");
     			ObjectNode innerNode = mapper.createObjectNode();
     			
     			innerNode.put("id",userId);
     			innerNode.put("name",userName);
-    			innerNode.put("image",userImage);
+        		if(imageBoolean) {
+        			String userImage = users.getString("user_image_path");
+        			innerNode.put("image",userImage);
+        		}
     			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
     			counter++;
     		}

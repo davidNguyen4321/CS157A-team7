@@ -21,8 +21,15 @@ public class ApplianceSearch extends HttpServlet {
 		//verification checks
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		String searchTerm = request.getParameter("searchValue");
+		String searchTerm = request.getParameter("searchTerm");
 		String excludeString = request.getParameter("excludeString");
+		Boolean imageBoolean;
+		if(request.getParameter("imageBoolean").equals("true")) {
+			imageBoolean=true;
+		}
+		else {
+			imageBoolean=false;
+		}
 		ObjectMapper mapper = new ObjectMapper();
 		Connection dbConnection = DatabaseAccess.getConnection();
 		if(searchTerm==null || searchTerm.trim().isEmpty()){
@@ -44,7 +51,11 @@ public class ApplianceSearch extends HttpServlet {
 			//sql connection
 			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
 			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT APPLIANCE_ID, APPLIANCE_NAME, APPLIANCE_IMAGE_PATH FROM APPLIANCES WHERE ");
+			sb.append("SELECT APPLIANCE_ID, APPLIANCE_NAME");
+			if(imageBoolean) {
+				sb.append(", APPLIANCE_IMAGE_PATH");
+			}
+			sb.append(" FROM APPLIANCES WHERE ");
 			if(excludeList.length>0) {
 				sb.append("NOT (APPLIANCE_ID IN (");
 				for(int i = 0; i < excludeList.length; i++) {
@@ -53,7 +64,7 @@ public class ApplianceSearch extends HttpServlet {
 				sb.setLength(sb.length()-2);//remove the last comma and space
 				sb.append(")) AND");
 			}
-			sb.append(" (APPLIANCE_NAME LIKE ? OR APPLIANCE_NAME LIKE ?) LIMIT 3");
+			sb.append(" (APPLIANCE_NAME LIKE ? OR APPLIANCE_NAME LIKE ?) LIMIT 5");
 			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
@@ -68,12 +79,14 @@ public class ApplianceSearch extends HttpServlet {
     		while(appliances.next()) {
     			Integer applianceId = appliances.getInt("appliance_id");
     			String applianceName = appliances.getString("appliance_name");
-    			String applianceImage = appliances.getString("appliance_image_path");
     			ObjectNode innerNode = mapper.createObjectNode();
     			
     			innerNode.put("id",applianceId);
     			innerNode.put("name",applianceName);
-    			innerNode.put("image",applianceImage);
+    			if(imageBoolean) {
+        			String applianceImage = appliances.getString("appliance_image_path");
+        			innerNode.put("image",applianceImage);
+    			}
     			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
     			counter++;
     		}
