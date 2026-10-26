@@ -40,49 +40,49 @@ public class CuisineSearch extends HttpServlet {
 			return;
 		}
 		
-
-		try {
-			//sql connection
-			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
-			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT CUISINE_ID, CUISINE_NAME FROM CUISINES WHERE ");
-			if(excludeList.length>0) {
-				sb.append("NOT (CUISINE_ID IN (");
-				for(int i = 0; i < excludeList.length; i++) {
-					sb.append("?, ");
-				}
-				sb.setLength(sb.length()-2);//remove the last comma and space
-				sb.append(")) AND");
+		// string building
+		Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT CUISINE_ID, CUISINE_NAME FROM CUISINES WHERE ");
+		if(excludeList.length>0) {
+			sb.append("NOT (CUISINE_ID IN (");
+			for(int i = 0; i < excludeList.length; i++) {
+				sb.append("?, ");
 			}
-			sb.append(" (CUISINE_NAME LIKE ? OR CUISINE_NAME LIKE ?) LIMIT 5");
-			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
+			sb.setLength(sb.length()-2);//remove the last comma and space
+			sb.append(")) AND");
+		}
+		sb.append(" (CUISINE_NAME LIKE ? OR CUISINE_NAME LIKE ?) ORDER BY CUISINE_NAME LIMIT 5");
+		
+		//connection
+		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
 			}
     		statement.setString(excludeList.length+1, searchTerm + "%");
     		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
-    		ResultSet ingredients = statement.executeQuery();
-    		ObjectNode outerNode = mapper.createObjectNode();
-    		Integer counter = 0;
-    		
-    		// formatting data into json
-    		while(ingredients.next()) {
-    			Integer ingredientId = ingredients.getInt("cuisine_id");
-    			String ingredientName = ingredients.getString("cuisine_name");
-    			ObjectNode innerNode = mapper.createObjectNode();
-    			
-    			innerNode.put("id",ingredientId);
-    			innerNode.put("name",ingredientName);
-    			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
-    			counter++;
+    		try(
+    	    ResultSet ingredients = statement.executeQuery();
+    	    PrintWriter pw = response.getWriter();
+    		){
+        		ObjectNode outerNode = mapper.createObjectNode();
+        		Integer counter = 0;
+        		
+        		// formatting data into json
+        		while(ingredients.next()) {
+        			Integer ingredientId = ingredients.getInt("cuisine_id");
+        			String ingredientName = ingredients.getString("cuisine_name");
+        			ObjectNode innerNode = mapper.createObjectNode();
+        			
+        			innerNode.put("id",ingredientId);
+        			innerNode.put("name",ingredientName);
+        			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
+        			counter++;
+        		}
+        		
+        		//writing response
+        		pw.write(mapper.writeValueAsString(outerNode));
     		}
-    		
-    		//writing response
-    		PrintWriter pw = response.getWriter();
-    		pw.write(mapper.writeValueAsString(outerNode));
-    		pw.close();
-    		ingredients.close();
-    		statement.close();
 		}
 		catch(SQLException ex) {//error checking
 			log("Cuisine search failed: " + ex.getMessage());

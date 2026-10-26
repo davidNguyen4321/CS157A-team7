@@ -127,16 +127,16 @@ import="Search.*"
                     <form action="index.jsp" method="GET" class="search-form" style="width: 100%;">
                         <div class="search-top-bar">
                             <span class="search-icon-fixed">🔍</span>
-                            <input type="text" name="search" placeholder="Search recipe name..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+                            <input id="RecipesSearch" type="text" name="search" placeholder="Search recipe..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 
                             <!-- Filters button next to the search bar -->
-                            <button type="button" class="filter-btn" onclick="handleFilterTypeClick('GeneralPanel', this)">
+                            <button type="button" class="filter-btn" onclick="handleFilterTypeClick('GeneralPanel', this);">
                                 ⚙️ Filters
                             </button>
                         </div>
 
                         <div class="search-bottom-row">
-                           <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterTypeClick('IngredientsPanel', this)">
+                           <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterTypeClick('IngredientsPanel', this);">
                                <div class="filter-icon-box">🥚</div>
                                <div>
                                    <div class="filter-label">Ingredients</div>
@@ -144,7 +144,7 @@ import="Search.*"
                                </div>
                            </button>
                            
-                           <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterTypeClick('AppliancesPanel', this)">
+                           <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterTypeClick('AppliancesPanel', this);">
                                <div class="filter-icon-box">🍳</div>
                                <div>
                                    <div class="filter-label">Appliances</div>
@@ -152,14 +152,14 @@ import="Search.*"
                                </div>
                            </button>
                            
-                           <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterTypeClick('AuthorsPanel', this)">
+                           <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterTypeClick('AuthorsPanel', this);">
                                <div class="filter-icon-box">👤</div>
                                <div>
                                    <div class="filter-label">Authors</div>
                                    <div class="filter-sub">Who to learn from?</div>
                                </div>
                            </button>
-                           <button type="submit" class="find-recipes-submit">Find Recipes</button>
+                           <button type="button" class="find-recipes-submit" onclick="searchRecipes('RecipesSearch');">Find Recipes</button>
                        </div>
                        
 						<div id="GeneralPanel" class="filter-panel">
@@ -168,28 +168,28 @@ import="Search.*"
 								General Filters
 		                    	</h1>
 		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
-		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date')">
+		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date');">
 		                    		<p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Publication Date
 		                    	</button>
-		                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks')">
+		                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks');">
 									<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Bookmarks
 								</button>
-		                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews')">
+		                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews');">
 		                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Reviews
 		                    	</button>
-		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Ratings')">
+		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Ratings');">
 		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Ratings
 		                    	</button>
 	                    	</div>
 	                    	<div class="filter-panel-container-no-grid">
 	                    		<div class="filter-panel-mini" style="width:1rem;">
 				                    <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
-										Dish Type
+										Dish Types
 			                    	</h2>
 			                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 			                    	<div style="color: #F5F5DC" class="search-top-bar">
 			                           <span class="search-icon-fixed">🔍</span>
-			                           <input id="DishTypesSearch" type="text" name="search" placeholder="Search appliances..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+			                           <input id="DishTypesSearch" type="text" name="search" placeholder="Search dish types..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 			                       	</div>
 			                       	<div id="DishTypesSearchContainer" class="filter-panel-search-container">
 									</div>
@@ -200,15 +200,14 @@ import="Search.*"
 			                       	<div id="DishTypesContainer" class="filter-panel-container">
 									</div>
 	                    		</div>
-	                    		<div class="vrounded-divider" style="border-color:#1F1800; height:100%; opacity:0.6;"> </div>
 	                    		<div class="filter-panel-mini" style="width:1rem;">
 				                    <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
-										Cuisine
+										Cuisines
 			                    	</h2>
 			                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 			                    	<div style="color: #F5F5DC" class="search-top-bar">
 			                           <span class="search-icon-fixed">🔍</span>
-			                           <input id="CuisinesSearch" type="text" name="search" placeholder="Search appliances..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+			                           <input id="CuisinesSearch" type="text" name="search" placeholder="Search cuisines..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
 			                       	</div>
 			                       	<div id="CuisinesSearchContainer" class="filter-panel-search-container">
 									</div>
@@ -219,29 +218,186 @@ import="Search.*"
 			                       	<div id="CuisinesContainer" class="filter-panel-container">
 									</div>
 	                    		</div>
+	                    		<div class="filter-panel-mini"  style="flex: 0; min-width: 200px; display: block;">
+	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+										Options
+			                    	</h2>
+			                    	<label for="AiGeneratedDescription" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Description</label>
+    								<input type="checkbox" name="AiGeneratedDescription" id="AiGeneratedDescription"/><br>
+    								<label for="AiGeneratedAppliances" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Appliances</label>
+			                    	<input type="checkbox" name="AiGeneratedAppliances" id="AiGeneratedAppliances"/><br>
+			                    	<label for="AiGeneratedCuisines" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Cuisines</label>
+			                    	<input type="checkbox" name="AiGeneratedCuisines" id="AiGeneratedCuisines"/><br>
+			                    	<label for="AiGeneratedDishTypes" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Dish Types</label>
+			                    	<input type="checkbox" name="AiGeneratedDishTypes" id="AiGeneratedDishTypes"/><br>
+			                    	<label for="AiGeneratedCookingMinutes" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Cooking Minutes</label>
+			                    	<input type="checkbox" name="AiGeneratedCookingMinutes" id="AiGeneratedCookingMinutes"/><br>
+			                    	<label for="AiGeneratedCourses" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Courses</label>
+			                    	<input type="checkbox" name="AiGeneratedCourses" id="AiGeneratedCourses"/>
+	                    		</div>
 	                    	</div>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<div class="filter-panel-container-no-grid">
-	                    		<div class="filter-panel-mini"  style="width:1rem;">
+	                    		<div class="filter-panel-mini"  style="min-width: 200px;">
 	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 										Dietary Restrictions
 			                    	</h2>
-			                    	<div id="DietaryRestrictionsContainer" class="filter-panel-container">
+			                    	<div class="filter-panel-container">
+			                    		<%
+					       					 if (dbConnection != null) {
+					       						String sql = 
+			     					    				"SELECT DIETARY_RESTRICTION_ID, DIETARY_RESTRICTION_NAME " +
+			     					    				"FROM DIETARY_RESTRICTIONS " +
+			     					    				"ORDER BY DIETARY_RESTRICTION_NAME ASC";
+					     					    try (
+					     	                            PreparedStatement popularStatement =
+					                                    dbConnection.prepareStatement(sql);
+					                                ResultSet popularRecipes =
+					                                    popularStatement.executeQuery()
+					                            ) {
+					     					    	
+					     					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
+					     					    	ResultSet dietaryRestrictions = statement.executeQuery();
+					     					    	
+					     					    	while(dietaryRestrictions.next()){
+					     					    		int dietaryRestrictionId = dietaryRestrictions.getInt("DIETARY_RESTRICTION_ID");
+					     					    		String dietaryRestrictionName = dietaryRestrictions.getString("DIETARY_RESTRICTION_NAME");
+			                    		%>
+			                    			<button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Dietary Restriction', <%=dietaryRestrictionId%> )">
+			                    				<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+												<%=dietaryRestrictionName%>
+						                    	</h2>
+			                    			</button>
+			                    		<%
+			                    					}
+			                    				}
+					     					   	catch (Exception error){
+					   					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+					   					    	}
+			                    			}
+			                    		%>
 									</div>
 	                    		</div>
-	                    		<div class="vrounded-divider" style="border-color:#1F1800; height:100%; opacity:0.6;"> </div>
-	                    		<div class="filter-panel-mini"  style="width:1rem;">
+	                    		<div class="filter-panel-mini"  style="min-width: 200px;">
 	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 										Courses
 			                    	</h2>
-			                    	<div id="CoursesContainer" class="filter-panel-container">
+			                    	<div class="filter-panel-container">
+			                    		<%
+					       					 if (dbConnection != null) {
+					       						String sql = 
+			     					    				"SELECT DISTINCT COURSE " +
+			     					    				"FROM RECIPES " +
+			     					    				"WHERE COURSE IS NOT NULL " +
+			     					    				"ORDER BY COURSE ASC";
+					     					    try (
+					     	                            PreparedStatement popularStatement =
+					                                    dbConnection.prepareStatement(sql);
+					                                ResultSet popularRecipes =
+					                                    popularStatement.executeQuery()
+					                            ) {
+					     					    	
+					     					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
+					     					    	ResultSet dietaryRestrictions = statement.executeQuery();
+					     					    	
+					     					    	while(dietaryRestrictions.next()){
+					     					    		String course = dietaryRestrictions.getString("COURSE");
+			                    		%>
+			                    			<button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Course', '<%=course%>' )">
+			                    				<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+												<%=course%>
+						                    	</h2>
+			                    			</button>
+			                    		<%
+			                    					}
+			                    				}
+					     					   	catch (Exception error){
+					   					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+					   					    	}
+			                    			}
+			                    		%>
 									</div>
 	                    		</div>
-	                    		<div class="vrounded-divider" style="border-color:#1F1800; height:100%; opacity:0.6;"> </div>
-	                    		<div class="filter-panel-mini"  style="width:1rem;">
+	                    		<div class="filter-panel-mini"  style="flex: 0; min-width: 450px;">
 	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 										Ranges
 			                    	</h2>
+			                    	<div class="filter-panel-mini">
+`		                    			<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
+											Reviews
+		                    			</h2>
+				                    	<div class="filter-panel-mini-flex">
+				                    		<input type="number" id="ReviewsMinRange" name="ReviewsMinRange" class="filter-range" min="0" step="1"/>
+			                    			<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												min to
+				                    			</h2>
+				                    		</div>
+				                    		<input type="number" id="ReviewsMaxRange" name="ReviewsMaxRange" class="filter-range" min="0" step="1"/>
+				                    		<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												max
+				                    			</h2>
+				                    		</div>
+				                    	</div>
+			                    	</div>
+			                    	<div class="filter-panel-mini">
+	                    				<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
+											Bookmarks
+		                    			</h2>
+				                    	<div class="filter-panel-mini-flex">
+				                    		<input type="number" id="BookmarksMinRange" name="BookmarksMinRange" class="filter-range" min="0" step="1"/>
+			                    			<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												min to
+				                    			</h2>
+				                    		</div>
+				                    		<input type="number" id="BookmarksMaxRange" name="BookmarksMaxRange" class="filter-range" min="0" step="1"/>
+				                    		<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												max
+				                    			</h2>
+				                    		</div>
+			                    		</div>
+			                    	</div>
+			                    	<div class="filter-panel-mini">
+	                    				<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
+											Average Ratings
+		                    			</h2>
+				                    	<div class="filter-panel-mini-flex">
+				                    		<input type="number" id="RatingsMinRange" name="RatingsMinRange" class="filter-range" min="0" max="5" step="1"/>
+			                    			<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												min to
+				                    			</h2>
+				                    		</div>
+				                    		<input type="number" id="RatingsMaxRange" name="RatingsMaxRange" class="filter-range" min="0" max="5" step="1"/>
+				                    		<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												max
+				                    			</h2>
+				                    		</div>
+			                    		</div>
+			                    	</div>
+			                    	<div class="filter-panel-mini">
+	                    				<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
+											Cooking Time (Minutes)
+		                    			</h2>
+				                    	<div class="filter-panel-mini-flex">
+				                    		<input type="number" id="CookingTimeMinRange" name="CookingTimeMinRange" class="filter-range" min="0" step="1"/>
+			                    			<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												min to
+				                    			</h2>
+				                    		</div>
+				                    		<input type="number" id="CookingTimeMaxRange" name="CookingTimeMaxRange" class="filter-range" min="0" step="1"/>
+				                    		<div class="filter-panel-mini-flex">
+			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
+												max
+				                    			</h2>
+				                    		</div>
+			                    		</div>
+			                    	</div>
 	                    		</div>
 	                    	</div>
                        </div>
@@ -268,7 +424,7 @@ import="Search.*"
 							Allow up to 0 missing ingredients
                     	</h2>
 						<div class="slidecontainer">
-						  <input id="IngredientsSlider" type="range" min="0" max="3" value="0" class="slider" id="IngredientsSlider">
+						  <input id="IngredientsSlider" type="range" min="0" max="3" value="0" class="slider">
 						</div>
                        </div>
                        
@@ -294,7 +450,7 @@ import="Search.*"
 							Allow up to 0 missing appliances
 	                    </h2>
 						<div class="slidecontainer">
-						  <input id="AppliancesSlider" type="range" min="0" max="3" value="0" class="slider" id="AppliancesSlider">
+						  <input id="AppliancesSlider" type="range" min="0" max="3" value="0" class="slider">
 						</div>
 	                    </div>
 	                    
@@ -309,7 +465,7 @@ import="Search.*"
 	                       	</div>
 	                       <div id="AuthorsSearchContainer" class="filter-panel-search-container">
 						</div>
-	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	        	            	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected authors
 	                    	</h2>
@@ -317,6 +473,62 @@ import="Search.*"
 						</div>
                        </div>
 						<script>
+						const sortOrder = [];
+						const sortOptions = new Map(); // use an array that is just the sort option AND a map that contains whether it ascends or not
+						for (let key of ["Publication Date", "Bookmarks", "Reviews", "Ratings"]){
+							let elementBaseId = key.replace(" ", "");
+							let object = {
+									sort: "ascending",
+									sortTextId: elementBaseId+"SortText"
+								}
+							sortOptions.set(key	, object); //True or false refers to ascending (True) or descending (False)
+						}
+						
+						sortSelect(document.getElementById("PublicationDateSortOption"), "PublicationDateSortText", "Publication Date");
+						const filterIds = new Map();
+						for (let key of ["Ingredient", "Appliance", "Author", "Cuisine", "Dish Type", "Dietary Restriction", "Course"]){
+							filterIds.set(key, []);
+						}
+						
+						addSearchListenerWithImage('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '/RecipeGenie/DishTypes/Search?', false);
+						addSearchListenerWithImage('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '/RecipeGenie/Cuisines/Search?', false);
+						addSearchListenerWithImage('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '/RecipeGenie/Ingredients/Search?', true);
+						addSearchListenerWithImage('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '/RecipeGenie/Appliances/Search?', true);
+						addSearchListenerWithImage('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '/RecipeGenie/Users/Search?', true);
+						
+						const tolerances = new Map();
+						for (let key of ["Ingredient", "Appliance"]){
+							tolerances.set(key, "0");
+						}
+						
+						addSliderListener("IngredientsSlider", "IngredientsToleranceDisplay", "Ingredient");
+						addSliderListener("AppliancesSlider", "AppliancesToleranceDisplay", "Appliance");
+						
+						const ranges = new Map();
+						for (let key of ["Bookmarks", "Cooking Time", "Ratings", "Reviews"]){
+							let object = {
+									min: "",
+									max: ""
+							}
+							ranges.set(key, object);
+						}
+						
+						addMinMaxListener("BookmarksMinRange", "BookmarksMaxRange", true, 0, null, "Bookmarks");
+						addMinMaxListener("CookingTimeMinRange", "CookingTimeMaxRange", true, 0, null, "Cooking Time");
+						addMinMaxListener("RatingsMinRange", "RatingsMaxRange", true, 0, 5, "Ratings");
+						addMinMaxListener("ReviewsMinRange", "ReviewsMaxRange", true, 0, null, "Reviews");
+
+						const options = new Map();
+						for (let key of ["Ai Generated Description", "Ai Generated Appliances", "Ai Generated Cuisines", "Ai Generated Dish Types", "Ai Generated Cooking Minutes", "Ai Generated Courses"]){
+							options.set(key, false);
+						}
+						
+						addCheckListener("AiGeneratedDescription", "Ai Generated Description");
+						addCheckListener("AiGeneratedAppliances", "Ai Generated Appliances");
+						addCheckListener("AiGeneratedCuisines", "Ai Generated Cuisines");
+						addCheckListener("AiGeneratedDishTypes", "Ai Generated Dish Types");
+						addCheckListener("AiGeneratedCookingMinutes", "Ai Generated Cooking Minutes");
+						addCheckListener("AiGeneratedCourses", "Ai Generated Courses");
 						
 						function handleFilterTypeClick(type, button) {
 							//toggling both the filter panel and the button
@@ -339,18 +551,6 @@ import="Search.*"
 					            element.classList.add('active');
 					        }
 						}
-						
-						const sortOrder = [];
-						const sortOptions = new Map(); // use an array that is just the sort option AND a map that contains whether it ascends or not
-						for (key of ["Publication Date", "Bookmarks", "Reviews", "Ratings"]){
-							elementBaseId = key.replace(" ", "");
-							let object = {
-									sort: "ascending",
-									sortTextId: elementBaseId+"SortText"
-								}
-							sortOptions.set(key, object); //True or false refers to ascending (True) or descending (False)
-						}
-						sortSelect(document.getElementById("PublicationDateSortOption"), "PublicationDateSortText", "Publication Date")
 						
 						function sortSelect(self, textElement, type){
 							if (self.classList.contains('descending')){ // State 1: descending --> ascending
@@ -385,11 +585,11 @@ import="Search.*"
 						}
 						
 						function updateSortTextElements(){
-							for (key of sortOptions.keys()){
+							for (let key of sortOptions.keys()){
 								let element = document.getElementById(sortOptions.get(key).sortTextId);
-								sortPosition = sortOrder.indexOf(key)+1;
+								let sortPosition = sortOrder.indexOf(key)+1;
 								if(sortPosition == 0){
-									element.textContent = key
+									element.textContent = key;
 									continue;
 								}
 								element.textContent = sortPosition+ " " + key  +": " + sortOptions.get(key).sort;
@@ -397,16 +597,16 @@ import="Search.*"
 							}
 						}
 						
-						const filterIds = new Map();
-						for (key of ["Ingredient", "Appliance", "Author", "Cuisine", "Dish Type", "Dietary Restriction"]){
-							filterIds.set(key, []);
+						function toggleBasicFilter(self, type, id){
+							if(self.classList.contains('active')){
+								self.classList.remove('active');
+								removeFilter(id, type);
+							}
+							else{
+								self.classList.add('active');
+				            	filterIds.get(type).push(id);
+							}
 						}
-						
-						addSearchListenerWithImage('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '/RecipeGenie/DishTypes/Search?', false);
-						addSearchListenerWithImage('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '/RecipeGenie/Cuisines/Search?', false);
-						addSearchListenerWithImage('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '/RecipeGenie/Ingredients/Search?', true);
-						addSearchListenerWithImage('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '/RecipeGenie/Appliances/Search?', true);
-						addSearchListenerWithImage('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '/RecipeGenie/Users/Search?', true);
 						
 						function addSearchListenerWithImage(searchId, type, panelSearchContainerId, panelContainerId, url, imageBoolean){
 							let input = document.getElementById(searchId);
@@ -461,7 +661,7 @@ import="Search.*"
 						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId, imageBoolean){
 			            	let panel = document.getElementById(panelSearchContainerId);
 			            	//create a result for each object
-							for (objectString of Object.values(objects)){
+							for (let objectString of Object.values(objects)){
 								//initialization
 				            	let object = JSON.parse(objectString);
 				            	let id = object["id"];
@@ -474,16 +674,16 @@ import="Search.*"
 				            	
 				            					            	
 				            	if(imageBoolean){
-					            	image = object["image"];
+					            	let image = object["image"];
 					            	let newPic = document.createElement("img");
 					            	newPic.classList.add("mini-pic");
 					            	newPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
 					            	newPic.setAttribute('alt', "'" + type + "'");
-					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', '" + image + "', '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"')");
+					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', '" + image + "', '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"');");
 					            	newElement.append(newPic);
 				            	}
 				            	else{
-					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + false + ", '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"')");
+					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + false + ", '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"');");
 				            	}
 				            	
 				            	//the text element
@@ -502,7 +702,7 @@ import="Search.*"
 			            	let filter = document.createElement("button");
 			            	filter.classList.add("mini-container");
 			            	filter.setAttribute('type','button');
-			            	filter.setAttribute("onclick", "removeFilterAndSelf(this, " + id + ", '" + type + "' )");
+			            	filter.setAttribute("onclick", "removeFilter(" + id + ", '" + type + "' );this.remove();");
 
 			            	if(image){
 				            	// the picture element
@@ -527,58 +727,265 @@ import="Search.*"
 							document.getElementById(searchId).value="";
 						}
 						
-						function removeFilterAndSelf(self, id, type){
-							const index = filterIds.get(type).indexOf(id);
+						function removeFilter(id, type){
+							let index = filterIds.get(type).indexOf(id);
 							if (index !== -1){
 								filterIds.get(type).splice(index, 1);
 							}
-							self.remove();
 						}
-						
-						function toggleActiveInclusive(element){ //for elements that are not mutually exclusive in activity
-							let isActive = element && element.classList.contains('active');
-							if(isActive){
-								element.classList.remove('active');
-							}
-							else{
-								element.classList.add('active');
-							}
-						}
-						
-						const tolerances = new Map();
-						for (key of ["Ingredients", "Appliances"]){
-							tolerances.set(key, 0);
-						}
-						
-						addSliderListener("IngredientsSlider", "IngredientsToleranceDisplay", "Ingredients")
-						addSliderListener("AppliancesSlider", "AppliancesToleranceDisplay", "Applianes")
 						
 						function addSliderListener(sliderId, toleranceDisplayId, name){
 							let slider = document.getElementById(sliderId);
 							let toleranceDisplay = document.getElementById(toleranceDisplayId);
-							updateSliderBackground(slider);
 							slider.oninput = function() {
-								toleranceDisplay.textContent="Allow up to "+ this.value + " missing " + name.toLowerCase();
-								tolerances[name]=this.value;
-								updateSliderBackground(sliderId);
-							} 
+								toleranceDisplay.textContent="Allow up to "+ this.value + " missing " + name.toLowerCase() + "s";
+								tolerances.set(name, this.value);
+							}
 						}
 						
-						function updateSliderBackground(slider){
-							const value = slider.value;
-							  const max = slider.max || 100;
-							  const percentage = (value / max) * 100;
-							  slider.style.background = `linear-gradient(to right, #04AA6D 0%, #04AA6D ${percentage}%, #d3d3d3 ${percentage}%, #d3d3d3 100%)`;
+						function addMinMaxListener(selfId, otherId, isMin, minMin, maxMax, key){//expects that self and other both share the same range
+							let self = document.getElementById(selfId);
+							let other = document.getElementById(otherId);
+							if(maxMax===null){
+								maxMax = Math.pow(2, 31)-1; //2147483647, max int for java
+								if(self.max!=='' && self.max!==undefined && self.hasAttribute('max')){
+									maxMax = Math.min(maxMax, self.max);
+								}
+								else{
+									self.max=maxMax;
+									other.max=maxMax;
+								}
+							}
+							if(minMin===null){
+								minMin = -Math.pow(2, 31); //-2147483648, min int for java
+								if(self.min!=='' && self.min!==undefined && self.hasAttribute('min')){
+									minMin = Math.max(minMin, self.min);
+								}
+								else{
+									self.min=minMin;
+									other.min=minMin;
+								}
+							}
+							self.addEventListener('input', function (e) {//tracking input
+							    enforceMinMax(self, other, isMin, minMin, maxMax, key);
+							});
+							other.addEventListener('input', function (e) {//tracking input
+							    enforceMinMax(other, self, !isMin, minMin, maxMax, key);
+							});
+							enforceMinMax(self, other, isMin, minMin, maxMax, key); // to finish initialization
+						}
+						
+						function enforceMinMax(self, other, isMin, minMin, maxMax, key){
+							let minElement = self;
+							let maxElement = other;
+							if (!isMin){
+								minElement = other;
+								maxElement = self;
+							}
+							let min = minElement.value;
+							let max = maxElement.value;
+							min = safeMinMax(minElement, min, minMin, maxMax);
+							max = safeMinMax(maxElement, max, minMin, maxMax);
+							if(!(min==="")&&!(max==="")){
+								minElement.value = Math.min(min, max);
+								maxElement.value = Math.max(min, max);
+							}
+							
+							if(minElement.value===""){ //to make parsing in java easier
+								ranges.get(key).min = minElement.min;
+							}
+							else{
+								ranges.get(key).min = minElement.value;
+							}
+							if(maxElement.value===""){ //to make parsing in java easier
+								ranges.get(key).max = maxElement.max;
+							}
+							else{
+								ranges.get(key).max = maxElement.value;
+							}
+						}
+						
+						function safeMinMax(element, num, minMin, maxMax){
+							if(num===""){ // if num is empty or has non numeric characters
+								num=""; //set it empty
+							}
+							else{
+								num = Math.min(maxMax, Math.max(minMin, num)); //bound num
+							}
+							element.value = num;
+							return num;
+						}
+						
+						function addCheckListener(selfId, key){
+							let self = document.getElementById(selfId);
+							self.addEventListener('input', function (e) {//tracking input
+								options.set(key, !options.get(key));
+							});
+						}
+						
+					    recipeSearchTimeout = null;
+					    
+						async function searchRecipes(searchBarId){
+						    clearTimeout(recipeSearchTimeout);
+						    recipeSearchTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
+								searchBar = document.getElementById(searchBarId);
+					    		searchTerm = searchBar.value.trim();
+						        let parameters = new URLSearchParams();
+						        parameters.append('searchTerm', searchTerm);
+						        parameters.append('sortOrder', JSON.stringify(sortOrder));
+						        parameters.append('sortOptions', JSON.stringify(Object.fromEntries(sortOptions)));
+						        parameters.append('filterIds', JSON.stringify(Object.fromEntries(filterIds)));
+						        parameters.append('tolerances', JSON.stringify(Object.fromEntries(tolerances)));
+						        parameters.append('ranges', JSON.stringify(Object.fromEntries(ranges)));
+						        parameters.append('options', JSON.stringify(Object.fromEntries(options)));
+						        console.log(parameters);
+								let response = await fetch("/RecipeGenie/Recipes/Search?" + parameters.toString(), {
+						        	method:'GET',
+						        	headers:{
+						                "Content-Type": "application/json",
+						                "Accept": "application/json"
+						        	},
+						        });
+								if (!response.ok) {
+						        	throw new Error('Network response was not ok');
+						        }
+					        	let objects = await response.json(); // Creates a JSON object
+					        	console.log(objects);
+					        	addResults(objects);
+						    }, 100);
+						}
+											
+						function addResults(objects){
+				        	document.getElementById("personalizedStrips").classList.remove("active");
+				        	let resultContainer = document.getElementById("recipeResults")
+				        	resultContainer.classList.add("active");
+				        	let scrollRow = document.getElementById("recipeResultsScrollRow")
+							let previousRecipes = document.querySelectorAll(".search-recipe-card");
+
+							//removing past recipes
+					    	for (let previousRecipe of previousRecipes) {
+					    		previousRecipe.remove();
+					    	}
+				        	for (let recipeString of Object.values(objects)){
+				            	let recipe = JSON.parse(recipeString);
+				            	let recipeId = recipe["recipeId"]; // not used until a later functionality (where clicking on the recipe leads to the recipe page)
+				            	let recipeName = recipe["recipeName"];
+				            	let recipeImagePath = recipe["recipeImagePath"];
+				            	let recipeDescription = recipe["recipeDescription"];
+				            	let recipeTotalMinutes = recipe["recipeTotalMinutes"];
+				            	let recipeActiveTimestamp = recipe["recipeActiveTimestamp"];
+				            	let reviewCount = recipe["reviewCount"];
+				            	let averageRating = recipe["averageRating"];
+				            	let bookmarkCount = recipe["bookmarkCount"];
+				            	let userId = recipe["userId"]; // not used until a later functionality (where clicking on the user leads to the user page)
+				            	let userName = recipe["userName"];
+				            	let userImagePath = recipe["userImagePath"];
+				            	
+				            	let recipeCard = document.createElement("article");
+				            	recipeCard.classList.add("search-recipe-card");
+				            	
+				            	let recipeImageContainer = document.createElement("div");
+				            	recipeImageContainer.classList.add("recipe-card-img");
+				            	let recipeImage = document.createElement("img");
+				            	recipeImage.setAttribute('src', "${pageContext.request.contextPath}"+recipeImagePath);
+				            	recipeImage.setAttribute('alt', "${pageContext.request.contextPath}"+"/images/recipes/recipe-placeholder.jpg");
+				            	recipeImageContainer.append(recipeImage);
+				            	
+				            	let recipeBadges = document.createElement("div");
+				            	recipeBadges.classList.add("recipe-card-badges");
+								let cookingTimeBadgePill = document.createElement("span");
+								if(recipeTotalMinutes>0){
+									cookingTimeBadgePill.classList.add("badge-pill");
+									cookingTimeBadgePill.textContent=recipeTotalMinutes + " m";
+									recipeBadges.append(cookingTimeBadgePill);
+								}
+								let publicationDateBadgePill = document.createElement("span");
+								publicationDateBadgePill.classList.add("badge-pill");
+								publicationDateBadgePill.textContent=recipeActiveTimestamp;
+								recipeBadges.append(cookingTimeBadgePill);
+								recipeBadges.append(publicationDateBadgePill);
+								recipeImageContainer.append(recipeBadges);
+				            	recipeCard.append(recipeImageContainer);
+								
+								let cardBody = document.createElement("div");
+								cardBody.classList.add("recipe-card-body");
+								let cardTitle = document.createElement("h3");
+								cardTitle.classList.add("recipe-card-title");
+								cardTitle.textContent=recipeName;
+								let cardDescription = document.createElement("p");
+								cardDescription.classList.add("recipe-card-desc");
+								cardDescription.textContent=recipeDescription;
+								cardBody.append(cardTitle);
+								cardBody.append(cardDescription);
+								recipeCard.append(cardBody);
+								
+								let cardFooter = document.createElement("div");
+								cardFooter.classList.add("recipe-card-footer");
+								cardFooter.setAttribute("style", "padding:1rem;");
+								let cardAuthor = document.createElement("div");
+								cardAuthor.classList.add("card-author");
+								let authorImage = document.createElement("img");
+								authorImage.classList.add("mini-pic");
+								authorImage.setAttribute('src', "${pageContext.request.contextPath}"+userImagePath);
+								authorImage.setAttribute('alt', "${pageContext.request.contextPath}"+"/images/users/user-placeholder.png");
+								let authorName = document.createElement("span");
+								authorName.textContent=userName;
+								cardAuthor.append(authorImage);
+								cardAuthor.append(authorName);
+								cardFooter.append(cardAuthor);
+								
+								let reviewMeta = document.createElement("div");
+								reviewMeta.classList.add("review-meta");
+								let ratings = document.createElement("span");
+								ratings.classList.add("card-rating");
+								ratings.textContent="Reviews: "+averageRating+"/5";
+								stars = document.createElement("span");
+								stars.classList.add("stars");
+								stars.setAttribute("style", "--rating: " + averageRating);
+								stars.setAttribute("aria-label", averageRating + " out of 5 stars");
+								let reviews = document.createElement("span");
+								reviews.classList.add("card-rating");
+								reviews.textContent=" (" + reviewCount +")";
+								ratings.append(stars);
+								ratings.append(reviews);
+								reviewMeta.append(ratings);
+								cardFooter.append(reviewMeta);
+								
+								let cardStats = document.createElement("div");
+								cardStats.classList.add("card-stats");
+								let cardBookmark = document.createElement("span");
+								cardBookmark.classList.add("card-bookmark");
+								cardBookmark.textContent = bookmarkCount;
+								let cardBookmarkImage = document.createElement("img");
+								cardBookmarkImage.setAttribute('src', "${pageContext.request.contextPath}"+"/images/bookmark_icon.svg");
+								cardBookmarkImage.setAttribute('alt', "bookmark");
+								cardBookmarkImage.setAttribute('width', "16");
+								cardBookmarkImage.setAttribute('height', "16");
+								cardBookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
+								cardBookmark.append(cardBookmarkImage);
+								cardStats.append(cardBookmark);
+								cardFooter.append(cardStats);
+								recipeCard.append(cardFooter);
+								scrollRow.append(recipeCard);
+				        	}
 						}
 						</script>
-
                     </form>
                 </div>
             </div>
         </section>
-
+        <div id="recipeResults" class="sections-container">
+        	<section>
+        		<div>
+                    <h2 class="section-title">Recipes Search Results</h2>
+                    <p class="section-subtitle">Recipes that you can make</p>
+                </div>
+			<div id="recipeResultsScrollRow" class="horizontal-scroll-row">
+			</div>
+        	</section>
+		</div>
         <!-- Personalized Strips Section (Your Feed, Reviews for You, Your Most Popular) -->
-        <div class="sections-container">
+        <div id="personalizedStrips" class="sections-container">
 
             <!-- Your Feed -->
             <section>
@@ -589,15 +996,13 @@ import="Search.*"
                 <div class="horizontal-scroll-row">
 					 <%
 					 if (dbConnection != null) {
-					    try {
 					    	String sql = 
-					    				"SELECT RECIPE_NAME, TOTAL_MINUTES, RECIPE_ACTIVE_TIMESTAMP, "+
-					    				"RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION " +
-					    				"FROM RECIPES WHERE RECIPE_STATUS = 'Active' " +
-					    				"ORDER BY RECIPE_ACTIVE_TIMESTAMP DESC";
-					    	
-					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
-					    	ResultSet recipes = statement.executeQuery();
+				    				"SELECT RECIPE_NAME, TOTAL_MINUTES, RECIPE_ACTIVE_TIMESTAMP, "+
+				    				"RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION " +
+				    				"FROM RECIPES WHERE RECIPE_STATUS = 'Active' " +
+				    				"ORDER BY RECIPE_ACTIVE_TIMESTAMP DESC";
+					    try (	PreparedStatement statement = dbConnection.prepareStatement(sql);
+						    	ResultSet recipes = statement.executeQuery();){
 					    	
 					    	while(recipes.next()){
 					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
@@ -638,8 +1043,6 @@ import="Search.*"
 
 					    		<%
 					    		        }
-					    recipes.close();
-					    statement.close();
 					    }catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
@@ -720,6 +1123,9 @@ import="Search.*"
                     <%
                             }
                         }
+                        catch (Exception error){
+					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+					    }
                     }
                     %>
                 </div>
@@ -793,12 +1199,18 @@ import="Search.*"
                                 rank++;
                             }
                         }
+                        catch (Exception error){
+					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+					    }
                     }
                     %>
                 </div>
             </section>
 
         </div>
+        <script>
+        	document.getElementById("personalizedStrips").classList.add("active");
+        </script>
     </main>
 
     <!-- Footer -->

@@ -47,57 +47,57 @@ public class IngredientSearch extends HttpServlet {
 			return;
 		}
 		
-
-		try {
-			//sql connection
-			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
-			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT INGREDIENT_ID, INGREDIENT_NAME");
-			if(imageBoolean) {
-				sb.append(", INGREDIENT_IMAGE_PATH");
+		// string building
+		Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT INGREDIENT_ID, INGREDIENT_NAME");
+		if(imageBoolean) {
+			sb.append(", INGREDIENT_IMAGE_PATH");
+		}
+		sb.append(" FROM INGREDIENTS WHERE ");
+		if(excludeList.length>0) {
+			sb.append("NOT (INGREDIENT_ID IN (");
+			for(int i = 0; i < excludeList.length; i++) {
+				sb.append("?, ");
 			}
-			sb.append(" FROM INGREDIENTS WHERE ");
-			if(excludeList.length>0) {
-				sb.append("NOT (INGREDIENT_ID IN (");
-				for(int i = 0; i < excludeList.length; i++) {
-					sb.append("?, ");
-				}
-				sb.setLength(sb.length()-2);//remove the last comma and space
-				sb.append(")) AND");
-			}
-			sb.append(" (INGREDIENT_NAME LIKE ? OR INGREDIENT_NAME LIKE ?) LIMIT 5");
-			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
+			sb.setLength(sb.length()-2);//remove the last comma and space
+			sb.append(")) AND");
+		}
+		sb.append(" (INGREDIENT_NAME LIKE ? OR INGREDIENT_NAME LIKE ?) ORDER BY INGREDIENT_NAME LIMIT 5");
+		
+		//connection
+		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
 			}
     		statement.setString(excludeList.length+1, searchTerm + "%");
     		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
+    		try(    		
     		ResultSet ingredients = statement.executeQuery();
-    		ObjectNode outerNode = mapper.createObjectNode();
-    		Integer counter = 0;
-    		
-    		// formatting data into json
-    		while(ingredients.next()) {
-    			Integer ingredientId = ingredients.getInt("ingredient_id");
-    			String ingredientName = ingredients.getString("ingredient_name");
-    			ObjectNode innerNode = mapper.createObjectNode();
-    			
-    			innerNode.put("id",ingredientId);
-    			innerNode.put("name",ingredientName);
-    			if(imageBoolean) {
-        			String ingredientImage = ingredients.getString("ingredient_image_path");
-        			innerNode.put("image",ingredientImage);
-    			}
-    			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
-    			counter++;
+    	    PrintWriter pw = response.getWriter();
+    		){
+        		ObjectNode outerNode = mapper.createObjectNode();
+        		Integer counter = 0;
+        		
+        		// formatting data into json
+        		while(ingredients.next()) {
+        			Integer ingredientId = ingredients.getInt("ingredient_id");
+        			String ingredientName = ingredients.getString("ingredient_name");
+        			ObjectNode innerNode = mapper.createObjectNode();
+        			
+        			innerNode.put("id",ingredientId);
+        			innerNode.put("name",ingredientName);
+        			if(imageBoolean) {
+            			String ingredientImage = ingredients.getString("ingredient_image_path");
+            			innerNode.put("image",ingredientImage);
+        			}
+        			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
+        			counter++;
+        		}
+        		
+        		//writing response
+        		pw.write(mapper.writeValueAsString(outerNode));
     		}
-    		
-    		//writing response
-    		PrintWriter pw = response.getWriter();
-    		pw.write(mapper.writeValueAsString(outerNode));
-    		pw.close();
-    		ingredients.close();
-    		statement.close();
 		}
 		catch(SQLException ex) {//error checking
 			log("Ingredient search failed: " + ex.getMessage());

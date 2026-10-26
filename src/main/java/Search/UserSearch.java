@@ -47,58 +47,58 @@ public class UserSearch extends HttpServlet {
 			return;
 		}
 		
-
-		try {
-			//sql connection
-			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
-			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT USER_ID, USER_NAME");
-			if(imageBoolean) {
-				sb.append(", USER_IMAGE_PATH");
+		// string building
+		Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT USER_ID, USER_NAME");
+		if(imageBoolean) {
+			sb.append(", USER_IMAGE_PATH");
+		}
+		sb.append(" FROM USERS WHERE USER_STATUS = 'Active' ");
+		if(excludeList.length>0) {
+			sb.append("AND NOT (USER_ID IN (");
+			for(int i = 0; i < excludeList.length; i++) {
+				sb.append("?, ");
 			}
-			sb.append(" FROM USERS WHERE USER_STATUS = 'Active' ");
-			if(excludeList.length>0) {
-				sb.append("AND NOT (USER_ID IN (");
-				for(int i = 0; i < excludeList.length; i++) {
-					sb.append("?, ");
-				}
-				sb.setLength(sb.length()-2);//remove the last comma and space
-				sb.append(")) ");
-			}
-			sb.append("AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) LIMIT 5");
-			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
+			sb.setLength(sb.length()-2);//remove the last comma and space
+			sb.append(")) ");
+		}
+		sb.append("AND (USER_NAME LIKE ? OR USER_NAME LIKE ?) ORDER BY USER_NAME LIMIT 5");
+		
+		//connection
+		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
 			}
     		statement.setString(excludeList.length+1, searchTerm + "%");
     		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
+    		try(
     		ResultSet users = statement.executeQuery();
-    		ObjectNode outerNode = mapper.createObjectNode();
-    		Integer counter = 0;
-    		
-    		// formatting data into json
-
-    		while(users.next()) {
-    			Integer userId = users.getInt("user_id");
-    			String userName = users.getString("user_name");
-    			ObjectNode innerNode = mapper.createObjectNode();
-    			
-    			innerNode.put("id",userId);
-    			innerNode.put("name",userName);
-        		if(imageBoolean) {
-        			String userImage = users.getString("user_image_path");
-        			innerNode.put("image",userImage);
+    	    PrintWriter pw = response.getWriter();
+    		){
+        		ObjectNode outerNode = mapper.createObjectNode();
+        		Integer counter = 0;
+        		
+        		// formatting data into json
+        		while(users.next()) {
+        			Integer userId = users.getInt("user_id");
+        			String userName = users.getString("user_name");
+        			ObjectNode innerNode = mapper.createObjectNode();
+        			
+        			innerNode.put("id",userId);
+        			innerNode.put("name",userName);
+            		if(imageBoolean) {
+            			String userImage = users.getString("user_image_path");
+            			innerNode.put("image",userImage);
+            		}
+        			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
+        			counter++;
         		}
-    			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
-    			counter++;
+        		
+        		//writing response
+        		pw.write(mapper.writeValueAsString(outerNode));
     		}
-    		
-    		//writing response
-    		PrintWriter pw = response.getWriter();
-    		pw.write(mapper.writeValueAsString(outerNode));
-    		pw.close();
-    		users.close();
-    		statement.close();
+
 		}
 		catch(SQLException ex) {//error checking
 			log("User search failed: " + ex.getMessage());

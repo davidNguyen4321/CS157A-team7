@@ -46,57 +46,57 @@ public class ApplianceSearch extends HttpServlet {
 			return;
 		}
 		
-
-		try {
-			//sql connection
-			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
-			StringBuilder sb = new StringBuilder();
-			sb.append("SELECT APPLIANCE_ID, APPLIANCE_NAME");
-			if(imageBoolean) {
-				sb.append(", APPLIANCE_IMAGE_PATH");
+		// string building
+		Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT APPLIANCE_ID, APPLIANCE_NAME");
+		if(imageBoolean) {
+			sb.append(", APPLIANCE_IMAGE_PATH");
+		}
+		sb.append(" FROM APPLIANCES WHERE ");
+		if(excludeList.length>0) {
+			sb.append("NOT (APPLIANCE_ID IN (");
+			for(int i = 0; i < excludeList.length; i++) {
+				sb.append("?, ");
 			}
-			sb.append(" FROM APPLIANCES WHERE ");
-			if(excludeList.length>0) {
-				sb.append("NOT (APPLIANCE_ID IN (");
-				for(int i = 0; i < excludeList.length; i++) {
-					sb.append("?, ");
-				}
-				sb.setLength(sb.length()-2);//remove the last comma and space
-				sb.append(")) AND");
-			}
-			sb.append(" (APPLIANCE_NAME LIKE ? OR APPLIANCE_NAME LIKE ?) LIMIT 5");
-			PreparedStatement statement = dbConnection.prepareStatement(sb.toString());
+			sb.setLength(sb.length()-2);//remove the last comma and space
+			sb.append(")) AND");
+		}
+		sb.append(" (APPLIANCE_NAME LIKE ? OR APPLIANCE_NAME LIKE ?) ORDER BY APPLIANCE_NAME LIMIT 5");
+		
+		//connection
+		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
 			for(int i = 0; i < excludeList.length; i++) {
 				statement.setInt(i+1, excludeList[i]);
 			}
     		statement.setString(excludeList.length+1, searchTerm + "%");
     		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
+    		try(
     		ResultSet appliances = statement.executeQuery();
-    		ObjectNode outerNode = mapper.createObjectNode();
-    		Integer counter = 0;
-    		
-    		// formatting data into json
-    		while(appliances.next()) {
-    			Integer applianceId = appliances.getInt("appliance_id");
-    			String applianceName = appliances.getString("appliance_name");
-    			ObjectNode innerNode = mapper.createObjectNode();
-    			
-    			innerNode.put("id",applianceId);
-    			innerNode.put("name",applianceName);
-    			if(imageBoolean) {
-        			String applianceImage = appliances.getString("appliance_image_path");
-        			innerNode.put("image",applianceImage);
-    			}
-    			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
-    			counter++;
+    	    PrintWriter pw = response.getWriter();
+    		){
+        		ObjectNode outerNode = mapper.createObjectNode();
+        		Integer counter = 0;
+        		
+        		// formatting data into json
+        		while(appliances.next()) {
+        			Integer applianceId = appliances.getInt("appliance_id");
+        			String applianceName = appliances.getString("appliance_name");
+        			ObjectNode innerNode = mapper.createObjectNode();
+        			
+        			innerNode.put("id",applianceId);
+        			innerNode.put("name",applianceName);
+        			if(imageBoolean) {
+            			String applianceImage = appliances.getString("appliance_image_path");
+            			innerNode.put("image",applianceImage);
+        			}
+        			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
+        			counter++;
+        		}
+        		
+        		//writing response
+        		pw.write(mapper.writeValueAsString(outerNode));
     		}
-    		
-    		//writing response
-    		PrintWriter pw = response.getWriter();
-    		pw.write(mapper.writeValueAsString(outerNode));
-    		pw.close();
-    		appliances.close();
-    		statement.close();
 		}
 		catch(SQLException ex) {//error checking
 			log("Appliance search failed: " + ex.getMessage());
