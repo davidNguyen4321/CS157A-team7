@@ -1,0 +1,26 @@
+<%
+    String hdrName = (String) session.getAttribute("username");
+    String hdrPic = (String) session.getAttribute("userImage");
+    int hdrId = (Integer) session.getAttribute("userId");
+%>
+<header>
+  <div class="header-inner"><div class="header-container">
+    <div class="nav-group">
+      <nav class="main-nav">
+        <a href="index.jsp?tab=discover" class="header-btn">Discover</a>
+        <a href="index.jsp?tab=share" class="header-btn">Share</a>
+        <a href="index.jsp?tab=library" class="header-btn">Library</a>
+      </nav>
+    </div>
+    <div class="header-spacer"></div>
+    <div class="header-actions"><div class="user-profile-group">
+      <a href="profile.jsp?id=<%= hdrId %>" class="author-link"><span class="username-display"><%= Auth.Util.esc(hdrName) %></span></a>
+      <div class="user-avatar">
+        <% if (hdrPic != null && !hdrPic.isEmpty()) { %>
+          <img src="${pageContext.request.contextPath}<%= hdrPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+        <% } else { %>👤<% } %>
+      </div>
+      <a href="logout.jsp" class="author-link" style="margin-left:.75rem;">Log out</a>
+    </div></div>
+  </div></div>
+</header>

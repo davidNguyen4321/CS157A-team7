@@ -1,3 +1,8 @@
+<!-- Includes file auth_check as a guard that user is authenticated before entering 
+index.jsp -->
+
+<%@ include file="auth_check.jspf" %>
+
 <%@ page import="java.sql.*"
 import="Search.*"
 %>
@@ -24,13 +29,17 @@ import="Search.*"
             currentTab = "discover";
         }
     %>
+    <%-- reuses connection that DbInit opened at startup --%>
+    <%
+    Connection dbConnection = DatabaseAccess.getConnection();
+    int sessionUserId = (Integer) session.getAttribute("userId");
+	%>
 
     <%
         String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
         String dbUser = "root";
         String dbPassword = request.getParameter("dbPassword");
         
-        Connection dbConnection = null;
         boolean isConnected = false;
         if (dbPassword != null) {
             try {
@@ -86,11 +95,15 @@ import="Search.*"
                 <!-- Right: Username and Profile Picture -->
                 <div class="header-actions">
                     <div class="user-profile-group">
-                        <span class="username-display"><%= displayUsername %></span>
-                        <div class="user-avatar" title="Account">
-                            👤
-                        </div>
-                    </div>
+					    <a href="profile.jsp?id=<%= sessionUserId %>" class="author-link"><span class="username-display"><%= Auth.Util.esc(displayUsername) %></span></a>
+					    <div class="user-avatar" title="Account">
+					        <% String myPic = (String) session.getAttribute("userImage");
+					           if (myPic != null && !myPic.isEmpty()) { %>
+					            <img src="${pageContext.request.contextPath}<%= myPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+					        <% } else { %>👤<% } %>
+					    </div>
+					    <a href="logout.jsp" class="author-link" style="margin-left:.75rem;">Log out</a>
+					</div>
                 </div>
             </div>
         </div>
@@ -996,14 +1009,16 @@ import="Search.*"
                 <div class="horizontal-scroll-row">
 					 <%
 					 if (dbConnection != null) {
-					    	String sql = 
-				    				"SELECT RECIPE_NAME, TOTAL_MINUTES, RECIPE_ACTIVE_TIMESTAMP, "+
-				    				"RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION " +
-				    				"FROM RECIPES WHERE RECIPE_STATUS = 'Active' " +
-				    				"ORDER BY RECIPE_ACTIVE_TIMESTAMP DESC";
-					    try (	PreparedStatement statement = dbConnection.prepareStatement(sql);
-						    	ResultSet recipes = statement.executeQuery();){
-					    	
+				    	String sql =
+				    		    "SELECT r.RECIPE_NAME, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, " +
+				    		    "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_NAME " +
+				    		    "FROM RECIPES r LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
+				    		    "WHERE r.RECIPE_STATUS = 'Active' ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC";
+					    try (
+					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
+					    	ResultSet recipes = statement.executeQuery();		
+				    		){
+					    					    	
 					    	while(recipes.next()){
 					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
 					    		if(imagePath == null || imagePath.isEmpty()){
@@ -1036,7 +1051,10 @@ import="Search.*"
 					    		        </p>
 
 					    		        <div class="recipe-card-footer">
-					    		            <span>Database recipe</span>
+					    		            <% String an = recipes.getString("USER_NAME"); int aid = recipes.getInt("AUTHOR_ID"); %>
+											<% if (an != null) { %>
+											    <a class="author-link" href="profile.jsp?id=<%= aid %>"><%= Auth.Util.esc(an) %></a>
+											<% } else { %><span>Anonymous</span><% } %>
 					    		        </div>
 					    		    </div>
 					    		</article>
