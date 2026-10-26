@@ -398,11 +398,11 @@ nav.main-nav {
 }
 
 .filter-panel-sort-option.ascending {
-	background-color: #FF7D5C;
+	background-color: #FF8D1C;
 }
 
 .filter-panel-sort-option.descending {
-	background-color: #5CDEFF;
+	background-color: #55E6AE;
 }
 
 .filter-panel-search-container {
@@ -469,7 +469,7 @@ nav.main-nav {
 
 .mini-container {
 	align-items: center;
-	background-color: #FFCF5C;
+	background-color: #D4782A;
 	max-width: 100%;
 	height: 40px;
 	border-radius: 25px;
@@ -501,7 +501,7 @@ nav.main-nav {
 }
 
 .mini-container-toggleable.active {
-	background-color: #FFCF5C;
+	background-color: #D4782A;
 }
 
 .mini-pic {
@@ -562,7 +562,7 @@ nav.main-nav {
 
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  background: #FFBB00;
+  background: #D4782A;
   border-radius: 50%;
   cursor: pointer;
   height: 20px;
@@ -571,7 +571,7 @@ nav.main-nav {
 }
 
 .slider::-moz-range-thumb {
-  background: #FFBB00;
+  background: #D4782A;
   border-radius: 50%;
   cursor: pointer;
   height: 20px;

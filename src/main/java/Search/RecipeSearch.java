@@ -475,14 +475,14 @@ public class RecipeSearch extends HttpServlet {
 	}
 	
 	private void buildRecipeReviewSubquery(StringBuilder sb) {
-		sb.append("SELECT recRevSubquery.RECIPE_ID, COUNT(rev.REVIEW_ID) AS reviewCount, AVG(rev.RATING) AS averageRating FROM RECIPES recRevSubquery ");
+		sb.append("SELECT recRevSubquery.RECIPE_ID, COUNT(rev.REVIEW_ID) AS reviewCount, AVG(rev.RATING*1.0) AS averageRating FROM RECIPES recRevSubquery ");
 		sb.append("LEFT JOIN REVIEWS rev ON recRevSubquery.RECIPE_ID = rev.RECIPE_ID ");
 		sb.append("GROUP BY recRevSubquery.RECIPE_ID ");
 		sb.append("HAVING COUNT(rev.REVIEW_ID)>=? ");
 		sb.append("AND COUNT(rev.REVIEW_ID)<=? ");
-		sb.append("AND ((AVG(rev.RATING) IS NULL) ");//edge case: no reviews
-			sb.append("OR (AVG(rev.RATING)>=? ");
-				sb.append("AND AVG(rev.RATING)<=? ");
+		sb.append("AND ((AVG(rev.RATING*1.0) IS NULL) ");//edge case: no reviews
+			sb.append("OR (AVG(rev.RATING*1.0)>=? ");
+				sb.append("AND AVG(rev.RATING*1.0)<=? ");
 		sb.append("))");
 	}
 	
@@ -638,10 +638,10 @@ public class RecipeSearch extends HttpServlet {
 			innerNode.put("recipeName", recipes.getString("RECIPE_NAME"));
 			innerNode.put("recipeImagePath", recipes.getString("RECIPE_IMAGE_PATH"));
 			innerNode.put("recipeDescription", recipes.getString("RECIPE_DESCRIPTION"));
-			innerNode.put("recipeTotalMinutes", recipes.getInt("TOTAL_MINUTES"));
+			innerNode.put("recipeTotalMinutes", recipes.getObject("TOTAL_MINUTES") == null ? "N/A" : recipes.getInt("TOTAL_MINUTES") + "m");
 			innerNode.put("recipeActiveTimestamp", recipes.getTimestamp("RECIPE_ACTIVE_TIMESTAMP").toString());
 			innerNode.put("reviewCount", recipes.getInt("reviewCount"));
-			innerNode.put("averageRating", recipes.getInt("averageRating"));
+			innerNode.put("averageRating", String.format("%.1f", recipes.getFloat("averageRating")));
 			innerNode.put("bookmarkCount", recipes.getInt("bookmarkCount"));
 			innerNode.put("userId", recipes.getInt("USER_ID"));
 			innerNode.put("userName", recipes.getString("USER_NAME"));

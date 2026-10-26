@@ -32,6 +32,10 @@ import="Search.*"
     <%-- reuses connection that DbInit opened at startup --%>
     <%
     Connection dbConnection = DatabaseAccess.getConnection();
+    boolean isConnected = false;
+    if(dbConnection!=null){
+    	isConnected=true;
+    }
     int sessionUserId = (Integer) session.getAttribute("userId");
 	%>
 
@@ -39,9 +43,7 @@ import="Search.*"
         String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
         String dbUser = "root";
         String dbPassword = request.getParameter("dbPassword");
-        
-        boolean isConnected = false;
-        if (dbPassword != null) {
+        if (isConnected==false && dbPassword != null) {
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 dbConnection = DriverManager.getConnection(dbURL, dbUser, dbPassword);
@@ -503,11 +505,11 @@ import="Search.*"
 							filterIds.set(key, []);
 						}
 						
-						addSearchListenerWithImage('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '/RecipeGenie/DishTypes/Search?', false);
-						addSearchListenerWithImage('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '/RecipeGenie/Cuisines/Search?', false);
-						addSearchListenerWithImage('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '/RecipeGenie/Ingredients/Search?', true);
-						addSearchListenerWithImage('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '/RecipeGenie/Appliances/Search?', true);
-						addSearchListenerWithImage('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '/RecipeGenie/Users/Search?', true);
+						addSearchListenerWithImage('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '${pageContext.request.contextPath}/DishTypes/Search?', false);
+						addSearchListenerWithImage('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '${pageContext.request.contextPath}/Cuisines/Search?', false);
+						addSearchListenerWithImage('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '${pageContext.request.contextPath}/Ingredients/Search?', true);
+						addSearchListenerWithImage('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '${pageContext.request.contextPath}/Appliances/Search?', true);
+						addSearchListenerWithImage('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '${pageContext.request.contextPath}/Users/Search?', true);
 						
 						const tolerances = new Map();
 						for (let key of ["Ingredient", "Appliance"]){
@@ -625,7 +627,7 @@ import="Search.*"
 							let input = document.getElementById(searchId);
 							let timeout = null;
 							input.addEventListener('keyup', function (e) {//tracking keyboard input
-								    clearTimeout(timeout);
+									clearTimeout(timeout);
 								    timeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
 								    	let searchTerm = input.value;
 								    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
@@ -851,8 +853,7 @@ import="Search.*"
 						        parameters.append('tolerances', JSON.stringify(Object.fromEntries(tolerances)));
 						        parameters.append('ranges', JSON.stringify(Object.fromEntries(ranges)));
 						        parameters.append('options', JSON.stringify(Object.fromEntries(options)));
-						        console.log(parameters);
-								let response = await fetch("/RecipeGenie/Recipes/Search?" + parameters.toString(), {
+								let response = await fetch("${pageContext.request.contextPath}/Recipes/Search?" + parameters.toString(), {
 						        	method:'GET',
 						        	headers:{
 						                "Content-Type": "application/json",
@@ -863,7 +864,6 @@ import="Search.*"
 						        	throw new Error('Network response was not ok');
 						        }
 					        	let objects = await response.json(); // Creates a JSON object
-					        	console.log(objects);
 					        	addResults(objects);
 						    }, 100);
 						}
@@ -901,17 +901,15 @@ import="Search.*"
 				            	recipeImageContainer.classList.add("recipe-card-img");
 				            	let recipeImage = document.createElement("img");
 				            	recipeImage.setAttribute('src', "${pageContext.request.contextPath}"+recipeImagePath);
-				            	recipeImage.setAttribute('alt', "${pageContext.request.contextPath}"+"/images/recipes/recipe-placeholder.jpg");
+				            	recipeImage.setAttribute('alt', "${pageContext.request.contextPath}/images/recipes/recipe-placeholder.jpg");
 				            	recipeImageContainer.append(recipeImage);
 				            	
 				            	let recipeBadges = document.createElement("div");
 				            	recipeBadges.classList.add("recipe-card-badges");
 								let cookingTimeBadgePill = document.createElement("span");
-								if(recipeTotalMinutes>0){
-									cookingTimeBadgePill.classList.add("badge-pill");
-									cookingTimeBadgePill.textContent=recipeTotalMinutes + " m";
-									recipeBadges.append(cookingTimeBadgePill);
-								}
+								cookingTimeBadgePill.classList.add("badge-pill");
+								cookingTimeBadgePill.textContent=recipeTotalMinutes;
+								recipeBadges.append(cookingTimeBadgePill);
 								let publicationDateBadgePill = document.createElement("span");
 								publicationDateBadgePill.classList.add("badge-pill");
 								publicationDateBadgePill.textContent=recipeActiveTimestamp;
@@ -939,10 +937,25 @@ import="Search.*"
 								cardAuthor.classList.add("card-author");
 								let authorImage = document.createElement("img");
 								authorImage.classList.add("mini-pic");
-								authorImage.setAttribute('src', "${pageContext.request.contextPath}"+userImagePath);
-								authorImage.setAttribute('alt', "${pageContext.request.contextPath}"+"/images/users/user-placeholder.png");
-								let authorName = document.createElement("span");
-								authorName.textContent=userName;
+								if(userImagePath){
+									authorImage.setAttribute('src', "${pageContext.request.contextPath}"+userImagePath);
+								}
+								else{
+									authorImage.setAttribute('src', "${pageContext.request.contextPath}/images/users/user-placeholder.png");
+								}
+								authorImage.setAttribute('alt', "Author");
+
+								let authorName;
+								if(userName&&userId){
+									authorName = document.createElement("a");
+									authorName.classList.add("author-link");
+									authorName.setAttribute("href", "profile.jsp?id="+userId);
+									authorName.textContent=userName;
+								}
+								else{
+									authorName = document.createElement("span");
+									authorName.textContent="Anonymous";
+								}
 								cardAuthor.append(authorImage);
 								cardAuthor.append(authorName);
 								cardFooter.append(cardAuthor);
@@ -966,12 +979,12 @@ import="Search.*"
 								
 								let cardStats = document.createElement("div");
 								cardStats.classList.add("card-stats");
-								let cardBookmark = document.createElement("span");
+								let cardBookmark = document.createElement("button");
 								cardBookmark.classList.add("card-bookmark");
 								cardBookmark.textContent = bookmarkCount;
 								let cardBookmarkImage = document.createElement("img");
 								cardBookmarkImage.setAttribute('src', "${pageContext.request.contextPath}"+"/images/bookmark_icon.svg");
-								cardBookmarkImage.setAttribute('alt', "bookmark");
+								cardBookmarkImage.setAttribute('alt', "Bookmark icon");
 								cardBookmarkImage.setAttribute('width', "16");
 								cardBookmarkImage.setAttribute('height', "16");
 								cardBookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
@@ -1011,24 +1024,39 @@ import="Search.*"
 					 if (dbConnection != null) {
 				    	String sql =
 				    		    "SELECT r.RECIPE_NAME, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, " +
-				    		    "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_NAME " +
+				    		    "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
+				    		    "u.USER_NAME, COUNT(b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED " + // really cheeky
 				    		    "FROM RECIPES r LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
-				    		    "WHERE r.RECIPE_STATUS = 'Active' ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC";
+				    		    "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+				    		    "WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+				    		    " r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_IMAGE_PATH," +
+				    		    " r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
+				    		    "u.USER_NAME ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC ";
 					    try (
 					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
-					    	ResultSet recipes = statement.executeQuery();		
 				    		){
-					    					    	
-					    	while(recipes.next()){
-					    		String imagePath = recipes.getString("RECIPE_IMAGE_PATH");
-					    		if(imagePath == null || imagePath.isEmpty()){
-					    			imagePath = "/images/recipe-placeholder.jpg";	
-					    		}
+					    	statement.setInt(1, sessionUserId);
+			    			try(
+			    				ResultSet recipes = statement.executeQuery();		
+							)	{
+						    	while(recipes.next()){
+						    		String recipeImagePath = recipes.getString("RECIPE_IMAGE_PATH");
+						    		if(recipeImagePath == null || recipeImagePath.isEmpty()){
+						    			recipeImagePath = "/images/recipes/recipe-placeholder.jpg";	
+						    		}
+						    		String userImagePath = recipes.getString("USER_IMAGE_PATH");
+						    		if(userImagePath == null || userImagePath.isEmpty()){
+						    			userImagePath = "/images/users/user-placeholder.png";	
+						    		}
+	                                String bookmarkImage = "/images/bookmark_icon.svg";
+	                                if(recipes.getInt("HAS_BOOKMARKED")>0){
+	                                	bookmarkImage ="/images/bookmark_icon_active.svg";
+	                                }    	
 					    		%>
 
 					    		<article class="recipe-card">
 					    		    <div class="recipe-card-img">
-					    		        <img src="${pageContext.request.contextPath}<%=imagePath%>" alt="Recipe">
+					    		        <img src="${pageContext.request.contextPath}<%=recipeImagePath%>" alt="Recipe">
 
 					    		        <div class="recipe-card-badges">
 					    		            <span class="badge-pill">
@@ -1049,19 +1077,25 @@ import="Search.*"
 					    		        <p class="recipe-card-desc">
 					    		            <%= recipes.getString("RECIPE_DESCRIPTION") %>
 					    		        </p>
-
-					    		        <div class="recipe-card-footer">
+					    		        <div class="recipe-card-footer" style="justify-content: left;">
+					    					<img class="mini-pic" src="${pageContext.request.contextPath}<%=userImagePath%>" alt="Author"/>
 					    		            <% String an = recipes.getString("USER_NAME"); int aid = recipes.getInt("AUTHOR_ID"); %>
 											<% if (an != null) { %>
 											    <a class="author-link" href="profile.jsp?id=<%= aid %>"><%= Auth.Util.esc(an) %></a>
 											<% } else { %><span>Anonymous</span><% } %>
+					    					<div class="card-stats">
+			                                    <span class="card-bookmark">
+												    <img src="${pageContext.request.contextPath}<%=bookmarkImage%>" alt="Bookmark icon" width="16" height="16" style="vertical-align: middle; stroke: currentColor;" />
+												    <%= recipes.getInt("BOOKMARK_COUNT") %>
+												</span>
+			                                </div>
 					    		        </div>
 					    		    </div>
 					    		</article>
 
 					    		<%
 					    		        }
-					    }catch (Exception error){
+					    }}catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
 					 }%>
@@ -1080,8 +1114,8 @@ import="Search.*"
                         String reviewSql =
                             "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
                             "v.REVIEW_DESCRIPTION, v.RATING, " +
-                            "v.REVIEW_ACTIVE_TIMESTAMP, u.USER_NAME, u.USER_IMAGE_PATH " +
-                            "FROM REVIEWS v " +
+                            "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
+                            "u.USER_IMAGE_PATH FROM REVIEWS v " +
                             "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID " +
                             "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
                             "WHERE v.REVIEW_STATUS = 'Active' " +
@@ -1098,11 +1132,6 @@ import="Search.*"
                                 if (reviewImage == null || reviewImage.isEmpty()) {
                                     reviewImage = "/images/recipe-placeholder.jpg";
                                 }
-
-                                String reviewer = reviews.getString("USER_NAME");
-                                if (reviewer == null) {
-                                    reviewer = "Anonymous";
-                                }
                                 String reviewerAvatar = reviews.getString("USER_IMAGE_PATH");
                                 if (reviewerAvatar == null || reviewerAvatar.isEmpty()){
                                 	reviewerAvatar = "/images/users/user-placeholder.png";
@@ -1114,7 +1143,7 @@ import="Search.*"
                         </div>
                         <div class="review-body">
                             <p class="review-title">
-                                <%= reviews.getString("RECIPE_NAME") %>
+                                <%= Auth.Util.esc(reviews.getString("RECIPE_NAME")) %>
                             </p>
                             <p class="review-text">
                                 <%= reviews.getString("REVIEW_DESCRIPTION") %>
@@ -1122,7 +1151,10 @@ import="Search.*"
                             <div class="review-footer">
                                 <div class="card-author">
                                     <img class="mini-pic" src="${pageContext.request.contextPath}<%=reviewerAvatar%>" alt="Author"/>
-                                    <span><%= reviewer %></span>
+                                  	<% String an = reviews.getString("USER_NAME"); int aid = reviews.getInt("REVIEWER_ID"); %>
+									<% if (an != null) { %>
+									    <a class="author-link" href="profile.jsp?id=<%= aid %>"><%= Auth.Util.esc(an) %></a>
+									<% } else { %><span>Anonymous</span><% } %>
                                 </div>
                                 <div class="review-meta">
                                     <span class="review-date">
@@ -1161,8 +1193,9 @@ import="Search.*"
                         String popularSql =
                             "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
                             "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
-                            "COUNT(b.USER_ID) AS BOOKMARK_COUNT " +
-                            "FROM RECIPES r " +
+                            "COUNT(b.USER_ID) AS BOOKMARK_COUNT, " +
+                            "SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " + // really cheeky
+                            "r.RECIPE_ID FROM RECIPES r " +
                             "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
                             "WHERE r.RECIPE_STATUS = 'Active' " +
                             "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
@@ -1173,16 +1206,18 @@ import="Search.*"
                         try (
                             PreparedStatement popularStatement =
                                 dbConnection.prepareStatement(popularSql);
-                            ResultSet popularRecipes =
-                                popularStatement.executeQuery()
                         ) {
-                            int rank = 1;
-                            while (popularRecipes.next()) {
-                                String popularImage =
-                                	popularRecipes.getString("RECIPE_IMAGE_PATH");
-                                if (popularImage == null || popularImage.isEmpty()) {
-                                    popularImage = "/images/recipes/recipe-placeholder.jpg";
-                                }
+                        	popularStatement.setInt(1, sessionUserId);
+                        	try(                           
+                        		ResultSet popularRecipes =
+                                    popularStatement.executeQuery()){
+                                int rank = 1;
+                                while (popularRecipes.next()) {
+                                    String popularImage =
+                                    	popularRecipes.getString("RECIPE_IMAGE_PATH");
+                                    if (popularImage == null || popularImage.isEmpty()) {
+                                        popularImage = "/images/recipes/recipe-placeholder.jpg";
+                                    }
                     %>
                     <article class="recipe-card">
                         <div class="recipe-card-img">
@@ -1198,24 +1233,33 @@ import="Search.*"
                         </div>
                         <div class="recipe-card-body">
                             <h3 class="recipe-card-title">
-                                <%= popularRecipes.getString("RECIPE_NAME") %>
+                                <%= Auth.Util.esc(popularRecipes.getString("RECIPE_NAME")) %>
                             </h3>
                             <p class="recipe-card-desc">
-                                <%= popularRecipes.getString("RECIPE_DESCRIPTION") %>
+                                <%= Auth.Util.esc(popularRecipes.getString("RECIPE_DESCRIPTION")) %>
                             </p>
                             <div class="recipe-card-footer">
                                 <div class="card-stats">
-                                    <span class="card-bookmark">
-									    <img src="images/bookmark_icon.svg" alt="Bookmark icon" width="16" height="16" style="vertical-align: middle; stroke: currentColor;" />
+                                    <button class="card-bookmark" onclick="toggleBookmark(this, <%=popularRecipes.getInt("RECIPE_ID")%>)">
+									    <img id="popularBookmark<%=rank%>" class="bookmark-icon" src="${pageContext.request.contextPath}/images/bookmark_icon.svg" alt="Bookmark icon" width="16" height="16" style="vertical-align: middle; stroke: currentColor;" />
 									    <%= popularRecipes.getInt("BOOKMARK_COUNT") %>
-									</span>
+									</button>
                                 </div>
                             </div>
                         </div>
                     </article>
                     <%
-                                rank++;
-                            }
+                    				if(popularRecipes.getInt("HAS_BOOKMARKED")>0){
+                    %>
+             			<script>
+             				currentBookmark = document.get("popularBookmark"+<%=rank%>);
+             				toggleBookmark(currentBookmarkElement, <%=popularRecipes.getInt("RECIPE_ID")	%>);
+             			</script>
+                    <%
+                    				}
+	                                rank++;
+	                            }
+	                        }
                         }
                         catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
@@ -1228,6 +1272,31 @@ import="Search.*"
         </div>
         <script>
         	document.getElementById("personalizedStrips").classList.add("active");
+		    bookmarkTimeout = null;
+		    
+			function toggleBookmark(bookmark, recId){
+				let url = "${pageContext.request.contextPath}/Bookmark/Add";
+			    clearTimeout(bookmarkTimeout);
+			    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
+					let response = await fetch(url, {
+			        	method:'POST',
+			        	body: JSON.stringify({
+				        	userId: <%=sessionUserId%>,
+	    					recipeId: recId
+			        	}),
+			        	headers:{
+			                "Content-Type": "application/json; charset=UTF-8",
+			                "Accept": "application/json; charset=UTF-8"
+			        	}
+			        });
+					if (!response.ok) {
+			        	throw new Error('Network response was not ok');
+			        }
+		        	let objects = await response.json(); // Creates a JSON object
+		        	console.log(objects);
+			    }, 100);
+			}
+			
         </script>
     </main>
 
