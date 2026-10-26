@@ -61,5 +61,6 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/ingredient-search.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/cuisine-search.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/dish-type-search.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/bcprov-jdk18on-1.86.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

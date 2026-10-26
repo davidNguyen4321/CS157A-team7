@@ -1,0 +1,112 @@
+/* ---------- Login / Create account ---------- */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background-color: var(--primary);
+}
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: var(--card);
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+}
+.auth-card h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--primary);
+}
+.auth-sub { margin: 0 0 0.5rem; color: var(--muted-foreground); }
+.auth-card label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin-top: 0.5rem;
+}
+.auth-card input {
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.95rem;
+  background: var(--background);
+  color: var(--foreground);
+}
+.auth-card input:focus { outline: 2px solid var(--ring); outline-offset: 1px; }
+.auth-error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+.auth-primary {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: var(--radius);
+  background-color: var(--accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-primary:hover { opacity: 0.9; }
+.auth-secondary {
+  text-align: center;
+  padding: 0.7rem;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-secondary:hover { background-color: var(--muted); }
+
+/* ---------- Links to profiles ---------- */
+.author-link { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.author-link:hover { color: var(--accent); }
+.user-profile-group .author-link { text-decoration: none; }
+
+/* ---------- Profile pages ---------- */
+.profile-page { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+}
+.profile-hero h1 { font-family: 'Fraunces', Georgia, serif; font-size: 2rem; }
+.profile-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 9999px;
+  object-fit: cover;
+  background: var(--secondary);
+  border: 3px solid var(--accent);
+}
+.profile-meta { color: var(--muted-foreground); margin: 0.25rem 0 0; }
+.profile-section { margin-top: 2rem; }
+.profile-section h2 { font-family: 'Fraunces', Georgia, serif; font-size: 1.25rem; font-weight: 600; margin: 0 0 0.75rem; }
+.profile-section-head { display: flex; justify-content: space-between; align-items: baseline; }
+.see-all { color: var(--primary); font-weight: 600; text-decoration: none; }
+.see-all:hover { color: var(--accent); }
+.profile-grid { display: flex; flex-wrap: wrap; gap: 1rem; }
