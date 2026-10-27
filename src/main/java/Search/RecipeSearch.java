@@ -488,7 +488,7 @@ public class RecipeSearch extends HttpServlet {
 	
 	private void buildRecipeReviewSubquery(StringBuilder sb) {
 		sb.append("SELECT recRevSubquery.RECIPE_ID, COUNT(rev.REVIEW_ID) AS reviewCount, AVG(rev.RATING*1.0) AS averageRating FROM RECIPES recRevSubquery ");
-		sb.append("LEFT JOIN REVIEWS rev ON recRevSubquery.RECIPE_ID = rev.RECIPE_ID ");
+		sb.append("LEFT JOIN REVIEWS rev ON recRevSubquery.RECIPE_ID = rev.RECIPE_ID AND rev.REVIEW_STATUS = 'ACTIVE' ");
 		sb.append("GROUP BY recRevSubquery.RECIPE_ID ");
 		sb.append("HAVING COUNT(rev.REVIEW_ID)>=? ");
 		sb.append("AND COUNT(rev.REVIEW_ID)<=? ");
@@ -501,7 +501,9 @@ public class RecipeSearch extends HttpServlet {
 	private void buildRecipeBookmarkSubquery(StringBuilder sb, int sessionUserId) {
 		sb.append("SELECT recBookSubquery.RECIPE_ID, COUNT(b.USER_ID) AS bookmarkCount, ");
 		sb.append("SUM(b.USER_ID = ?) AS userbookmarked FROM RECIPES recBookSubquery ");
-		sb.append("LEFT JOIN BOOKMARK b ON recBookSubquery.RECIPE_ID = b.RECIPE_ID ");
+		sb.append("LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b ");
+		sb.append("INNER JOIN USERS u ON u.USER_ID = b.USER_ID AND u.USER_STATUS = 'ACTIVE' ");
+		sb.append(") b ON recBookSubquery.RECIPE_ID = b.RECIPE_ID ");
 		sb.append("GROUP BY recBookSubquery.RECIPE_ID ");
 		sb.append("HAVING COUNT(b.USER_ID)>=? ");
 		sb.append("AND COUNT(b.USER_ID)<=? ");

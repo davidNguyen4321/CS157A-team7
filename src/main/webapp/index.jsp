@@ -1092,10 +1092,13 @@ import="Search.*"
 			                		"FROM RECIPES recRevSubquery " +
 				           			"LEFT JOIN REVIEWS rev ON " +
 				           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+				            		"AND rev.REVIEW_STATUS = 'Active' " +
 			                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
 				           		") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
-								"LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
-				    		    "WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+		             			"LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
+		  							"INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
+		  		  					"AND u.USER_STATUS = 'Active' " +
+            			  		") b ON r.RECIPE_ID = b.RECIPE_ID " +				    		    "WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
 				    		    "r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_IMAGE_PATH, " +
 				    		    "r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
 						    	"recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING, " +
@@ -1280,13 +1283,17 @@ import="Search.*"
 	                           "recRevSubquery.AVERAGE_RATING, " +
 	                           "recRevSubquery.REVIEW_COUNT, "+
 	                           "r.RECIPE_ID FROM RECIPES r " +
-	                           "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+	             			   "LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
+		  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
+		  		  				   "AND u.USER_STATUS = 'Active' " +
+            			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
 			                   "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
 			                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
 			                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
 			                		"FROM RECIPES recRevSubquery " +
 				           			"LEFT JOIN REVIEWS rev ON " +
 				           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+				            		"AND rev.REVIEW_STATUS = 'Active' " +
 			                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
 	                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
 	                           "WHERE r.RECIPE_STATUS = 'Active' " +
@@ -1394,7 +1401,10 @@ import="Search.*"
 						           "recRevSubquery.AVERAGE_RATING, " +
 		                           "r.RECIPE_ID, r.AUTHOR_ID, u.USER_NAME, " +
 		                           "u.USER_IMAGE_PATH FROM RECIPES r " +
-		                           "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+		             			   "LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
+			  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
+			  		  				   "AND u.USER_STATUS = 'Active' " +
+	            			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
 				                   "LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
 		                           "LEFT JOIN REVIEWS rev ON r.RECIPE_ID = rev.RECIPE_ID " +
 				                   "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
@@ -1403,6 +1413,7 @@ import="Search.*"
 				                		"FROM RECIPES recRevSubquery " +
 					           			"LEFT JOIN REVIEWS rev ON " +
 					           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+					            		"AND rev.REVIEW_STATUS = 'Active' " +
 				                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
 		                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
 				                   "WHERE r.RECIPE_STATUS = 'Active' " +

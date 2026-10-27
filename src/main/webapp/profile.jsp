@@ -196,13 +196,17 @@
             String rsql = "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
             			  "r.RECIPE_ID, COUNT(b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
   						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
-            			  "FROM RECIPES r LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
-            			  "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+            			  "FROM RECIPES r LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
+	  						  "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
+	  		  				  "AND u.USER_STATUS = 'Active' " +
+            			  ") b ON r.RECIPE_ID = b.RECIPE_ID " +
+            			  "INNER JOIN (SELECT recRevSubquery.RECIPE_ID, " +
                           	"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
             			  	"AVG(rev.RATING*1.0) AS AVERAGE_RATING " +
                           	"FROM RECIPES recRevSubquery " +
             			  	"LEFT JOIN REVIEWS rev ON " +
                           	"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+            			  	"AND rev.REVIEW_STATUS = 'Active' " +
             			  	"GROUP BY recRevSubquery.RECIPE_ID " +
                        	  ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
                           "WHERE r.AUTHOR_ID = ? AND r.RECIPE_STATUS = 'Active' " +
@@ -264,8 +268,9 @@
         </div>
         <div class="profile-grid">
         <%
-            String vsql = "SELECT v.REVIEW_NAME, v.REVIEW_DESCRIPTION, v.RATING, v.REVIEW_ACTIVE_TIMESTAMP, " +
-                          "r.RECIPE_NAME FROM REVIEWS v JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID " +
+            String vsql = "SELECT v.REVIEW_NAME, v.REVIEW_DESCRIPTION, v.RATING, " +
+                          "v.REVIEW_ACTIVE_TIMESTAMP, r.RECIPE_NAME, r.RECIPE_IMAGE_PATH FROM REVIEWS v " +
+                          "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID " +
                           "WHERE v.REVIEWER_ID = ? AND v.REVIEW_STATUS = 'Active' " +
                           "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC LIMIT 5";
             boolean anyReview = false;
@@ -274,15 +279,29 @@
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
                         anyReview = true;
+               			String reviewImage =
+               					rs.getString("RECIPE_IMAGE_PATH");
+               			if (reviewImage == null || reviewImage.isEmpty()) {
+               				reviewImage = "/images/recipe-placeholder.jpg";
+               			}
+               			int rating = rs.getInt("RATING");
         %>
             <article class="review-card">
+    	        <div class="review-thumb">
+                    <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
+                </div>
                 <div class="review-body">
                     <p class="review-title"><%= Util.esc(rs.getString("REVIEW_NAME")) %>
                         <small>on <%= Util.esc(rs.getString("RECIPE_NAME")) %></small></p>
                     <p class="review-text"><%= Util.esc(rs.getString("REVIEW_DESCRIPTION")) %></p>
                     <div class="review-footer">
                         <span class="review-date"><%= rs.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %></span>
-                        <span class="card-rating"><%= rs.getInt("RATING") %>/5</span>
+						<span class="card-rating">
+                             <span class="stars"
+                                 style="--rating: <%= rating %>;"
+                                 aria-label="<%= rating %> out of 5 stars"></span>
+                             <%= rating %>/5
+                       </span>
                     </div>
                 </div>
             </article>
