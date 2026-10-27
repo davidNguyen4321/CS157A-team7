@@ -594,6 +594,13 @@ nav.main-nav {
 .section-subtitle { font-size: 0.875rem; color: var(--muted-foreground); margin-top: 0.125rem; margin-bottom: 1rem; }
 
 .horizontal-scroll-row { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem; }
+.horizontal-scroll-row:not(:has(*))::before {
+  content: "No elements found.";
+  color: #888;
+  font-style: italic;
+  color:#403200;
+  font-size: 0.85rem;
+}
 
 /* Recipe cards (Your Feed and Your Most Popular) */
 .recipe-card { flex-shrink: 0; width: 20rem; background-color: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow 0.2s; }
@@ -623,7 +630,8 @@ nav.main-nav {
 .card-avatar { width: 1.75rem; height: 1.75rem; border-radius: 9999px; background-color: var(--secondary); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0; }
 .card-avatar img {width: 100%; height: 100%; object-fit: contain;}
 .card-stats { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 0.75rem; font-size: 0.75rem; color: var(--muted-foreground); }
-.card-bookmark, .card-rating { display: inline-flex; align-items: center; gap: 0.25rem; }
+.card-bookmark, .card-rating, .card-follow { display: inline-flex; align-items: center; gap: 0.25rem;}
+.card-bookmark.active, .card-rating.active, .card-follow.active { background: #FFD966;}
 
 /* Star rating: set --rating (0-5, decimals allowed) and the stars fill to match */
 .stars { --percent: calc(var(--rating) / 5 * 100%); display: inline-block; font-size: 0.95rem; letter-spacing: 1px; line-height: 1; }

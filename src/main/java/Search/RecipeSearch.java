@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,10 +28,20 @@ public class RecipeSearch extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		
+		HttpSession session = request.getSession(false);
+		Integer sessionUserId;
+		//assumes that if the userId exists, that it is a valid id
+		if(!request.isRequestedSessionIdValid() || session == null || (sessionUserId = (Integer) session.getAttribute("userId")) == null) {
+			log("Invalid session.");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.getWriter().write("{}");
+			return;
+		}
+		
 		Connection dbConnection = DatabaseAccess.getConnection();
 		if(dbConnection==null) {
 			log("No dbConnection available.");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 			response.getWriter().write("{}");
 			return;
 		}
@@ -70,11 +81,11 @@ public class RecipeSearch extends HttpServlet {
 							dbConnection
 							)
 					);
-			searchRecipe(requestInfo, dbConnection, response);
+			searchRecipe(requestInfo, dbConnection, response, sessionUserId);
 		}
 		catch(Exception ex) {//error checking
 			log("Recipe search failed: " + ex.getMessage());
-			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().write("{}");
 			return;
 		}
@@ -309,8 +320,8 @@ public class RecipeSearch extends HttpServlet {
 		return permissibleProvidedIds.toArray(new Integer[permissibleProvidedIds.size()]);
 	}
 	
-	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response) throws SQLException, IOException{
-		try (PreparedStatement statement = dbConnection.prepareStatement(buildRecipeQuery(requestInfo));){
+	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response, int sessionUserId) throws SQLException, IOException{
+		try (PreparedStatement statement = dbConnection.prepareStatement(buildRecipeQuery(requestInfo, sessionUserId));){
 			int counter = 1;
 			
 			// ingredient filters
@@ -331,6 +342,7 @@ public class RecipeSearch extends HttpServlet {
 			statement.setInt(counter++, requestInfo.ranges.get("Ratings").get("max"));    		
 			
 			//bookmarks
+			statement.setInt(counter++, sessionUserId);
 			statement.setInt(counter++, requestInfo.ranges.get("Bookmarks").get("min"));
 			statement.setInt(counter++, requestInfo.ranges.get("Bookmarks").get("max"));
 			
@@ -376,12 +388,12 @@ public class RecipeSearch extends HttpServlet {
     		}
 		}
 	}
-	private String buildRecipeQuery(RecipeSearchRequest requestInfo) {
+	private String buildRecipeQuery(RecipeSearchRequest requestInfo, int sessionUserId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT rec.RECIPE_ID, rec.RECIPE_NAME, rec.RECIPE_IMAGE_PATH, rec.RECIPE_DESCRIPTION, ");
 		sb.append("rec.TOTAL_MINUTES, rec.RECIPE_ACTIVE_TIMESTAMP, recRevSubquery.reviewCount, ");
-		sb.append("recRevSubquery.averageRating, recBookSubquery.bookmarkCount, recAuthSubquery.USER_ID, ");
-		sb.append("recAuthSubquery.USER_NAME, recAuthSubquery.USER_IMAGE_PATH FROM RECIPES rec ");
+		sb.append("recRevSubquery.averageRating, recBookSubquery.bookmarkCount, recBookSubquery.userbookmarked, ");
+		sb.append("recAuthSubquery.USER_ID, recAuthSubquery.USER_NAME, recAuthSubquery.USER_IMAGE_PATH FROM RECIPES rec ");
 		
 		//ingredient filter
 		int ingredientsLength = requestInfo.filterIdsNotCourses.get("Ingredient").length;
@@ -403,7 +415,7 @@ public class RecipeSearch extends HttpServlet {
 		
 		// bookmarks
 		sb.append("INNER JOIN (");
-			buildRecipeBookmarkSubquery(sb);
+			buildRecipeBookmarkSubquery(sb, sessionUserId);
 		sb.append(") recBookSubquery ON rec.RECIPE_ID = recBookSubquery.RECIPE_ID ");
 		
 		// authors
@@ -486,8 +498,9 @@ public class RecipeSearch extends HttpServlet {
 		sb.append("))");
 	}
 	
-	private void buildRecipeBookmarkSubquery(StringBuilder sb) {
-		sb.append("SELECT recBookSubquery.RECIPE_ID, COUNT(b.USER_ID) AS bookmarkCount FROM RECIPES recBookSubquery ");
+	private void buildRecipeBookmarkSubquery(StringBuilder sb, int sessionUserId) {
+		sb.append("SELECT recBookSubquery.RECIPE_ID, COUNT(b.USER_ID) AS bookmarkCount, ");
+		sb.append("SUM(b.USER_ID = ?) AS userbookmarked FROM RECIPES recBookSubquery ");
 		sb.append("LEFT JOIN BOOKMARK b ON recBookSubquery.RECIPE_ID = b.RECIPE_ID ");
 		sb.append("GROUP BY recBookSubquery.RECIPE_ID ");
 		sb.append("HAVING COUNT(b.USER_ID)>=? ");
@@ -643,6 +656,7 @@ public class RecipeSearch extends HttpServlet {
 			innerNode.put("reviewCount", recipes.getInt("reviewCount"));
 			innerNode.put("averageRating", String.format("%.1f", recipes.getFloat("averageRating")));
 			innerNode.put("bookmarkCount", recipes.getInt("bookmarkCount"));
+			innerNode.put("userBookmarked", recipes.getInt("userbookmarked")>0);
 			innerNode.put("userId", recipes.getInt("USER_ID"));
 			innerNode.put("userName", recipes.getString("USER_NAME"));
 			innerNode.put("userImagePath", recipes.getString("USER_IMAGE_PATH"));

@@ -110,73 +110,137 @@ import="Search.*"
             </div>
         </div>
     </header>
-
+	<script>
+		function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
+			self.classList.add("card-bookmark");
+			self.setAttribute("onclick", "toggleBookmark(this, " + recId + ");");
+			self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
+			self.textContent=bookmarkCount;
+			let bookmarkImage = document.createElement("img");
+			bookmarkImage.classList.add("bookmark-icon");
+			bookmarkImage.setAttribute('alt', "Bookmark icon");
+			bookmarkImage.setAttribute('width', "16");
+			bookmarkImage.setAttribute('height', "16");
+			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
+			if(userBookmarked){
+				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
+				self.classList.add("active");
+			}
+			else{
+				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
+			}
+			self.append(bookmarkImage);
+		}
+		
+	    bookmarkTimeout = null;
+		function toggleBookmark(self, recId){
+			let url = "${pageContext.request.contextPath}/Bookmark/Toggle";
+		    clearTimeout(bookmarkTimeout);
+		    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
+				let response = await fetch(url, {
+		        	method:'POST',
+		        	body: JSON.stringify({
+						recipeId: recId
+		        	}),
+		        	headers:{
+		                "Content-Type": "application/json; charset=UTF-8",
+		                "Accept": "application/json; charset=UTF-8"
+		        	}
+		        });
+				if (!response.ok) {
+		        	throw new Error('Network response was not ok');
+		        }
+	        	let objects = await response.json(); // Creates a JSON object
+	        	toggleBookmarkElement(self, objects["bookmark"], objects["bookmarkCount"]);
+		    }, 100);
+		}
+		
+		function toggleBookmarkElement(self, toggleOnBoolean, newCount){
+			let bookmarkImage = document.createElement("img");
+			bookmarkImage.classList.add("bookmark-icon");
+			bookmarkImage.setAttribute('alt', "Bookmark icon");
+			bookmarkImage.setAttribute('width', "16");
+			bookmarkImage.setAttribute('height', "16");
+			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
+			if(toggleOnBoolean){
+				self.classList.add("active");
+				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
+			}
+			else{
+				self.classList.remove("active");
+				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon.svg")
+			}
+			self.textContent=newCount;
+			self.append(bookmarkImage);
+		}
+	</script>
     <!--
       =========================================================================
       DISCOVER TAB MAIN SECTION
       =========================================================================
     -->
     <main>
-        <!-- Hero & Smart Search Box Section -->
-        <section class="hero-section">
-            <div class="hero-bg-blobs">
-                <div class="blob-1"></div>
-                <div class="blob-2"></div>
-            </div>
-            <div class="hero-content-wrapper">
-                <!-- Use inline-block style so this wrapper matches the exact width of the title text -->
-                <div style="display: inline-block; max-width: 100%;">
-                    <div class="hero-badge">
-                        <span class="hero-badge-dot"></span>
-                        Cook smarter, not harder
-                    </div>
-                    <h1 class="hero-title">
-                        What can you cook <span style="white-space: nowrap;"><em>right now?</em></span>
-                    </h1>
-                    <div class="hero-desc">
-                        <p style="margin: 0 0 0.5rem 0;">Search by ingredients and appliances you already have.</p>
-                        <p style="margin: 0;">Discover recipes that fit your kitchen, not the other way around.</p>
-                    </div>
-
-                    <!-- Smart search form -->
-                    <form action="index.jsp" method="GET" class="search-form" style="width: 100%;">
-                        <div class="search-top-bar">
-                            <span class="search-icon-fixed">🔍</span>
-                            <input id="RecipesSearch" type="text" name="search" placeholder="Search recipe..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
-
-                            <!-- Filters button next to the search bar -->
-                            <button type="button" class="filter-btn" onclick="handleFilterTypeClick('GeneralPanel', this);">
-                                ⚙️ Filters
-                            </button>
-                        </div>
-
-                        <div class="search-bottom-row">
-                           <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterTypeClick('IngredientsPanel', this);">
-                               <div class="filter-icon-box">🥚</div>
-                               <div>
-                                   <div class="filter-label">Ingredients</div>
-                                   <div class="filter-sub">What do you have?</div>
-                               </div>
-                           </button>
-                           
-                           <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterTypeClick('AppliancesPanel', this);">
-                               <div class="filter-icon-box">🍳</div>
-                               <div>
-                                   <div class="filter-label">Appliances</div>
-                                   <div class="filter-sub">What can you use?</div>
-                               </div>
-                           </button>
-                           
-                           <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterTypeClick('AuthorsPanel', this);">
-                               <div class="filter-icon-box">👤</div>
-                               <div>
-                                   <div class="filter-label">Authors</div>
-                                   <div class="filter-sub">Who to learn from?</div>
-                               </div>
-                           </button>
-                           <button type="button" class="find-recipes-submit" onclick="searchRecipes('RecipesSearch');">Find Recipes</button>
-                       </div>
-                       
+    	<% if ("discover".equals(currentTab)) { %>
+	       <!-- Hero & Smart Search Box Section -->
+	       <section class="hero-section">
+	           <div class="hero-bg-blobs">
+	               <div class="blob-1"></div>
+	               <div class="blob-2"></div>
+	           </div>
+	           <div class="hero-content-wrapper">
+	               <!-- Use inline-block style so this wrapper matches the exact width of the title text -->
+	               <div style="display: inline-block; max-width: 100%;">
+	                   <div class="hero-badge">
+	                       <span class="hero-badge-dot"></span>
+	                       Cook smarter, not harder
+	                   </div>
+	                   <h1 class="hero-title">
+	                       What can you cook <span style="white-space: nowrap;"><em>right now?</em></span>
+	                   </h1>
+	                   <div class="hero-desc">
+	                       <p style="margin: 0 0 0.5rem 0;">Search by ingredients and appliances you already have.</p>
+	                       <p style="margin: 0;">Discover recipes that fit your kitchen, not the other way around.</p>
+	                   </div>
+	
+	                   <!-- Smart search form -->
+	                   <form action="index.jsp" method="GET" class="search-form" style="width: 100%;">
+	                       <div class="search-top-bar">
+	                           <span class="search-icon-fixed">🔍</span>
+	                           <input id="RecipesSearch" type="text" name="search" placeholder="Search recipe..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+	
+	                           <!-- Filters button next to the search bar -->
+	                           <button type="button" class="filter-btn" onclick="handleFilterTypeClick('GeneralPanel', this);">
+	                               ⚙️ Filters
+	                           </button>
+	                       </div>
+	
+	                       <div class="search-bottom-row">
+	                          <button type="button" id="Ingredients" class="search-filter-col" onclick="handleFilterTypeClick('IngredientsPanel', this);">
+	                              <div class="filter-icon-box">🥚</div>
+	                              <div>
+	                                  <div class="filter-label">Ingredients</div>
+	                                  <div class="filter-sub">What do you have?</div>
+	                              </div>
+	                          </button>
+	                          
+	                          <button type="button" id="Appliances" class="search-filter-col" onclick="handleFilterTypeClick('AppliancesPanel', this);">
+	                              <div class="filter-icon-box">🍳</div>
+	                              <div>
+	                                  <div class="filter-label">Appliances</div>
+	                                  <div class="filter-sub">What can you use?</div>
+	                              </div>
+	                          </button>
+	                          
+	                          <button type="button" id="Authors" class="search-filter-col" onclick="handleFilterTypeClick('AuthorsPanel', this);">
+	                              <div class="filter-icon-box">👤</div>
+	                              <div>
+	                                  <div class="filter-label">Authors</div>
+	                                  <div class="filter-sub">Who to learn from?</div>
+	                              </div>
+	                          </button>
+	                          <button type="button" class="find-recipes-submit" onclick="searchRecipes('RecipesSearch');">Find Recipes</button>
+	                      </div>
+	                      
 						<div id="GeneralPanel" class="filter-panel">
 							<div class="filter-panel-container-no-grid" style="align-items: center;">
 								<h1 class="filter-panel-name">
@@ -238,8 +302,8 @@ import="Search.*"
 										Options
 			                    	</h2>
 			                    	<label for="AiGeneratedDescription" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Description</label>
-    								<input type="checkbox" name="AiGeneratedDescription" id="AiGeneratedDescription"/><br>
-    								<label for="AiGeneratedAppliances" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Appliances</label>
+	   								<input type="checkbox" name="AiGeneratedDescription" id="AiGeneratedDescription"/><br>
+	   								<label for="AiGeneratedAppliances" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Appliances</label>
 			                    	<input type="checkbox" name="AiGeneratedAppliances" id="AiGeneratedAppliances"/><br>
 			                    	<label for="AiGeneratedCuisines" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Cuisines</label>
 			                    	<input type="checkbox" name="AiGeneratedCuisines" id="AiGeneratedCuisines"/><br>
@@ -335,10 +399,10 @@ import="Search.*"
 	                    		</div>
 	                    		<div class="filter-panel-mini"  style="flex: 0; min-width: 450px;">
 	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
-										Ranges
-			                    	</h2>
-			                    	<div class="filter-panel-mini">
-`		                    			<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
+											Ranges
+				                    	</h2>
+				                    	<div class="filter-panel-mini">
+	`		                    			<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
 											Reviews
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
@@ -415,34 +479,34 @@ import="Search.*"
 			                    	</div>
 	                    		</div>
 	                    	</div>
-                       </div>
-                       
-                       <div id="IngredientsPanel" class="filter-panel">
+	                      </div>
+	                      
+	                      <div id="IngredientsPanel" class="filter-panel">
 							<h1 class="filter-panel-name">
 							Ingredients
 	                    	</h1>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-                       	<div style="color: #F5F5DC" class="search-top-bar">
-                           <span class="search-icon-fixed">🔍</span>
-                           <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
-                       	</div>
-                       <div id="IngredientsSearchContainer" class="filter-panel-search-container">
+	                      	<div style="color: #F5F5DC" class="search-top-bar">
+	                          <span class="search-icon-fixed">🔍</span>
+	                          <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%= request.getParameter("search") != null ? request.getParameter("search") : "" %>">
+	                      	</div>
+	                      <div id="IngredientsSearchContainer" class="filter-panel-search-container">
 						</div>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected ingredients
 	                    	</h2>
-                       	<div id="IngredientsContainer" class="filter-panel-container">
+	                      	<div id="IngredientsContainer" class="filter-panel-container">
 						</div>
-                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-                    	<h2 id="IngredientsToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
+	                   	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	                   	<h2 id="IngredientsToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Allow up to 0 missing ingredients
-                    	</h2>
+	                   	</h2>
 						<div class="slidecontainer">
 						  <input id="IngredientsSlider" type="range" min="0" max="3" value="0" class="slider">
 						</div>
-                       </div>
-                       
+	                      </div>
+	                      
 						<div id="AppliancesPanel" class="filter-panel">
 							<h1 class="filter-panel-name">
 							Appliances
@@ -480,13 +544,13 @@ import="Search.*"
 	                       	</div>
 	                       <div id="AuthorsSearchContainer" class="filter-panel-search-container">
 						</div>
-	        	            	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
+	        	            <hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected authors
 	                    	</h2>
 	                    <div id="AuthorsContainer" class="filter-panel-container">
 						</div>
-                       </div>
+	                      </div>
 						<script>
 						const sortOrder = [];
 						const sortOptions = new Map(); // use an array that is just the sort option AND a map that contains whether it ascends or not
@@ -532,7 +596,7 @@ import="Search.*"
 						addMinMaxListener("CookingTimeMinRange", "CookingTimeMaxRange", true, 0, null, "Cooking Time");
 						addMinMaxListener("RatingsMinRange", "RatingsMaxRange", true, 0, 5, "Ratings");
 						addMinMaxListener("ReviewsMinRange", "ReviewsMaxRange", true, 0, null, "Reviews");
-
+	
 						const options = new Map();
 						for (let key of ["Ai Generated Description", "Ai Generated Appliances", "Ai Generated Cuisines", "Ai Generated Dish Types", "Ai Generated Cooking Minutes", "Ai Generated Courses"]){
 							options.set(key, false);
@@ -718,7 +782,7 @@ import="Search.*"
 			            	filter.classList.add("mini-container");
 			            	filter.setAttribute('type','button');
 			            	filter.setAttribute("onclick", "removeFilter(" + id + ", '" + type + "' );this.remove();");
-
+	
 			            	if(image){
 				            	// the picture element
 				            	let filterPic = document.createElement("img");
@@ -872,9 +936,9 @@ import="Search.*"
 				        	document.getElementById("personalizedStrips").classList.remove("active");
 				        	let resultContainer = document.getElementById("recipeResults")
 				        	resultContainer.classList.add("active");
-				        	let scrollRow = document.getElementById("recipeResultsScrollRow")
+				        	let scrollRow = document.getElementById("recipeResultsScrollRow");
 							let previousRecipes = document.querySelectorAll(".search-recipe-card");
-
+	
 							//removing past recipes
 					    	for (let previousRecipe of previousRecipes) {
 					    		previousRecipe.remove();
@@ -890,6 +954,7 @@ import="Search.*"
 				            	let reviewCount = recipe["reviewCount"];
 				            	let averageRating = recipe["averageRating"];
 				            	let bookmarkCount = recipe["bookmarkCount"];
+				            	let userBookmarked = recipe["userBookmarked"];
 				            	let userId = recipe["userId"]; // not used until a later functionality (where clicking on the user leads to the user page)
 				            	let userName = recipe["userName"];
 				            	let userImagePath = recipe["userImagePath"];
@@ -928,11 +993,9 @@ import="Search.*"
 								cardDescription.textContent=recipeDescription;
 								cardBody.append(cardTitle);
 								cardBody.append(cardDescription);
-								recipeCard.append(cardBody);
 								
 								let cardFooter = document.createElement("div");
 								cardFooter.classList.add("recipe-card-footer");
-								cardFooter.setAttribute("style", "padding:1rem;");
 								let cardAuthor = document.createElement("div");
 								cardAuthor.classList.add("card-author");
 								let authorImage = document.createElement("img");
@@ -944,7 +1007,7 @@ import="Search.*"
 									authorImage.setAttribute('src', "${pageContext.request.contextPath}/images/users/user-placeholder.png");
 								}
 								authorImage.setAttribute('alt', "Author");
-
+	
 								let authorName;
 								if(userName&&userId){
 									authorName = document.createElement("a");
@@ -980,65 +1043,72 @@ import="Search.*"
 								let cardStats = document.createElement("div");
 								cardStats.classList.add("card-stats");
 								let cardBookmark = document.createElement("button");
-								cardBookmark.classList.add("card-bookmark");
-								cardBookmark.textContent = bookmarkCount;
-								let cardBookmarkImage = document.createElement("img");
-								cardBookmarkImage.setAttribute('src', "${pageContext.request.contextPath}"+"/images/bookmark_icon.svg");
-								cardBookmarkImage.setAttribute('alt', "Bookmark icon");
-								cardBookmarkImage.setAttribute('width', "16");
-								cardBookmarkImage.setAttribute('height', "16");
-								cardBookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
-								cardBookmark.append(cardBookmarkImage);
+								createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
 								cardStats.append(cardBookmark);
 								cardFooter.append(cardStats);
-								recipeCard.append(cardFooter);
+								cardBody.append(cardFooter);
+								recipeCard.append(cardBody);
 								scrollRow.append(recipeCard);
 				        	}
 						}
 						</script>
-                    </form>
-                </div>
-            </div>
-        </section>
-        <div id="recipeResults" class="sections-container">
-        	<section>
-        		<div>
-                    <h2 class="section-title">Recipes Search Results</h2>
-                    <p class="section-subtitle">Recipes that you can make</p>
-                </div>
+	                   </form>
+	               </div>
+	           </div>
+	       </section>
+	       <div id="recipeResults" class="sections-container">
+	       	<section>
+	       		<div>
+	                   <h2 class="section-title">Recipes Search Results</h2>
+	                   <p class="section-subtitle">Recipes that you can make</p>
+	               </div>
 			<div id="recipeResultsScrollRow" class="horizontal-scroll-row">
 			</div>
-        	</section>
+	       	</section>
 		</div>
-        <!-- Personalized Strips Section (Your Feed, Reviews for You, Your Most Popular) -->
-        <div id="personalizedStrips" class="sections-container">
-
-            <!-- Your Feed -->
-            <section>
-                <div>
-                    <h2 class="section-title">Your Feed</h2>
-                    <p class="section-subtitle">Latest recipes from your favorite creators</p>
-                </div>
-                <div class="horizontal-scroll-row">
+	       <!-- Personalized Strips Section (Your Feed, Reviews for You, Your Most Popular) -->
+	       <div id="personalizedStrips" class="sections-container">
+	
+	           <!-- Your Feed -->
+	           <section>
+	               <div>
+	                   <h2 class="section-title">Your Feed</h2>
+	                   <p class="section-subtitle">Latest recipes from your favorite creators</p>
+	               </div>
+	               <div class="horizontal-scroll-row">
 					 <%
 					 if (dbConnection != null) {
 				    	String sql =
-				    		    "SELECT r.RECIPE_NAME, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, " +
+				    		    "SELECT r.RECIPE_NAME, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_ID, " +
 				    		    "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
-				    		    "u.USER_NAME, COUNT(b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED " + // really cheeky
-				    		    "FROM RECIPES r LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
-				    		    "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+				    		    "u.USER_NAME, COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " + // really cheeky
+								"recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
+				    		    "FROM RECIPES r INNER JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
+						    	"INNER JOIN FOLLOW f ON r.AUTHOR_ID = f.FOLLOWING_ID " +
+								"AND f.FOLLOWER_ID = ? " +
+						    	"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+			                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
+			                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
+			                		"FROM RECIPES recRevSubquery " +
+				           			"LEFT JOIN REVIEWS rev ON " +
+				           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+			                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
+				           		") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
+								"LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
 				    		    "WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
-				    		    " r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_IMAGE_PATH," +
-				    		    " r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
+				    		    "r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_IMAGE_PATH, " +
+				    		    "r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
+						    	"recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING, " +
 				    		    "u.USER_NAME ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC ";
 					    try (
 					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
 				    		){
 					    	statement.setInt(1, sessionUserId);
+					    	statement.setInt(2, sessionUserId);
 			    			try(
 			    				ResultSet recipes = statement.executeQuery();		
 							)	{
+			    				int counter = 1;
 						    	while(recipes.next()){
 						    		String recipeImagePath = recipes.getString("RECIPE_IMAGE_PATH");
 						    		if(recipeImagePath == null || recipeImagePath.isEmpty()){
@@ -1051,29 +1121,30 @@ import="Search.*"
 	                                String bookmarkImage = "/images/bookmark_icon.svg";
 	                                if(recipes.getInt("HAS_BOOKMARKED")>0){
 	                                	bookmarkImage ="/images/bookmark_icon_active.svg";
-	                                }    	
+	                                }
+	                                String rating = String.format("%.1f", recipes.getFloat("AVERAGE_RATING"));
 					    		%>
-
+	
 					    		<article class="recipe-card">
 					    		    <div class="recipe-card-img">
 					    		        <img src="${pageContext.request.contextPath}<%=recipeImagePath%>" alt="Recipe">
-
+	
 					    		        <div class="recipe-card-badges">
 					    		            <span class="badge-pill">
 					    		                <%= recipes.getObject("TOTAL_MINUTES") == null ? "N/A" : recipes.getInt("TOTAL_MINUTES") + "m" %>
 					    		            </span>
-
+	
 					    		            <span class="badge-pill">
 					    		                <%= recipes.getTimestamp("RECIPE_ACTIVE_TIMESTAMP") %>
 					    		            </span>
 					    		        </div>
 					    		    </div>
-
+	
 					    		    <div class="recipe-card-body">
 					    		        <h3 class="recipe-card-title">
 					    		            <%= recipes.getString("RECIPE_NAME") %>
 					    		        </h3>
-
+	
 					    		        <p class="recipe-card-desc">
 					    		            <%= recipes.getString("RECIPE_DESCRIPTION") %>
 					    		        </p>
@@ -1083,221 +1154,349 @@ import="Search.*"
 											<% if (an != null) { %>
 											    <a class="author-link" href="profile.jsp?id=<%= aid %>"><%= Auth.Util.esc(an) %></a>
 											<% } else { %><span>Anonymous</span><% } %>
+							    			<span class="card-rating">
+			                                      <span class="stars"
+			                                          style="--rating: <%= rating %>;"
+			                                          aria-label="<%= rating %> out of 5 stars"></span>
+			                                      <%= rating %>/5 (<%=recipes.getInt("REVIEW_COUNT")%>)
+			                                </span>
 					    					<div class="card-stats">
-			                                    <span class="card-bookmark">
-												    <img src="${pageContext.request.contextPath}<%=bookmarkImage%>" alt="Bookmark icon" width="16" height="16" style="vertical-align: middle; stroke: currentColor;" />
-												    <%= recipes.getInt("BOOKMARK_COUNT") %>
-												</span>
+			                                    <button id="followBookmark<%=counter %>">
+												</button>
 			                                </div>
 					    		        </div>
 					    		    </div>
 					    		</article>
-
+		            			<script>
+	            				currentBookmarkElement = document.getElementById("followBookmark"+<%=counter%>);
+	            				createNewBookmark(currentBookmarkElement, <%=recipes.getInt("RECIPE_ID")%>, <%=recipes.getInt("BOOKMARK_COUNT")%>, <%=recipes.getInt("HAS_BOOKMARKED")>0%>);
+	            			</script>
 					    		<%
+					    		counter++;
 					    		        }
 					    }}catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
 					 }%>
-                </div>
-            </section>
-
-            <!-- Reviews for You -->
-            <section>
-                <div>
-                    <h2 class="section-title">Reviews for You</h2>
-                    <p class="section-subtitle">What people are saying about your recipes</p>
-                </div>
-                <div class="horizontal-scroll-row">
-                    <%
-                    if (dbConnection != null) {
-                        String reviewSql =
-                            "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
-                            "v.REVIEW_DESCRIPTION, v.RATING, " +
-                            "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
-                            "u.USER_IMAGE_PATH FROM REVIEWS v " +
-                            "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID " +
-                            "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
-                            "WHERE v.REVIEW_STATUS = 'Active' " +
-                            "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC";
-
-                        try (
-                            PreparedStatement reviewStatement =
-                                dbConnection.prepareStatement(reviewSql);
-                            ResultSet reviews = reviewStatement.executeQuery()
-                        ) {
-                            while (reviews.next()) {
-                                String reviewImage =
-                                    reviews.getString("RECIPE_IMAGE_PATH");
-                                if (reviewImage == null || reviewImage.isEmpty()) {
-                                    reviewImage = "/images/recipe-placeholder.jpg";
-                                }
-                                String reviewerAvatar = reviews.getString("USER_IMAGE_PATH");
-                                if (reviewerAvatar == null || reviewerAvatar.isEmpty()){
-                                	reviewerAvatar = "/images/users/user-placeholder.png";
-                                }
-                    %>
-                    <article class="review-card">
-                        <div class="review-thumb">
-                            <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
-                        </div>
-                        <div class="review-body">
-                            <p class="review-title">
-                                <%= Auth.Util.esc(reviews.getString("RECIPE_NAME")) %>
-                            </p>
-                            <p class="review-text">
-                                <%= reviews.getString("REVIEW_DESCRIPTION") %>
-                            </p>
-                            <div class="review-footer">
-                                <div class="card-author">
-                                    <img class="mini-pic" src="${pageContext.request.contextPath}<%=reviewerAvatar%>" alt="Author"/>
-                                  	<% String an = reviews.getString("USER_NAME"); int aid = reviews.getInt("REVIEWER_ID"); %>
+	               </div>
+	           </section>
+	
+	           <!-- Reviews for You -->
+	           <section>
+	               <div>
+	                   <h2 class="section-title">Reviews for You</h2>
+	                   <p class="section-subtitle">What people are saying about your recipes</p>
+	               </div>
+	               <div class="horizontal-scroll-row">
+	                   <%
+	                   if (dbConnection != null) {
+	                       String reviewSql =
+	                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+	                           "v.REVIEW_DESCRIPTION, v.RATING, " +
+	                           "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
+	                           "u.USER_IMAGE_PATH FROM REVIEWS v " +
+	                           "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID AND r.AUTHOR_ID = ? " +
+	                           "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
+	                           "WHERE v.REVIEW_STATUS = 'Active' " +
+	                           "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC";
+	
+	                       try (
+	                           PreparedStatement reviewStatement =
+	                               dbConnection.prepareStatement(reviewSql);
+	                       ) {
+	                       	reviewStatement.setInt(1, sessionUserId);
+	                       	try(
+	                       		ResultSet reviews = reviewStatement.executeQuery()
+								){
+	                       		while (reviews.next()) {
+	                       			String reviewImage =
+	                       					reviews.getString("RECIPE_IMAGE_PATH");
+	                       			if (reviewImage == null || reviewImage.isEmpty()) {
+	                       				reviewImage = "/images/recipe-placeholder.jpg";
+	                       			}
+	                       			String reviewerAvatar = reviews.getString("USER_IMAGE_PATH");
+	                       			if (reviewerAvatar == null || reviewerAvatar.isEmpty()){
+	                       				reviewerAvatar = "/images/users/user-placeholder.png";
+	                       			}
+	                   %>
+	                   <article class="review-card">
+	                       <div class="review-thumb">
+	                           <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
+	                       </div>
+	                       <div class="review-body">
+	                           <p class="review-title">
+	                               <%= Auth.Util.esc(reviews.getString("RECIPE_NAME")) %>
+	                           </p>
+	                           <p class="review-text">
+	                               <%= reviews.getString("REVIEW_DESCRIPTION") %>
+	                           </p>
+	                           <div class="review-footer">
+	                               <div class="card-author">
+	                                   <img class="mini-pic" src="${pageContext.request.contextPath}<%=reviewerAvatar%>" alt="revieweer"/>
+	                                 	<% String an = reviews.getString("USER_NAME"); int aid = reviews.getInt("REVIEWER_ID"); %>
 									<% if (an != null) { %>
 									    <a class="author-link" href="profile.jsp?id=<%= aid %>"><%= Auth.Util.esc(an) %></a>
 									<% } else { %><span>Anonymous</span><% } %>
-                                </div>
-                                <div class="review-meta">
-                                    <span class="review-date">
-                                        <%= reviews.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %>
-                                    </span>
-                                    <span class="card-rating">
-                                        <span class="stars"
-                                            style="--rating: <%= reviews.getInt("RATING") %>;"
-                                            aria-label="<%= reviews.getInt("RATING") %> out of 5 stars"></span>
-                                        <%= reviews.getInt("RATING") %>/5
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    <%
-                            }
-                        }
-                        catch (Exception error){
+	                               </div>
+	                               <div class="review-meta">
+	                                   <span class="review-date">
+	                                       <%= reviews.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %>
+	                                   </span>
+	                                   <span class="card-rating">
+	                                       <span class="stars"
+	                                           style="--rating: <%= reviews.getInt("RATING") %>;"
+	                                           aria-label="<%= reviews.getInt("RATING") %> out of 5 stars"></span>
+	                                       <%= reviews.getInt("RATING") %>/5
+	                                   </span>
+	                               </div>
+	                           </div>
+	                       </div>
+	                   </article>
+	                   <%			}
+	                           }
+	                       }
+	                       catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
-                    }
-                    %>
-                </div>
-            </section>
+	                   }
+	                   %>
+	               </div>
+	           </section>
+	
+	           <!-- Your Most Popular -->
+	           <section>
+	               <div>
+	                   <h2 class="section-title">Your Most Popular</h2>
+	                   <p class="section-subtitle">Which of your recipes are the most popular</p>
+	               </div>
+	               <div class="horizontal-scroll-row">
+	                   <%
+	                   if (dbConnection != null) {
+	                       String popularSql =
+	                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+	                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
+	                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, " +
+	                           "SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
+	                           "recRevSubquery.AVERAGE_RATING, " +
+	                           "recRevSubquery.REVIEW_COUNT, "+
+	                           "r.RECIPE_ID FROM RECIPES r " +
+	                           "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+			                   "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+			                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
+			                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
+			                		"FROM RECIPES recRevSubquery " +
+				           			"LEFT JOIN REVIEWS rev ON " +
+				           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+			                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
+	                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
+	                           "WHERE r.RECIPE_STATUS = 'Active' " +
+	                           "AND r.AUTHOR_ID = ? " +
+	                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+	                           "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
+	                           "r.TOTAL_MINUTES, recRevSubquery.AVERAGE_RATING, " +
+	                           "recRevSubquery.REVIEW_COUNT " +
+	                           "ORDER BY BOOKMARK_COUNT DESC";
+	
+	                       try (
+	                           PreparedStatement popularStatement =
+	                               dbConnection.prepareStatement(popularSql);
+	                       ) {
+	                    	   popularStatement.setInt(1, sessionUserId);
+	                    	   popularStatement.setInt(2, sessionUserId);
+	                       	try(                           
+	                       		ResultSet popularRecipes =
+	                       				popularStatement.executeQuery()){
+	                               int rank = 1;
+	                               while (popularRecipes.next()) {
+	                                   String popularImage =
+	                                		   popularRecipes.getString("RECIPE_IMAGE_PATH");
+	                                   if (popularImage == null || popularImage.isEmpty()) {
+	                                       popularImage = "/images/recipes/recipe-placeholder.jpg";
+	                                   }
+	                                   String rating = String.format("%.1f", popularRecipes.getFloat("AVERAGE_RATING"));
 
-            <!-- Your Most Popular -->
-            <section>
-                <div>
-                    <h2 class="section-title">Your Most Popular</h2>
-                    <p class="section-subtitle">Which of your recipes are the most popular</p>
-                </div>
-                <div class="horizontal-scroll-row">
-                    <%
-                    if (dbConnection != null) {
-                        String popularSql =
-                            "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
-                            "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
-                            "COUNT(b.USER_ID) AS BOOKMARK_COUNT, " +
-                            "SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " + // really cheeky
-                            "r.RECIPE_ID FROM RECIPES r " +
-                            "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
-                            "WHERE r.RECIPE_STATUS = 'Active' " +
-                            "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
-                            "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
-                            "r.TOTAL_MINUTES " +
-                            "ORDER BY BOOKMARK_COUNT DESC LIMIT 5";
-
-                        try (
-                            PreparedStatement popularStatement =
-                                dbConnection.prepareStatement(popularSql);
-                        ) {
-                        	popularStatement.setInt(1, sessionUserId);
-                        	try(                           
-                        		ResultSet popularRecipes =
-                                    popularStatement.executeQuery()){
-                                int rank = 1;
-                                while (popularRecipes.next()) {
-                                    String popularImage =
-                                    	popularRecipes.getString("RECIPE_IMAGE_PATH");
-                                    if (popularImage == null || popularImage.isEmpty()) {
-                                        popularImage = "/images/recipes/recipe-placeholder.jpg";
-                                    }
-                    %>
-                    <article class="recipe-card">
-                        <div class="recipe-card-img">
-                            <img src="${pageContext.request.contextPath}<%=popularImage%>" alt="Recipe" />
-                            <div class="rank-badge">#<%= rank %></div>
-                            <div class="recipe-card-badges">
-                                <div class="card-badge-group">
-                                    <span class="badge-pill">
-                                        <%= popularRecipes.getObject("TOTAL_MINUTES") == null ? "N/A" : popularRecipes.getInt("TOTAL_MINUTES") + "m" %>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="recipe-card-body">
-                            <h3 class="recipe-card-title">
-                                <%= Auth.Util.esc(popularRecipes.getString("RECIPE_NAME")) %>
-                            </h3>
-                            <p class="recipe-card-desc">
-                                <%= Auth.Util.esc(popularRecipes.getString("RECIPE_DESCRIPTION")) %>
-                            </p>
-                            <div class="recipe-card-footer">
-                                <div class="card-stats">
-                                    <button class="card-bookmark" onclick="toggleBookmark(this, <%=popularRecipes.getInt("RECIPE_ID")%>)">
-									    <img id="popularBookmark<%=rank%>" class="bookmark-icon" src="${pageContext.request.contextPath}/images/bookmark_icon.svg" alt="Bookmark icon" width="16" height="16" style="vertical-align: middle; stroke: currentColor;" />
-									    <%= popularRecipes.getInt("BOOKMARK_COUNT") %>
+	                   %>
+	                   <article class="recipe-card">
+	                       <div class="recipe-card-img">
+	                           <img src="${pageContext.request.contextPath}<%=popularImage%>" alt="Recipe" />
+	                           <div class="rank-badge">#<%= rank %></div>
+	                           <div class="recipe-card-badges">
+	                               <div class="card-badge-group">
+	                                   <span class="badge-pill">
+	                                       <%= popularRecipes.getObject("TOTAL_MINUTES") == null ? "N/A" : popularRecipes.getInt("TOTAL_MINUTES") + "m" %>
+	                                   </span>
+	                               </div>
+	                           </div>
+	                       </div>
+	                       <div class="recipe-card-body">
+	                           <h3 class="recipe-card-title">
+	                               <%= Auth.Util.esc(popularRecipes.getString("RECIPE_NAME")) %>
+	                           </h3>
+	                           <p class="recipe-card-desc">
+	                               <%= Auth.Util.esc(popularRecipes.getString("RECIPE_DESCRIPTION")) %>
+	                           </p>
+	                           <div class="recipe-card-footer">
+                           			<span class="card-rating">
+                                       <span class="stars"
+                                           style="--rating: <%= rating %>;"
+                                           aria-label="<%= rating %> out of 5 stars"></span>
+                                       <%= rating %>/5 (<%=popularRecipes.getInt("REVIEW_COUNT")%>)
+                                   </span>
+	                               <div class="card-stats">
+	                                   <button id="popularBookmark<%=rank%>">
 									</button>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                    <%
-                    				if(popularRecipes.getInt("HAS_BOOKMARKED")>0){
-                    %>
-             			<script>
-             				currentBookmark = document.get("popularBookmark"+<%=rank%>);
-             				toggleBookmark(currentBookmarkElement, <%=popularRecipes.getInt("RECIPE_ID")	%>);
-             			</script>
-                    <%
-                    				}
+	                               </div>
+	                           </div>
+	                       </div>
+	                   </article>
+	            			<script>
+	            				currentBookmarkElement = document.getElementById("popularBookmark"+<%=rank%>);
+	            				createNewBookmark(currentBookmarkElement, <%=popularRecipes.getInt("RECIPE_ID")%>, <%=popularRecipes.getInt("BOOKMARK_COUNT")%>, true);
+	            			</script>
+	                   <%
 	                                rank++;
 	                            }
 	                        }
-                        }
-                        catch (Exception error){
+	                       }
+	                       catch (Exception error){
 					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 					    }
-                    }
-                    %>
-                </div>
-            </section>
-
-        </div>
-        <script>
-        	document.getElementById("personalizedStrips").classList.add("active");
-		    bookmarkTimeout = null;
-		    
-			function toggleBookmark(bookmark, recId){
-				let url = "${pageContext.request.contextPath}/Bookmark/Add";
-			    clearTimeout(bookmarkTimeout);
-			    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
-					let response = await fetch(url, {
-			        	method:'POST',
-			        	body: JSON.stringify({
-				        	userId: <%=sessionUserId%>,
-	    					recipeId: recId
-			        	}),
-			        	headers:{
-			                "Content-Type": "application/json; charset=UTF-8",
-			                "Accept": "application/json; charset=UTF-8"
-			        	}
-			        });
-					if (!response.ok) {
-			        	throw new Error('Network response was not ok');
-			        }
-		        	let objects = await response.json(); // Creates a JSON object
-		        	console.log(objects);
-			    }, 100);
-			}
-			
-        </script>
+	                   }
+	                   %>
+	               </div>
+	           </section>
+	       </div>
+	       <script>
+	       		document.getElementById("personalizedStrips").classList.add("active");
+	       </script>
+    </main>
+            <% } else if ("share".equals(currentTab)) { %>
+        	<p>Not Implemented
+        	</p>
+    <main>
+    </main>
+    <main>
+            <% } else { %> <!-- Fallback: library (also the final option) -->
+           	<div id="library" class="sections-container">
+	        	<section>
+		               <div>
+		                   <h2 class="section-title">Your Library</h2>
+		                   <p class="section-subtitle">Recipes Too Good to Forget</p>
+		               </div>
+		               <div class="horizontal-scroll-row">
+		                   <%
+		                   if (dbConnection != null) {
+		                       String bookmarkSql =
+		                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+		                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
+		                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, " +
+				                   "recRevSubquery.REVIEW_COUNT, " +
+						           "recRevSubquery.AVERAGE_RATING, " +
+		                           "r.RECIPE_ID, r.AUTHOR_ID, u.USER_NAME, " +
+		                           "u.USER_IMAGE_PATH FROM RECIPES r " +
+		                           "LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+				                   "LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
+		                           "LEFT JOIN REVIEWS rev ON r.RECIPE_ID = rev.RECIPE_ID " +
+				                   "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+				                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
+				                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
+				                		"FROM RECIPES recRevSubquery " +
+					           			"LEFT JOIN REVIEWS rev ON " +
+					           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+				                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
+		                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
+				                   "WHERE r.RECIPE_STATUS = 'Active' " +
+		                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+		                           "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
+		                           "r.TOTAL_MINUTES, u.USER_ID, u.USER_NAME, " + 
+		                           "u.USER_IMAGE_PATH, recRevSubquery.REVIEW_COUNT, " +
+		                           "recRevSubquery.AVERAGE_RATING " + 
+		                           "HAVING SUM(b.USER_ID = ?)>0 " +
+		                           "ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC";
+		
+		                       try (
+		                           PreparedStatement bookmarkedStatement =
+		                               dbConnection.prepareStatement(bookmarkSql);
+		                       ) {
+		                    	   bookmarkedStatement.setInt(1, sessionUserId);
+		                       	try(                           
+		                       		ResultSet bookmarkedRecipes =
+		                       				bookmarkedStatement.executeQuery()){
+		                               int rank = 1;
+		                               while (bookmarkedRecipes.next()) {
+		                                   String bookmarkedImage =
+		                                		   bookmarkedRecipes.getString("RECIPE_IMAGE_PATH");
+		                                   if (bookmarkedImage == null || bookmarkedImage.isEmpty()) {
+		                                	   bookmarkedImage = "/images/recipes/recipe-placeholder.jpg";
+		                                   }
+		                                   String authorAvatar =
+		                                		   bookmarkedRecipes.getString("USER_IMAGE_PATH");
+		                                   if (authorAvatar == null || authorAvatar.isEmpty()) {
+		                                	   authorAvatar = "/images/users/user-placeholder.png";
+		                                   }
+		                                   String rating = String.format("%.1f", bookmarkedRecipes.getFloat("AVERAGE_RATING"));
+		                   %>
+		                   <article class="recipe-card">
+		                       <div class="recipe-card-img">
+		                           <img src="${pageContext.request.contextPath}<%=bookmarkedImage%>" alt="Recipe" />
+		                           <div class="rank-badge">#<%= rank %></div>
+		                           <div class="recipe-card-badges">
+		                               <div class="card-badge-group">
+		                                   <span class="badge-pill">
+		                                       <%= bookmarkedRecipes.getObject("TOTAL_MINUTES") == null ? "N/A" : bookmarkedRecipes.getInt("TOTAL_MINUTES") + "m" %>
+		                                   </span>
+		                               </div>
+		                           </div>
+		                       </div>
+		                       <div class="recipe-card-body">
+		                           <h3 class="recipe-card-title">
+		                               <%= Auth.Util.esc(bookmarkedRecipes.getString("RECIPE_NAME")) %>
+		                           </h3>
+		                           <p class="recipe-card-desc">
+		                               <%= Auth.Util.esc(bookmarkedRecipes.getString("RECIPE_DESCRIPTION")) %>
+		                           </p>
+		                           <div class="recipe-card-footer">
+			                           <div class="card-author">
+		                                   <img class="mini-pic" src="${pageContext.request.contextPath}<%=authorAvatar%>" alt="Author"/>
+		                                 	<% String an = bookmarkedRecipes.getString("USER_NAME"); int aid = bookmarkedRecipes.getInt("AUTHOR_ID"); %>
+										<% if (an != null) { %>
+										    <a class="author-link" href="profile.jsp?id=<%= aid %>"><%= Auth.Util.esc(an) %></a>
+										<% } else { %><span>Anonymous</span><% } %>
+		                               </div>
+		                               <span class="card-rating">
+	                                       <span class="stars"
+	                                           style="--rating: <%= rating %>;"
+	                                           aria-label="<%= rating %> out of 5 stars"></span>
+	                                       <%= rating %>/5 (<%=bookmarkedRecipes.getInt("REVIEW_COUNT")%>)
+	                                   </span>
+		                               <div class="card-stats">
+		                                   <button id="bookmarkedBookmark<%=rank%>">
+										</button>
+		                               </div>
+		                           </div>
+		                       </div>
+		                   </article>
+		            			<script>
+		            				currentBookmarkElement = document.getElementById("bookmarkedBookmark"+<%=rank%>);
+		            				createNewBookmark(currentBookmarkElement, <%=bookmarkedRecipes.getInt("RECIPE_ID")%>, <%=bookmarkedRecipes.getInt("BOOKMARK_COUNT")%>, true);
+		            			</script>
+		                   <%
+		                                rank++;
+		                            }
+		                        }
+		                       }
+		                       catch (Exception error){
+						    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+						    }
+		                   }
+		                   %>
+		               </div>
+		           </section>
+		      </div>
+		   <script>
+	       		document.getElementById("library").classList.add("active");
+	       </script>
+        <% } %>
     </main>
 
     <!-- Footer -->

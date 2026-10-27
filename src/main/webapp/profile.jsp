@@ -5,7 +5,7 @@
     int profileId;
     try { profileId = Integer.parseInt(request.getParameter("id")); }
     catch (Exception e) { profileId = (Integer) session.getAttribute("userId"); }
-
+    int sessionUserId = (Integer) session.getAttribute("userId");
     Connection con = DatabaseAccess.getConnection();
     UserDAO.User profile = UserDAO.findById(profileId);
     boolean available = profile != null && "Active".equals(profile.status);
@@ -29,7 +29,7 @@
 %>
     <section class="profile-hero">
         <img class="profile-avatar" src="${pageContext.request.contextPath}<%= pic %>" alt="Avatar">
-        <div>
+        <div id ="profile-container">
             <h1 style="margin:0;"><%= Util.esc(profile.name) %></h1>
             <p class="profile-meta">Timezone: <%= Util.esc(profile.timezone) %></p>
         </div>
@@ -47,17 +47,180 @@
             <a class="see-all" href="profile_recipes.jsp?id=<%= profileId %>">See all &rarr;</a>
         </div>
         <div class="profile-grid">
-        <%
-            String rsql = "SELECT RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, TOTAL_MINUTES " +
-                          "FROM RECIPES WHERE AUTHOR_ID = ? AND RECIPE_STATUS = 'Active' " +
-                          "ORDER BY RECIPE_ACTIVE_TIMESTAMP DESC LIMIT 5";
+      <script>      	
+		function createNewFollow(self, followingId, userFollowed){
+			self.classList.add("card-follow");
+			self.setAttribute("onclick", "toggleFollow(this, " + followingId + ");");
+			self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
+			let followImage = document.createElement("img");
+			followImage.classList.add("follow-icon");
+			followImage.setAttribute('alt', "Follow icon");
+			followImage.setAttribute('width', "16");
+			followImage.setAttribute('height', "16");
+			followImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
+			if(userFollowed){
+				followImage.setAttribute('src', "${pageContext.request.contextPath}/images/following_icon.svg");
+				self.textContent="Following";
+				self.classList.add("active");
+			}
+			else{
+				followImage.setAttribute('src', "${pageContext.request.contextPath}/images/follow_icon.svg");
+				self.textContent="Follow";
+			}
+			self.append(followImage);
+		}
+		
+	    followTimeout = null;
+		function toggleFollow(self, followingID){
+			let url = "${pageContext.request.contextPath}/Follow/Toggle";
+		    clearTimeout(followTimeout);
+		    followTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
+				let response = await fetch(url, {
+		        	method:'POST',
+		        	body: JSON.stringify({
+		        		followingId: followingID
+		        	}),
+		        	headers:{
+		                "Content-Type": "application/json; charset=UTF-8",
+		                "Accept": "application/json; charset=UTF-8"
+		        	}
+		        });
+				if (!response.ok) {
+		        	throw new Error('Network response was not ok');
+		        }
+	        	let objects = await response.json(); // Creates a JSON object
+	        	toggleFollowElement(self, objects["follow"]);
+		    }, 100);
+		}
+		
+		function toggleFollowElement(self, toggleOnBoolean){
+			let followImage = document.createElement("img");
+			followImage.classList.add("follow-icon");
+			followImage.setAttribute('alt', "Follow icon");
+			followImage.setAttribute('width', "16");
+			followImage.setAttribute('height', "16");
+			followImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
+			if(toggleOnBoolean){
+				self.classList.add("active");
+				followImage.setAttribute('src', "${pageContext.request.contextPath}/images/following_icon.svg");
+				self.textContent="Following";
+			}
+			else{
+				self.classList.remove("active");
+				followImage.setAttribute('src', "${pageContext.request.contextPath}/images/follow_icon.svg");
+				self.textContent="Follow";
+			}
+			self.append(followImage);
+		}
+
+		function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
+			self.classList.add("card-bookmark");
+			self.setAttribute("onclick", "toggleBookmark(this, " + recId + ");");
+			self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
+			self.textContent=bookmarkCount;
+			let bookmarkImage = document.createElement("img");
+			bookmarkImage.classList.add("bookmark-icon");
+			bookmarkImage.setAttribute('alt', "Bookmark icon");
+			bookmarkImage.setAttribute('width', "16");
+			bookmarkImage.setAttribute('height', "16");
+			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
+			if(userBookmarked){
+				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
+				self.classList.add("active");
+			}
+			else{
+				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
+			}
+			self.append(bookmarkImage);
+		}
+		
+	    bookmarkTimeout = null;
+		function toggleBookmark(self, recId){
+			let url = "${pageContext.request.contextPath}/Bookmark/Toggle";
+		    clearTimeout(bookmarkTimeout);
+		    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
+				let response = await fetch(url, {
+		        	method:'POST',
+		        	body: JSON.stringify({
+						recipeId: recId
+		        	}),
+		        	headers:{
+		                "Content-Type": "application/json; charset=UTF-8",
+		                "Accept": "application/json; charset=UTF-8"
+		        	}
+		        });
+				if (!response.ok) {
+		        	throw new Error('Network response was not ok');
+		        }
+	        	let objects = await response.json(); // Creates a JSON object
+	        	toggleBookmarkElement(self, objects["bookmark"], objects["bookmarkCount"]);
+		    }, 100);
+		}
+		
+		function toggleBookmarkElement(self, toggleOnBoolean, newCount){
+			let bookmarkImage = document.createElement("img");
+			bookmarkImage.classList.add("bookmark-icon");
+			bookmarkImage.setAttribute('alt', "Bookmark icon");
+			bookmarkImage.setAttribute('width', "16");
+			bookmarkImage.setAttribute('height', "16");
+			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
+			if(toggleOnBoolean){
+				self.classList.add("active");
+				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
+			}
+			else{
+				self.classList.remove("active");
+				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon.svg")
+			}
+			self.textContent=newCount;
+			self.append(bookmarkImage);
+		}
+	</script>
+	<% if(profileId!=sessionUserId){
+		String fsql = "SELECT 1 FROM FOLLOW " + 
+					  "WHERE FOLLOWER_ID = ? " +
+					  "AND FOLLOWING_ID = ? ";
+		try(PreparedStatement followStatement = con.prepareStatement(fsql)){
+			followStatement.setInt(1, sessionUserId);
+			followStatement.setInt(2, profileId);
+			try(ResultSet rs = followStatement.executeQuery()){
+				boolean isFollowing = rs.next();
+	%>
+		<script>
+			let container = document.getElementById("profile-container");		
+			let button = document.createElement("button");
+      		createNewFollow(button, <%=profileId%>, <%=isFollowing%>);
+      		container.append(button);
+		</script>
+        <%}}}
+            String rsql = "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
+            			  "r.RECIPE_ID, COUNT(b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
+  						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
+            			  "FROM RECIPES r LEFT JOIN BOOKMARK b ON r.RECIPE_ID = b.RECIPE_ID " +
+            			  "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+                          	"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
+            			  	"AVG(rev.RATING*1.0) AS AVERAGE_RATING " +
+                          	"FROM RECIPES recRevSubquery " +
+            			  	"LEFT JOIN REVIEWS rev ON " +
+                          	"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+            			  	"GROUP BY recRevSubquery.RECIPE_ID " +
+                       	  ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
+                          "WHERE r.AUTHOR_ID = ? AND r.RECIPE_STATUS = 'Active' " +
+                          "GROUP BY r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " + 
+                          "r.TOTAL_MINUTES, r.RECIPE_ID, r.RECIPE_ACTIVE_TIMESTAMP, " + 
+  						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
+                          "ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC LIMIT 5";
             boolean anyRecipe = false;
             try (PreparedStatement ps = con.prepareStatement(rsql)) {
-                ps.setInt(1, profileId);
+                ps.setInt(1, sessionUserId);
+                ps.setInt(2, profileId);
                 try (ResultSet rs = ps.executeQuery()) {
+                	int counter = 1;
                     while (rs.next()) {
                         anyRecipe = true;
                         String img = Util.or(rs.getString("RECIPE_IMAGE_PATH"), "/images/recipe-placeholder.jpg");
+                        String rating = String.format("%.1f", rs.getFloat("AVERAGE_RATING"));
+
         %>
             <article class="recipe-card">
                 <div class="recipe-card-img">
@@ -69,9 +232,25 @@
                 <div class="recipe-card-body">
                     <h3 class="recipe-card-title"><%= Util.esc(rs.getString("RECIPE_NAME")) %></h3>
                     <p class="recipe-card-desc"><%= Util.esc(rs.getString("RECIPE_DESCRIPTION")) %></p>
+                   <div class="recipe-card-footer">
+       				   <span class="card-rating">
+                             <span class="stars"
+                                 style="--rating: <%= rating %>;"
+                                 aria-label="<%= rating %> out of 5 stars"></span>
+                             <%= rating %>/5 (<%=rs.getInt("REVIEW_COUNT")%>)
+                       </span>
+                       <div class="card-stats">
+                           <button id="profileBookmark<%=counter%>">
+							</button>
+                       </div>
+                   </div>
                 </div>
             </article>
-        <%      }
+            <script>
+    			currentBookmarkElement = document.getElementById("profileBookmark"+<%=counter%>);
+    			createNewBookmark(currentBookmarkElement, <%=rs.getInt("RECIPE_ID")%>, <%=rs.getInt("BOOKMARK_COUNT")%>, <%=rs.getInt("HAS_BOOKMARKED")>0%>);
+    		</script>
+        <%counter++;      }
                 }
             }
             if (!anyRecipe) { %><p>No recipes yet.</p><% } %>

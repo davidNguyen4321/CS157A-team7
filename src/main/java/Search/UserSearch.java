@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -31,6 +32,15 @@ public class UserSearch extends HttpServlet {
 			imageBoolean=false;
 		}
 		
+		HttpSession session = request.getSession(false);
+		//assumes that if the userId exists, that it is a valid id
+		if(!request.isRequestedSessionIdValid() || session == null || session.getAttribute("userId") == null) {
+			log("Invalid session.");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.getWriter().write("{}");
+			return;
+		}
+		
 		ObjectMapper mapper = new ObjectMapper();
 		Connection dbConnection = DatabaseAccess.getConnection();
 		if(searchTerm==null || searchTerm.trim().isEmpty()){
@@ -42,7 +52,7 @@ public class UserSearch extends HttpServlet {
 		
 		if(dbConnection==null) {
 			log("No dbConnection available.");
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 			response.getWriter().write("{}");
 			return;
 		}
@@ -102,7 +112,7 @@ public class UserSearch extends HttpServlet {
 		}
 		catch(SQLException ex) {//error checking
 			log("User search failed: " + ex.getMessage());
-			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().write("{}");
 		}
 	}
