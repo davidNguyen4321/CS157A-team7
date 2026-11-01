@@ -321,7 +321,7 @@ public class RecipeSearch extends HttpServlet {
 	}
 	
 	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response, int sessionUserId) throws SQLException, IOException{
-		try (PreparedStatement statement = dbConnection.prepareStatement(buildRecipeQuery(requestInfo, sessionUserId));){
+		try (PreparedStatement statement = dbConnection.prepareStatement(buildRecipeQuery(requestInfo));){
 			int counter = 1;
 			
 			// ingredient filters
@@ -365,6 +365,12 @@ public class RecipeSearch extends HttpServlet {
 	    		statement.setInt(counter++, requestInfo.tolerances.get("Appliance"));
 			}
     		
+			//cooking time
+			if(requestInfo.ranges.get("Cooking Time").get("min")!=0 || requestInfo.ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
+				statement.setInt(counter++, requestInfo.ranges.get("Cooking Time").get("min"));
+				statement.setInt(counter++, requestInfo.ranges.get("Cooking Time").get("max"));
+			}
+			
 			//dish type
     		for(Integer id : requestInfo.filterIdsNotCourses.get("Dish Type")) {
     			statement.setInt(counter++, id);
@@ -375,7 +381,7 @@ public class RecipeSearch extends HttpServlet {
     			statement.setInt(counter++, id);
     		}    
     		
-			//cuisine
+			//courses
     		for(String name : requestInfo.courses) {
     			statement.setString(counter++, name);
     		}
@@ -388,7 +394,7 @@ public class RecipeSearch extends HttpServlet {
     		}
 		}
 	}
-	private String buildRecipeQuery(RecipeSearchRequest requestInfo, int sessionUserId) {
+	private String buildRecipeQuery(RecipeSearchRequest requestInfo) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT rec.RECIPE_ID, rec.RECIPE_NAME, rec.RECIPE_IMAGE_PATH, rec.RECIPE_DESCRIPTION, ");
 		sb.append("rec.TOTAL_MINUTES, rec.RECIPE_ACTIVE_TIMESTAMP, recRevSubquery.reviewCount, ");
@@ -415,7 +421,7 @@ public class RecipeSearch extends HttpServlet {
 		
 		// bookmarks
 		sb.append("INNER JOIN (");
-			buildRecipeBookmarkSubquery(sb, sessionUserId);
+			buildRecipeBookmarkSubquery(sb);
 		sb.append(") recBookSubquery ON rec.RECIPE_ID = recBookSubquery.RECIPE_ID ");
 		
 		// authors
@@ -431,6 +437,11 @@ public class RecipeSearch extends HttpServlet {
 		
 		// appliance tolerance
 		buildApplianceCondition(sb, requestInfo.filterIdsNotCourses.get("Appliance").length, requestInfo.tolerances.get("Appliance")>0);
+		
+		// cooking time. if the requested range encompasses the entire possible range, then any null cooking times are permissible 
+		if(requestInfo.ranges.get("Cooking Time").get("min")!=0 || requestInfo.ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
+			buildCookingTimeCondition(sb);
+		}
 		
 		// dish type
 		buildDishTypeCondition(sb, requestInfo.filterIdsNotCourses.get("Dish Type").length);
@@ -498,7 +509,7 @@ public class RecipeSearch extends HttpServlet {
 		sb.append("))");
 	}
 	
-	private void buildRecipeBookmarkSubquery(StringBuilder sb, int sessionUserId) {
+	private void buildRecipeBookmarkSubquery(StringBuilder sb) {
 		sb.append("SELECT recBookSubquery.RECIPE_ID, COUNT(b.USER_ID) AS bookmarkCount, ");
 		sb.append("SUM(b.USER_ID = ?) AS userbookmarked FROM RECIPES recBookSubquery ");
 		sb.append("LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b ");
@@ -549,6 +560,11 @@ public class RecipeSearch extends HttpServlet {
 				}
 			sb.append(") <=? ");
 		}
+	}
+	
+	private void buildCookingTimeCondition(StringBuilder sb) {
+		sb.append("AND rec.TOTAL_MINUTES>=? ");
+		sb.append("AND rec.TOTAL_MINUTES<=? ");
 	}
 	
 	private void buildDishTypeCondition(StringBuilder sb, int dishTypesLength) {
