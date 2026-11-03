@@ -1,3 +1,5 @@
+<%@ include file="WEB-INF/fragments/guest_only.jspf" %>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="auth.UserDAO" %>
 <%@ page import="util.WebUtils" %>
@@ -47,12 +49,12 @@
         	<div class="auth-error"><%= WebUtils.esc(error) %></div>
         <% } %>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" minlength = 3 maxlength="100" value="<%= WebUtils.esc(username) %>" required>
+		<input type="text" id="username" name="username" autocomplete="off" minlength="3" maxlength="100" value="<%= WebUtils.esc(username) %>" required>
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" maxlength="254" value="<%= WebUtils.esc(email) %>" required>
+		<input type="email" id="email" name="email" autocomplete="off" maxlength="254" value="<%= WebUtils.esc(email) %>" required>
         <label for="password">Password (min 8 characters)</label>
-        <input type="password" id="password" name="password" minlength = 8 maxlength="128" required>
-        <input type="hidden" id="timezone" name="timezone" value="UTC">
+		<input type="password" id="password" name="password" autocomplete="new-password" minlength="8" maxlength="128" required>        
+		<input type="hidden" id="timezone" name="timezone" value="UTC">
         <button type="submit" class="auth-primary">Sign up</button>
         <a href="login.jsp" class="auth-secondary">Back to log in</a>
     </form>

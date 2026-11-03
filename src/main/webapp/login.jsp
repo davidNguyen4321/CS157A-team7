@@ -1,8 +1,8 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="auth.*" %>
-<%
-    if (session.getAttribute("userId") != null) { response.sendRedirect("index.jsp"); return; }
+<%@ include file="WEB-INF/fragments/guest_only.jspf" %>
 
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="auth.UserDAO" %>
+<%
     String error = null;
     String loginValue = "";
     if ("POST".equalsIgnoreCase(request.getMethod())) {
@@ -43,7 +43,7 @@
         <p class="auth-sub">Log in to continue</p>
         <% if (error != null) { %><div class="auth-error"><%= util.WebUtils.esc(error) %></div><% } %>
         <label for="login">Username or email</label>
-        <input type="text" id="login" name="login" value="<%= util.WebUtils.esc(loginValue) %>" required>
+        <input type="text" id="login" name="login" autocomplete="off" value="<%= util.WebUtils.esc(loginValue) %>" required>
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
         <button type="submit" class="auth-primary">Log in</button>

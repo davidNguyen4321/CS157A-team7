@@ -1,0 +1,7 @@
+<%@ include file="no_cache.jspf" %>
+<%
+    if (session.getAttribute("userId") != null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+%>
