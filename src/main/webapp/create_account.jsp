@@ -1,8 +1,11 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@ page import="auth.UserDAO" %>
+
+<%@ page import="util.WebUtils" %>
+
 <%@ include file="WEB-INF/fragments/guest_only.jspf" %>
 
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="auth.UserDAO" %>
-<%@ page import="util.WebUtils" %>
 <%
     String error = null;
     String username = "", email = "";

@@ -1,9 +1,15 @@
 package Search;
-import java.sql.*;
+
 import database.DbAccess;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;

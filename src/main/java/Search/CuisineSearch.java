@@ -1,9 +1,14 @@
 package Search;
-import java.sql.*;
-import java.io.IOException;
-import java.io.PrintWriter;
+
 import database.DbAccess;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

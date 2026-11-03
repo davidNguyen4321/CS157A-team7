@@ -1,7 +1,9 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@ page import="auth.UserDAO" %>
+
 <%@ include file="WEB-INF/fragments/guest_only.jspf" %>
 
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="auth.UserDAO" %>
 <%
     String error = null;
     String loginValue = "";

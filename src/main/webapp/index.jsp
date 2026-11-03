@@ -1,10 +1,16 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%@ page import="database.DbAccess" %>
+
+<%@ page import="util.WebUtils" %>
+
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+<%@ page import="java.sql.DriverManager" %>
+
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 
-<%@ page import="java.sql.*"
-import="search.*,util.*,database.*"
-%>
-
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1121,7 +1127,7 @@ import="search.*,util.*,database.*"
 											<%
 											if (an != null) {
 											%>
-											    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=util.WebUtils.esc(an)%></a>
+											    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=WebUtils.esc(an)%></a>
 											<%
 											} else {
 											%><span>Anonymous</span><%
@@ -1199,7 +1205,7 @@ import="search.*,util.*,database.*"
 	                       </div>
 	                       <div class="review-body">
 	                           <p class="review-title">
-	                               <%=util.WebUtils.esc(reviews.getString("RECIPE_NAME"))%>
+	                               <%=WebUtils.esc(reviews.getString("RECIPE_NAME"))%>
 	                           </p>
 	                           <p class="review-text">
 	                               <%=reviews.getString("REVIEW_DESCRIPTION")%>
@@ -1213,7 +1219,7 @@ import="search.*,util.*,database.*"
 									<%
 									if (an != null) {
 									%>
-									    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=util.WebUtils.esc(an)%></a>
+									    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=WebUtils.esc(an)%></a>
 									<%
 									} else {
 									%><span>Anonymous</span><%
@@ -1316,10 +1322,10 @@ import="search.*,util.*,database.*"
 	                       </div>
 	                       <div class="recipe-card-body">
 	                           <h3 class="recipe-card-title">
-	                               <%=util.WebUtils.esc(popularRecipes.getString("RECIPE_NAME"))%>
+	                               <%=WebUtils.esc(popularRecipes.getString("RECIPE_NAME"))%>
 	                           </h3>
 	                           <p class="recipe-card-desc">
-	                               <%=util.WebUtils.esc(popularRecipes.getString("RECIPE_DESCRIPTION"))%>
+	                               <%=WebUtils.esc(popularRecipes.getString("RECIPE_DESCRIPTION"))%>
 	                           </p>
 	                           <div class="recipe-card-footer">
                            			<span class="card-rating">
@@ -1444,10 +1450,10 @@ import="search.*,util.*,database.*"
 		                       </div>
 		                       <div class="recipe-card-body">
 		                           <h3 class="recipe-card-title">
-		                               <%=util.WebUtils.esc(bookmarkedRecipes.getString("RECIPE_NAME"))%>
+		                               <%=WebUtils.esc(bookmarkedRecipes.getString("RECIPE_NAME"))%>
 		                           </h3>
 		                           <p class="recipe-card-desc">
-		                               <%=util.WebUtils.esc(bookmarkedRecipes.getString("RECIPE_DESCRIPTION"))%>
+		                               <%=WebUtils.esc(bookmarkedRecipes.getString("RECIPE_DESCRIPTION"))%>
 		                           </p>
 		                           <div class="recipe-card-footer">
 			                           <div class="card-author">
@@ -1458,7 +1464,7 @@ import="search.*,util.*,database.*"
 										<%
 										if (an != null) {
 										%>
-										    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=util.WebUtils.esc(an)%></a>
+										    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=WebUtils.esc(an)%></a>
 										<% } else { %><span>Anonymous</span><% } %>
 		                               </div>
 		                               <span class="card-rating">

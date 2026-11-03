@@ -1,7 +1,17 @@
-<%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.sql.*,auth.*, database.*" %>
-<%@ page import="util.*" %>
+
+<%@ page import="database.DbAccess" %>
+
+<%@ page import="util.WebUtils" %>
+
+<%@ page import="auth.UserDAO" %>
+
+<%@ page import="java.sql.Connection" %>
+<%@ page import="java.sql.PreparedStatement" %>
+<%@ page import="java.sql.ResultSet" %>
+
+<%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
+
 <%
 int profileId;
     try { profileId = Integer.parseInt(request.getParameter("id")); }
@@ -292,9 +302,9 @@ int profileId;
                     <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
                 </div>
                 <div class="review-body">
-                    <p class="review-title"><%= util.WebUtils.esc(rs.getString("REVIEW_NAME")) %>
-                        <small>on <%= util.WebUtils.esc(rs.getString("RECIPE_NAME")) %></small></p>
-                    <p class="review-text"><%= util.WebUtils.esc(rs.getString("REVIEW_DESCRIPTION")) %></p>
+                    <p class="review-title"><%= WebUtils.esc(rs.getString("REVIEW_NAME")) %>
+                        <small>on <%= WebUtils.esc(rs.getString("RECIPE_NAME")) %></small></p>
+                    <p class="review-text"><%= WebUtils.esc(rs.getString("REVIEW_DESCRIPTION")) %></p>
                     <div class="review-footer">
                         <span class="review-date"><%= rs.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %></span>
 						<span class="card-rating">
