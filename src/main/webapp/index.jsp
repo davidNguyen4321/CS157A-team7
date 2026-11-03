@@ -1,7 +1,4 @@
-<!-- Includes file auth_check as a guard that user is authenticated before entering 
-index.jsp -->
-
-<%@ include file="auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 
 <%@ page import="java.sql.*"
 import="search.*,util.*,database.*"
@@ -72,51 +69,7 @@ import="search.*,util.*,database.*"
       NAVIGATION HEADER
       =========================================================================
     -->
-    <header>
-        <div class="header-inner">
-            <div class="header-container">
-                <!-- Left: Plate Logo + Discover, Share, Library Nav -->
-                <div class="nav-group">
-                    <div class="plate-logo" title="Recipe Genie">
-                        <div class="plate-rim">
-                            <div class="plate-text-container">
-                                <span class="logo-recipe">Recipe</span>
-                                <span class="logo-genie">Genie</span>
-                            </div>
-                        </div>
-                    </div>
-                    <nav class="main-nav">
-                        <a href="index.jsp?tab=discover" class="header-btn <%= "discover".equals(currentTab) ? "active" : "" %>">Discover</a>
-                        <a href="index.jsp?tab=share" class="header-btn <%= "share".equals(currentTab) ? "active" : "" %>">Share</a>
-                        <a href="index.jsp?tab=library" class="header-btn <%= "library".equals(currentTab) ? "active" : "" %>">Library</a>
-                    </nav>
-                </div>
-
-                <!-- Center: Empty (Balanced Spacer) -->
-                <div class="header-spacer"></div>
-
-                <!-- Right: Username and Profile Picture -->
-                <div class="header-actions">
-                    <div class="user-profile-group">
-					    <a href="profile.jsp?id=<%= sessionUserId %>" class="author-link"><span class="username-display"><%=util.WebUtils.esc(displayUsername)%></span></a>
-					    <div class="user-avatar" title="Account">
-					        <%
-					        String myPic = (String) session.getAttribute("userImage");
-					        			           if (myPic != null && !myPic.isEmpty()) {
-					        %>
-					            <img src="${pageContext.request.contextPath}<%= myPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-					        <%
-					        } else {
-					        %>👤<%
-					        }
-					        %>
-					    </div>
-					    <a href="logout.jsp" class="author-link" style="margin-left:.75rem;">Log out</a>
-					</div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <%@ include file="/WEB-INF/fragments/header.jspf" %>
 	<script>
 		function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
 			self.classList.add("card-bookmark");

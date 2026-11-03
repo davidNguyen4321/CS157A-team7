@@ -1,4 +1,4 @@
-<%@ include file="auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*,auth.*, database.*" %>
 <%@ page import="util.*" %>
@@ -21,7 +21,7 @@ int profileId;
     <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
-<%@ include file="header.jspf" %>
+<%@ include file="/WEB-INF/fragments/header.jspf" %>
 <main class="profile-page">
 <% if (!available) { %>
     <h1>This profile is unavailable.</h1>

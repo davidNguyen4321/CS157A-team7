@@ -1,0 +1,49 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    String hdrName = (String) session.getAttribute("username");
+    String hdrPic = (String) session.getAttribute("userImage");
+    int hdrId = (Integer) session.getAttribute("userId");
+        
+    // Fallback if currentTab isn't defined on a page like profile.jsp
+    String activeTab = (request.getParameter("tab") != null) ? request.getParameter("tab") : "";
+%>
+<header>
+    <div class="header-inner">
+        <div class="header-container">
+            <!-- Left: Plate Logo + Nav -->
+            <div class="nav-group">
+                <div class="plate-logo" title="Recipe Genie">
+                    <div class="plate-rim">
+                        <div class="plate-text-container">
+                            <span class="logo-recipe">Recipe</span>
+                            <span class="logo-genie">Genie</span>
+                        </div>
+                    </div>
+                </div>
+                <nav class="main-nav">
+                    <a href="index.jsp?tab=discover" class="header-btn <%= "discover".equals(activeTab) ? "active" : "" %>">Discover</a>
+                    <a href="index.jsp?tab=share" class="header-btn <%= "share".equals(activeTab) ? "active" : "" %>">Share</a>
+                    <a href="index.jsp?tab=library" class="header-btn <%= "library".equals(activeTab) ? "active" : "" %>">Library</a>
+                </nav>
+            </div>
+
+            <!-- Center Spacer -->
+            <div class="header-spacer"></div>
+
+            <!-- Right: User Profile & Actions -->
+            <div class="header-actions">
+                <div class="user-profile-group">
+                    <a href="profile.jsp?id=<%= hdrId %>" class="author-link">
+                        <span class="username-display"><%= util.WebUtils.esc(hdrName) %></span>
+                    </a>
+                    <div class="user-avatar" title="Account">
+                        <% if (hdrPic != null && !hdrPic.isEmpty()) { %>
+                            <img src="${pageContext.request.contextPath}<%= hdrPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                        <% } else { %>👤<% } %>
+                    </div>
+                    <a href="logout.jsp" class="author-link" style="margin-left:.75rem;">Log out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,6 +1,9 @@
 package auth;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.ZoneId;
 import java.util.regex.Pattern;
 import database.DbAccess;
@@ -11,10 +14,8 @@ public class UserDAO {
         public String name, imagePath, description, timezone, status, role;
     }
 
-    private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9 _.\\-]{3,50}$");
+    private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9_-]{3,100}$");
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-    private static final String COLS =
-        "USER_ID, USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, TIMEZONE, USER_STATUS, ROLE";
 
     private static User map(ResultSet rs) throws SQLException {
         User u = new User();
@@ -30,7 +31,7 @@ public class UserDAO {
 
     /** Returns the user if credentials are valid and the account is Active, else null. */
     public static User authenticate(String login, String password) throws SQLException {
-        String sql = "SELECT " + COLS + ", PASSWORD_HASH FROM USERS WHERE USER_NAME = ? OR EMAIL = ?";
+        String sql = "SELECT * FROM USERS WHERE USER_NAME = ? OR EMAIL = ?";
         try (PreparedStatement ps = DbAccess.getConnection().prepareStatement(sql)) {
             ps.setString(1, login);
             ps.setString(2, login);
@@ -47,17 +48,15 @@ public class UserDAO {
     public static String create(String username, String email, String password, String timezone)
             throws SQLException {
         if (!USERNAME.matcher(username).matches())
-            return "Username must be 3-50 characters (letters, numbers, spaces, _ . -).";
+            return "Username must be 3-100 characters (letters, numbers, underscores, or hyphens).";
         if (email.length() > 254 || !EMAIL.matcher(email).matches())
             return "Please enter a valid email address.";
         if (password.length() < 8 || password.length() > 128)
             return "Password must be 8-128 characters.";
-        if (timezone == null || !ZoneId.getAvailableZoneIds().contains(timezone)
-                || timezone.length() > 30)
+        if (timezone == null || !ZoneId.getAvailableZoneIds().contains(timezone) || timezone.length() > 30)
             timezone = "UTC";
 
-        String sql = "INSERT INTO USERS (USER_NAME, ROLE, TIMEZONE, PASSWORD_HASH, EMAIL) "
-                   + "VALUES (?, 'User', ?, ?, ?)";
+        String sql = "INSERT INTO USERS (USER_NAME, ROLE, TIMEZONE, PASSWORD_HASH, EMAIL) VALUES (?, 'User', ?, ?, ?)";
         try (PreparedStatement ps = DbAccess.getConnection().prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, timezone);
@@ -71,10 +70,10 @@ public class UserDAO {
                                          : "That username is already taken.";
         }
     }
-
+    
     public static User findById(int id) throws SQLException {
         try (PreparedStatement ps = DbAccess.getConnection()
-                .prepareStatement("SELECT " + COLS + " FROM USERS WHERE USER_ID = ?")) {
+                .prepareStatement("SELECT * FROM USERS WHERE USER_ID = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? map(rs) : null;

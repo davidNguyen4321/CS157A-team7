@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="auth.*" %>
-<%@ page import="util.*" %>
+<%@ page import="auth.UserDAO" %>
+<%@ page import="util.WebUtils" %>
 <%
     String error = null;
     String username = "", email = "";
@@ -43,20 +43,22 @@
 <div class="auth-wrapper">
     <form method="post" action="create_account.jsp" class="auth-card">
         <h1>Create account</h1>
-        <% if (error != null) { %><div class="auth-error"><%= WebUtils.esc(error) %></div><% } %>
+        <% if (error != null) { %>
+        	<div class="auth-error"><%= WebUtils.esc(error) %></div>
+        <% } %>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" maxlength="50" value="<%= WebUtils.esc(username) %>" required>
+        <input type="text" id="username" name="username" minlength = 3 maxlength="100" value="<%= WebUtils.esc(username) %>" required>
         <label for="email">Email</label>
         <input type="email" id="email" name="email" maxlength="254" value="<%= WebUtils.esc(email) %>" required>
         <label for="password">Password (min 8 characters)</label>
-        <input type="password" id="password" name="password" maxlength="128" required>
+        <input type="password" id="password" name="password" minlength = 8 maxlength="128" required>
         <input type="hidden" id="timezone" name="timezone" value="UTC">
         <button type="submit" class="auth-primary">Sign up</button>
         <a href="login.jsp" class="auth-secondary">Back to log in</a>
     </form>
 </div>
 <script>
-    // Pre-fill the user's timezone so the NOT NULL TIMEZONE column gets a real value
+    // Detect user's timezone, swallows errors if blocked or unsupported
     try { document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) {}
 </script>
 </body>
