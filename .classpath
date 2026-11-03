@@ -32,34 +32,11 @@
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-annotations-2.16.1.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-core-2.16.1.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-databind-2.16.1.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/mysql-connector-j-26.7.0.jar">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/appliance-search.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/ingredient-search.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/cuisine-search.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/dish-type-search.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-annotations-2.16.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-core-2.16.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-databind-2.16.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/mysql-connector-j-26.7.0.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/bcprov-jdk18on-1.86.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/recipe-search.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/bookmark-toggle.jar"/>
-	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/follow-toggle.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v10.1">
 		<attributes>
 			<attribute name="owner.project.facets" value="jst.web"/>
