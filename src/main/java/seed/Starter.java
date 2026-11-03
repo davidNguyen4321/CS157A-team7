@@ -1,3 +1,4 @@
+package seed;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.DriverManager;
@@ -34,7 +35,6 @@ public class Starter {
 		    
 		    StarterPopulator populator = new StarterPopulator(starter);
 		    populator.populateTables();
-		    starter.setDemoPasswords();
 		}
 		
 		starter.close();
@@ -74,17 +74,6 @@ public class Starter {
 	public void createTables() throws SQLException {
 		createEntitySets();
 		createRelationshipSets();
-	}
-	
-	public void setDemoPasswords() throws SQLException {
-	    try (java.sql.PreparedStatement ps = connection.prepareStatement(
-	            "UPDATE USERS SET PASSWORD_HASH = ? WHERE USER_ID = ?")) {
-	        for (int id = 1; id <= 12; id++) {
-	            ps.setString(1, Auth.PasswordUtil.hash("Password123!"));
-	            ps.setInt(2, id);
-	            ps.executeUpdate();
-	        }
-	    }
 	}
 	
 	public void createEntitySets() throws SQLException {

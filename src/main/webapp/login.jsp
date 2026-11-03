@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="Auth.*" %>
+<%@ page import="auth.*" %>
 <%
     if (session.getAttribute("userId") != null) { response.sendRedirect("index.jsp"); return; }
 
@@ -41,9 +41,9 @@
     <form method="post" action="login.jsp" class="auth-card">
         <h1>Recipe Genie</h1>
         <p class="auth-sub">Log in to continue</p>
-        <% if (error != null) { %><div class="auth-error"><%= Util.esc(error) %></div><% } %>
+        <% if (error != null) { %><div class="auth-error"><%= util.WebUtils.esc(error) %></div><% } %>
         <label for="login">Username or email</label>
-        <input type="text" id="login" name="login" value="<%= Util.esc(loginValue) %>" required>
+        <input type="text" id="login" name="login" value="<%= util.WebUtils.esc(loginValue) %>" required>
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required>
         <button type="submit" class="auth-primary">Log in</button>

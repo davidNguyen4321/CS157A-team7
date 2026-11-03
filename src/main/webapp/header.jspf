@@ -14,7 +14,7 @@
     </div>
     <div class="header-spacer"></div>
     <div class="header-actions"><div class="user-profile-group">
-      <a href="profile.jsp?id=<%= hdrId %>" class="author-link"><span class="username-display"><%= Auth.Util.esc(hdrName) %></span></a>
+      <a href="profile.jsp?id=<%= hdrId %>" class="author-link"><span class="username-display"><%= util.WebUtils.esc(hdrName) %></span></a>
       <div class="user-avatar">
         <% if (hdrPic != null && !hdrPic.isEmpty()) { %>
           <img src="${pageContext.request.contextPath}<%= hdrPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">

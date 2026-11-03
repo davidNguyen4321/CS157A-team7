@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
-import Search.DatabaseAccess;
+import database.DbAccess;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -61,7 +61,7 @@ public class FollowToggle extends HttpServlet {
 			return;
 		}
 		
-		Connection dbConnection = DatabaseAccess.getConnection();
+		Connection dbConnection = DbAccess.getConnection();
 		if(dbConnection==null) {
 			log("No connection available.");
 			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);

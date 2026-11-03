@@ -1,5 +1,7 @@
 package Search;
 import java.sql.*;
+import database.DbAccess;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -35,7 +37,7 @@ public class DishTypeSearch extends HttpServlet {
 		}
 		
 		ObjectMapper mapper = new ObjectMapper();
-		Connection dbConnection = DatabaseAccess.getConnection();
+		Connection dbConnection = DbAccess.getConnection();
 		if(searchTerm==null || searchTerm.trim().isEmpty()){
 			log("No search term provided.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

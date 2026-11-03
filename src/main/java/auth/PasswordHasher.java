@@ -1,13 +1,15 @@
-package Auth;
+package auth;
 
+import java.util.Base64;
 import java.nio.charset.StandardCharsets;
+
 import java.security.MessageDigest;
 import java.security.SecureRandom;
-import java.util.Base64;
+
 import org.bouncycastle.crypto.generators.Argon2BytesGenerator;
 import org.bouncycastle.crypto.params.Argon2Parameters;
 
-public class PasswordUtil {
+public class PasswordHasher {
     private static final int MEMORY_KB = 65536, ITERATIONS = 3, PARALLELISM = 1;
     private static final int SALT_BYTES = 16, HASH_BYTES = 32;
     private static final SecureRandom RNG = new SecureRandom();
@@ -23,7 +25,6 @@ public class PasswordUtil {
 
     public static boolean verify(String password, String stored) {
         try {
-            // "$argon2id$v=19$m=..,t=..,p=..$salt$hash" -> ["", "argon2id", "v=19", params, salt, hash]
             String[] parts = stored.split("\\$");
             if (parts.length != 6 || !parts[1].equals("argon2id")) return false;
             int m = 0, t = 0, p = 0;

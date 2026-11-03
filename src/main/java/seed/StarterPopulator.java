@@ -1,4 +1,7 @@
+package seed;
 import java.sql.SQLException;
+
+import auth.PasswordHasher;
 
 public class StarterPopulator {
 	Starter starter;
@@ -14,154 +17,170 @@ public class StarterPopulator {
 	}
 	
 	public void populateEntitySets() throws SQLException {
+		String usersSql = String.format(
+			    """
+			    INSERT INTO USERS (USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, USER_ACTIVE_TIMESTAMP, USER_REMOVE_TIMESTAMP, USER_STATUS, ROLE, TIMEZONE, PASSWORD_HASH, EMAIL) VALUES
+			        (
+			            'Jeremy Lin', 
+			            '/images/users/jeremy_lin.jpg', 
+			            'Home cook and comfort-food enthusiast who believes the best meals are simple, easy to make, and easy to eat. Always experimenting with quick, foolproof pantry staples.', 
+			            '2024-01-01 11:01:01',
+			            NULL,
+			            'Active',
+			            'Admin', 
+			            'America/New_York', 
+			            '%s', 
+			            'linj436@gmail.com'
+			        ),
+			        (
+			            'Mary Baker',
+			            '/images/users/mary_baker.jpg',
+			            'Passionate home baker with a soft spot for chewy cookies and show-stopping layer cakes. my goal is to make home baking approachable, fun, and irresistibly delicious. Grab a spatula and let''s bake something memorable together!',
+			            '2024-02-02 12:12:12',
+			            NULL,
+			            'Active',
+			            'Moderator',
+			            'America/Chicago',
+			            '%s',
+			            'marybaker932!132@gmail.com'
+			        ),
+			        (
+			            'Peter Parker',
+			            '/images/users/peter_parker.jpg',
+			            'Your friendly insect-devouring neighbor. I love cooking all types of insect based dishes. From ants, worms, cockroaches, locusts, you name it! I shall eat your pests away!',
+			            '2024-03-03 13:03:03',
+			            NULL,
+			            'Active',
+			            'Moderator',
+			            'America/Los_Angeles',
+			            '%s',
+			            'ppinsectdevourer328@gmail.com'
+			        ),
+			        (
+			            'Valerie Vance',
+			            '/images/users/valerie_vance.jpg',
+			            'Hardcore environmentalist here. I hope everyone becomes addicted to my vegan dishes so we can all help reduce our carbon footprint together!',
+			            '2024-04-04 14:14:14',
+			            '2025-08-08 18:18:18',
+			            'Deleted',
+			            'User',
+			            'America/New_York',
+			            '%s',
+			            'valeriev454@gmail.com'
+			        ),
+			        (
+			            'Grill Boss', 
+			            '/images/users/grill_boss.jpg', 
+			            'Ready for some awesome roasts. Daddy here can grill, you down!? Haha sorry, please excuse daddy''s absolutely hilarious puns.',
+			            '2024-05-05 15:05:05',
+			            NULL,
+			            'Active',
+			            'User', 
+			            'America/Denver', 
+			            '%s', 
+			            'grilldaddy2132@gmail.com'
+			        ),
+			        (
+			            'Sue mei',
+			            '/images/users/sue_mei.jpg',
+			            'I am a predator and I like to eat things raw. What are you going to do? Sue me? Ha, good luck!',
+			            '2025-06-06 16:09:16',
+			            NULL,
+			            'Active',
+			            'User',
+			            'Asia/Tokyo',
+			            '%s',
+			            'suemei8375@gmail.com'
+			        ),
+			        (
+			            'Steph Curry',
+			            '/images/users/steph_curry.jpg',
+			            'Hey, if yall don''t know me, I am a really famous NBA player. Athletes gotta eat too ya know. My favorite food is curry, it is my namesake haha. Believe it or not, Indian food is my thing. Biryani, dosa, you name it!',
+			            '2025-07-07 17:17:17',
+			            NULL,
+			            'Active',
+			            'User',
+			            'Europe/London',
+			            '%s',
+			            'justForRecipeGenieSC@gmail.com'
+			        ),
+			        (
+			            '67_67',
+			            NULL,
+			            'Your dishes all fucking suck! If you take offense, that is your problem!',
+			            '2026-09-10 09:09:09',
+			            '2026-10-09 10:10:10',
+			            'Banned',
+			            'User',
+			            'America/New_York',
+			            '%s',
+			            'dfg3785yib@gmail.com'
+			        ),
+			        (
+			            'RealGordanRamsay',
+			            '/images/users/realgordanramsay.jpg',
+			            'I make fabulous dishes and feature in popular shows. Follow me for exquisite cuisines!',
+			            '2026-08-09 08:08:08',
+			            '2026-09-08 19:19:19',
+			            'Banned',
+			            'User',
+			            'Europe/London',
+			            '%s',
+			            'realgordanramsay283@gmail.com'
+			        ),
+			        (
+			            'Timothy32612',
+			            NULL,
+			            'I love cooking apps!',
+			            '2026-11-11 06:06:06',
+			            '2026-11-11 06:09:09',
+			            'Banned',
+			            'User',
+			            'America/Los_Angeles',
+			            '%s',
+			            '1e89g4r63fydcwuo@gmail.com'
+			        ),
+			        (
+			            'Timothy32613',
+			            NULL,
+			            'I love cooking apps!',
+			            '2026-11-12 06:06:06',
+			            '2026-11-12 06:08:08',
+			            'Banned',
+			            'User',
+			            'America/Los_Angeles',
+			            '%s',
+			            'ewfegt8y@gmail.com'
+			        ),
+			        (
+			            'Timothy32614',
+			            NULL,
+			            'I love cooking apps!',
+			            '2026-11-13 06:06:06',
+			            '2026-11-13 06:07:07',
+			            'Banned',
+			            'User',
+			            'America/Los_Angeles',
+			            '%s',
+			            'h3efdsjefwieru@gmail.com'
+			        );
+			    """,
+			    PasswordHasher.hash("JeremyLin"),
+			    PasswordHasher.hash("MaryBaker"),
+			    PasswordHasher.hash("PeterParker"),
+			    PasswordHasher.hash("ValerieVance"),
+			    PasswordHasher.hash("GrillBoss"),
+			    PasswordHasher.hash("SueMei"),
+			    PasswordHasher.hash("StephCurry"),
+			    PasswordHasher.hash("67_67"),
+			    PasswordHasher.hash("RealGordanRamsay"),
+			    PasswordHasher.hash("Timothy32612"),
+			    PasswordHasher.hash("Timothy32613"),
+			    PasswordHasher.hash("Timothy32614")
+			);
+		
 		String[] codeblocks = {
-				"""
-				INSERT INTO USERS (USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, USER_ACTIVE_TIMESTAMP, USER_REMOVE_TIMESTAMP, USER_STATUS, ROLE, TIMEZONE, PASSWORD_HASH, EMAIL) VALUES
-				    (
-				        'Jeremy Lin', 
-				        '/images/users/jeremy_lin.jpg', 
-				        'Home cook and comfort-food enthusiast who believes the best meals are simple, easy to make, and easy to eat. Always experimenting with quick, foolproof pantry staples.', 
-				        '2024-01-01 11:01:01',
-				        NULL,
-				        'Active',
-				        'Admin', 
-				        'America/New_York', 
-				        '$argon2id$v=19$m=65536,t=3,p=1$Z2VuZXJhdGVkc2FsdDI$9xK7m8Wb+5Bq7Zq7Q9Fw9k9Q7vX5k8Wb+5Bq7Zq7Q9E=', 
-				        'linj436@gmail.com'
-				    ),
-				    (
-				        'Mary Baker',
-				        '/images/users/mary_baker.jpg',
-				        'Passionate home baker with a soft spot for chewy cookies and show-stopping layer cakes. my goal is to make home baking approachable, fun, and irresistibly delicious. Grab a spatula and let''s bake something memorable together!',
-				        '2024-02-02 12:12:12',
-				        NULL,
-				        'Active',
-				        'Moderator',
-				        'America/Chicago',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdHRlc3RzYWx0Mw$Kp3v5m8Wb+5Bq7Zq7Q9Fw9k9Q7vX5k8Wb+5Bq7Zq7Q8=',
-				        'marybaker932!132@gmail.com'
-				    ),
-				    (
-				        'Peter Parker',
-				        '/images/users/peter_parker.jpg',
-				        'Your friendly insect-devouring neighbor. I love cooking all types of insect based dishes. From ants, worms, cockroaches, locusts, you name it! I shall eat your pests away!',
-				        '2024-03-03 13:03:03',
-				        NULL,
-				        'Active',
-				        'Moderator',
-				        'America/Los_Angeles',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdHRlc3RzYWx0NA$Wb+5Bq7Zq7Q9Fw9k9Q7vX5k8Wb+5Bq7Zq7Q9Fw9k9Q7v=',
-				        'ppinsectdevourer328@gmail.com'
-				    ),
-				    (
-				        'Valerie Vance',
-				        '/images/users/valerie_vance.jpg',
-				        'Hardcore environmentalist here. I hope everyone becomes addicted to my vegan dishes so we can all help reduce our carbon footprint together!',
-				        '2024-04-04 14:14:14',
-				        '2025-08-08 18:18:18',
-				        'Deleted',
-				        'User',
-				        'America/New_York',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdHRlc3RzYWx0MQ$v/5k7m8Wb+5Bq7Zq7Q9Fw9k9Q7vX5k8Wb+5Bq7Zq7Q9',
-				        'valeriev454@gmail.com'
-				    ),
-				    (
-				        'Grill Boss', 
-				        '/images/users/grill_boss.jpg', 
-				        'Ready for some awesome roasts. Daddy here can grill, you down!? Haha sorry, please excuse daddy''s absolutely hilarious puns.',
-				        '2024-05-05 15:05:05',
-				        NULL,
-				        'Active',
-				        'User', 
-				        'America/Denver', 
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdHRlc3RzYWx0NQ$8k9Q7vX5k8Wb+5Bq7Zq7Q9Fw9k9Q7vX5k8Wb+5Bq7Z8=', 
-				        'grilldaddy2132@gmail.com'
-				    ),
-				    (
-				        'Sue mei',
-				        '/images/users/sue_mei.jpg',
-				        'I am a predator and I like to eat things raw. What are you going to do? Sue me? Ha, good luck!',
-				        '2025-06-06 16:09:16',
-				        NULL,
-				        'Active',
-				        'User',
-				        'Asia/Tokyo',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9qZkllajQzag$D76tBiqd93gScqfEnjSKcEA1nsv252ZuWfPic/Lbj34=',
-				        'suemei8375@gmail.com'
-				    ),
-				    (
-				        'Steph Curry',
-				        '/images/users/steph_curry.jpg',
-				        'Hey, if yall don''t know me, I am a really famous NBA player. Athletes gotta eat too ya know. My favorite food is curry, it is my namesake haha. Believe it or not, Indian food is my thing. Biryani, dosa, you name it!',
-				        '2025-07-07 17:17:17',
-				        NULL,
-				        'Active',
-				        'User',
-				        'Europe/London',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9oZGR3WUQyMw$6lUiP/dsCzDKx8GtlvXLEV7V63hU5CN0iXkWpXxszFk=',
-				        'justForRecipeGenieSC@gmail.com'
-				    ),
-				    (
-				        '67_67',
-				        NULL,
-				        'Your dishes all fucking suck! If you take offense, that is your problem!',
-				        '2026-09-10 09:09:09',
-				        '2026-10-09 10:10:10',
-				        'Banned',
-				        'User',
-				        'America/New_York',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9wYXNzd29yZDEyMw$NEuKhUIhvR6vk4LarqGZb7zUlvFY6YP4g1x+9QhMVbs=',
-				        'dfg3785yib@gmail.com'
-				    ),
-				    (
-				        'RealGordanRamsay',
-				        '/images/users/realgordanramsay.jpg',
-				        'I make fabulous dishes and feature in popular shows. Follow me for exquisite cuisines!',
-				        '2026-08-09 08:08:08',
-				        '2026-09-08 19:19:19',
-				        'Banned',
-				        'User',
-				        'Europe/London',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9waWthY2h1MTIz$jgygfJieEA1C70cD3/zzgkMKv909VdzFcK3XkHmWrws=',
-				        'realgordanramsay283@gmail.com'
-				    ),
-				    (
-				        'Timothy32612',
-				        NULL,
-				        'I love cooking apps!',
-				        '2026-11-11 06:06:06',
-				        '2026-11-11 06:09:09',
-				        'Banned',
-				        'User',
-				        'America/Los_Angeles',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9hdXN0aW5zdGFtcDEyMw$UoYEPZr6Al854O5789QrIgCvsUVrVsUdedqUQ5kMAy4=',
-				        '1e89g4r63fydcwuo@gmail.com'
-				    ),
-				    (
-				        'Timothy32613',
-				        NULL,
-				        'I love cooking apps!',
-				        '2026-11-12 06:06:06',
-				        '2026-11-12 06:08:08',
-				        'Banned',
-				        'User',
-				        'America/Los_Angeles',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9hdXN0aW5zdGFtcDEyMw$UoYEPZr6Al854O5789QrIgCvsUVrVsUdedqUQ5kMAy4=',
-				        'ewfegt8y@gmail.com'
-				    ),
-				    (
-				        'Timothy32614',
-				        NULL,
-				        'I love cooking apps!',
-				        '2026-11-13 06:06:06',
-				        '2026-11-13 06:07:07',
-				        'Banned',
-				        'User',
-				        'America/Los_Angeles',
-				        '$argon2id$v=19$m=65536,t=3,p=1$c2FsdF9hdXN0aW5zdGFtcDEyMw$UoYEPZr6Al854O5789QrIgCvsUVrVsUdedqUQ5kMAy4=',
-				        'h3efdsjefwieru@gmail.com'
-				    );
-				""",
+				usersSql,
 				"""
 				INSERT INTO APPLIANCES (APPLIANCE_NAME, APPLIANCE_IMAGE_PATH, APPLIANCE_DESCRIPTION) VALUES
 					(

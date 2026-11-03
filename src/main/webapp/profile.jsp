@@ -1,12 +1,13 @@
 <%@ include file="auth_check.jspf" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.sql.*, Auth.*, Search.DatabaseAccess" %>
+<%@ page import="java.sql.*,auth.*, database.*" %>
+<%@ page import="util.*" %>
 <%
-    int profileId;
+int profileId;
     try { profileId = Integer.parseInt(request.getParameter("id")); }
     catch (Exception e) { profileId = (Integer) session.getAttribute("userId"); }
     int sessionUserId = (Integer) session.getAttribute("userId");
-    Connection con = DatabaseAccess.getConnection();
+    Connection con = DbAccess.getConnection();
     UserDAO.User profile = UserDAO.findById(profileId);
     boolean available = profile != null && "Active".equals(profile.status);
 %>
@@ -15,7 +16,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= available ? Util.esc(profile.name) : "Profile" %> | Recipe Genie</title>
+    <title><%=available ? WebUtils.esc(profile.name) : "Profile"%> | Recipe Genie</title>
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/auth.css">
 </head>
@@ -25,20 +26,20 @@
 <% if (!available) { %>
     <h1>This profile is unavailable.</h1>
 <% } else {
-       String pic = Util.or(profile.imagePath, "/images/users/user-placeholder.png");
+       String pic = WebUtils.or(profile.imagePath, "/images/users/user-placeholder.png");
 %>
     <section class="profile-hero">
         <img class="profile-avatar" src="${pageContext.request.contextPath}<%= pic %>" alt="Avatar">
         <div id ="profile-container">
-            <h1 style="margin:0;"><%= Util.esc(profile.name) %></h1>
-            <p class="profile-meta">Timezone: <%= Util.esc(profile.timezone) %></p>
+            <h1 style="margin:0;"><%= WebUtils.esc(profile.name) %></h1>
+            <p class="profile-meta">Timezone: <%= WebUtils.esc(profile.timezone) %></p>
         </div>
     </section>
 
     <section class="profile-section">
         <h2>Biography</h2>
         <p><%= profile.description == null || profile.description.trim().isEmpty()
-                ? "This user hasn't written a biography yet." : Util.esc(profile.description) %></p>
+                ? "This user hasn't written a biography yet." : WebUtils.esc(profile.description) %></p>
     </section>
 
     <section class="profile-section">
@@ -222,7 +223,7 @@
                 	int counter = 1;
                     while (rs.next()) {
                         anyRecipe = true;
-                        String img = Util.or(rs.getString("RECIPE_IMAGE_PATH"), "/images/recipe-placeholder.jpg");
+                        String img = WebUtils.or(rs.getString("RECIPE_IMAGE_PATH"), "/images/recipe-placeholder.jpg");
                         String rating = String.format("%.1f", rs.getFloat("AVERAGE_RATING"));
 
         %>
@@ -234,8 +235,8 @@
                     </span></div>
                 </div>
                 <div class="recipe-card-body">
-                    <h3 class="recipe-card-title"><%= Util.esc(rs.getString("RECIPE_NAME")) %></h3>
-                    <p class="recipe-card-desc"><%= Util.esc(rs.getString("RECIPE_DESCRIPTION")) %></p>
+                    <h3 class="recipe-card-title"><%= WebUtils.esc(rs.getString("RECIPE_NAME")) %></h3>
+                    <p class="recipe-card-desc"><%= WebUtils.esc(rs.getString("RECIPE_DESCRIPTION")) %></p>
                    <div class="recipe-card-footer">
        				   <span class="card-rating">
                              <span class="stars"
@@ -291,9 +292,9 @@
                     <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
                 </div>
                 <div class="review-body">
-                    <p class="review-title"><%= Util.esc(rs.getString("REVIEW_NAME")) %>
-                        <small>on <%= Util.esc(rs.getString("RECIPE_NAME")) %></small></p>
-                    <p class="review-text"><%= Util.esc(rs.getString("REVIEW_DESCRIPTION")) %></p>
+                    <p class="review-title"><%= util.WebUtils.esc(rs.getString("REVIEW_NAME")) %>
+                        <small>on <%= util.WebUtils.esc(rs.getString("RECIPE_NAME")) %></small></p>
+                    <p class="review-text"><%= util.WebUtils.esc(rs.getString("REVIEW_DESCRIPTION")) %></p>
                     <div class="review-footer">
                         <span class="review-date"><%= rs.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %></span>
 						<span class="card-rating">

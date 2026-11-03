@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="Auth.*" %>
+<%@ page import="auth.*" %>
+<%@ page import="util.*" %>
 <%
     String error = null;
     String username = "", email = "";
@@ -42,13 +43,13 @@
 <div class="auth-wrapper">
     <form method="post" action="create_account.jsp" class="auth-card">
         <h1>Create account</h1>
-        <% if (error != null) { %><div class="auth-error"><%= Util.esc(error) %></div><% } %>
+        <% if (error != null) { %><div class="auth-error"><%= WebUtils.esc(error) %></div><% } %>
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" maxlength="50" value="<%= Util.esc(username) %>" required>
+        <input type="text" id="username" name="username" maxlength="50" value="<%= WebUtils.esc(username) %>" required>
         <label for="email">Email</label>
-        <input type="email" id="email" name="email" maxlength="254" value="<%= Util.esc(email) %>" required>
+        <input type="email" id="email" name="email" maxlength="254" value="<%= WebUtils.esc(email) %>" required>
         <label for="password">Password (min 8 characters)</label>
-        <input type="password" id="password" name="password" minlength="8" maxlength="128" required>
+        <input type="password" id="password" name="password" maxlength="128" required>
         <input type="hidden" id="timezone" name="timezone" value="UTC">
         <button type="submit" class="auth-primary">Sign up</button>
         <a href="login.jsp" class="auth-secondary">Back to log in</a>

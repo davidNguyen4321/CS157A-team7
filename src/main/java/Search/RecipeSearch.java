@@ -1,5 +1,7 @@
 package Search;
 import java.sql.*;
+import database.DbAccess;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -38,7 +40,7 @@ public class RecipeSearch extends HttpServlet {
 			return;
 		}
 		
-		Connection dbConnection = DatabaseAccess.getConnection();
+		Connection dbConnection = DbAccess.getConnection();
 		if(dbConnection==null) {
 			log("No dbConnection available.");
 			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);

@@ -1,9 +1,9 @@
-package Auth;
+package auth;
 
 import java.sql.*;
 import java.time.ZoneId;
 import java.util.regex.Pattern;
-import Search.DatabaseAccess;
+import database.DbAccess;
 
 public class UserDAO {
     public static class User {
@@ -31,12 +31,12 @@ public class UserDAO {
     /** Returns the user if credentials are valid and the account is Active, else null. */
     public static User authenticate(String login, String password) throws SQLException {
         String sql = "SELECT " + COLS + ", PASSWORD_HASH FROM USERS WHERE USER_NAME = ? OR EMAIL = ?";
-        try (PreparedStatement ps = DatabaseAccess.getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = DbAccess.getConnection().prepareStatement(sql)) {
             ps.setString(1, login);
             ps.setString(2, login);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) return null;
-                if (!PasswordUtil.verify(password, rs.getString("PASSWORD_HASH"))) return null;
+                if (!PasswordHasher.verify(password, rs.getString("PASSWORD_HASH"))) return null;
                 User u = map(rs);
                 return "Active".equals(u.status) ? u : null;
             }
@@ -58,10 +58,10 @@ public class UserDAO {
 
         String sql = "INSERT INTO USERS (USER_NAME, ROLE, TIMEZONE, PASSWORD_HASH, EMAIL) "
                    + "VALUES (?, 'User', ?, ?, ?)";
-        try (PreparedStatement ps = DatabaseAccess.getConnection().prepareStatement(sql)) {
+        try (PreparedStatement ps = DbAccess.getConnection().prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, timezone);
-            ps.setString(3, PasswordUtil.hash(password));
+            ps.setString(3, PasswordHasher.hash(password));
             ps.setString(4, email);
             ps.executeUpdate();
             return null;
@@ -73,7 +73,7 @@ public class UserDAO {
     }
 
     public static User findById(int id) throws SQLException {
-        try (PreparedStatement ps = DatabaseAccess.getConnection()
+        try (PreparedStatement ps = DbAccess.getConnection()
                 .prepareStatement("SELECT " + COLS + " FROM USERS WHERE USER_ID = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
