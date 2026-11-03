@@ -16,13 +16,10 @@ Follow these steps to get the project running and to share your changes with the
 ### 2. Run it
 
 1. Right-click the project and choose **Run As → Run on Server**, then pick your Tomcat.
-2. If the project shows red errors, open **Properties → Java Build Path** (or **Targeted Runtimes**) and select your own Tomcat runtime. A runtime name mismatch is the usual cause.
-3. After verifying that your Tomcat server can run, navigate to the menu bar and go to **Window → Show View → Other**
-4. Search and select servers.
-5. Double click your Tomcat server to open the server overview menu.
-6. Press "Open launch configuration" and go to the environment tab.
-7. Look for a row with the name "RG_DB_PASSWORD" and enter your MYSQL password as the value. If it does not exist, create a new variable called "RG_DB_PASSWORD" with your password by clicking "New" then "Apply".
-8. After pressing OK, restart the server. Now, when you start your Apache Tomcat server, you will automatically connect to the MySQL database.
+2. If the project shows red errors, open **Properties → Java Build Path** (or **Targeted Runtimes**) and select your own Tomcat runtime.
+3. On Eclipse go to **Run -> Run Configurations**, then on the lefthand side search Tomcat and select your own version.
+4. Go to the Environments tab. Add a new variable called "RG_DB_PASSWORD" setting your password as the value. Then click Apply.
+5. Restart the server. Now, when you start your Apache Tomcat server, you will automatically connect to the MySQL database.
 
 ### 3. Every time after that
 
