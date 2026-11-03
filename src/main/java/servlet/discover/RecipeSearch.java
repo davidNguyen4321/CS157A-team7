@@ -1,4 +1,4 @@
-package Search;
+package servlet.discover;
 
 import database.DbAccess;
 

@@ -1,4 +1,4 @@
-package Misc;
+package servlet.engagement;
 
 import database.DbAccess;
 
@@ -23,8 +23,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@WebServlet("/Bookmark/Toggle")
-public class BookmarkToggle extends HttpServlet {
+@WebServlet("/Follow/Toggle")
+public class FollowToggle extends HttpServlet {
 	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
 	
 
@@ -52,10 +52,17 @@ public class BookmarkToggle extends HttpServlet {
 		}
 		
 		ObjectMapper mapper = new ObjectMapper();
-		HashMap<String, Integer> bookmarkMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});
-		Integer recipeId;
-		if((recipeId = bookmarkMap.get("recipeId"))==null) {
-			log("No recipe id provided.");
+		HashMap<String, Integer> followMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});
+		Integer followingId;
+		if((followingId = followMap.get("followingId"))==null) {
+			log("No following id provided.");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().write("{}");
+			return;
+		}
+		
+		if(sessionUserId.equals(followingId)){
+			log("Session user is the same as the following user.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().write("{}");
 			return;
@@ -70,53 +77,39 @@ public class BookmarkToggle extends HttpServlet {
 		}
 		
 		sb = new StringBuilder(); //checking if to toggle on or off
-		sb.append("SELECT 1 FROM BOOKMARK ");
-		sb.append("WHERE USER_ID = ? ");
-		sb.append("AND RECIPE_ID = ? ");
+		sb.append("SELECT FOLLOWER_ID, FOLLOWING_ID FROM FOLLOW ");
+		sb.append("WHERE FOLLOWER_ID = ? ");
+		sb.append("AND FOLLOWING_ID = ? ");
 		try(PreparedStatement queryStatement = dbConnection.prepareStatement(sb.toString())){
 			queryStatement.setInt(1, sessionUserId);
-			queryStatement.setInt(2, recipeId);
+			queryStatement.setInt(2, followingId);
 			try(
 				ResultSet bookmark = queryStatement.executeQuery();
 				PrintWriter pw = response.getWriter();
 					){
         		ObjectNode node = mapper.createObjectNode();
         		sb = new StringBuilder();
-				if(bookmark.next()){ // since userId and recipeId together make the primary key, it is guaranteed that there is either one or no matches
-					sb.append("DELETE FROM BOOKMARK ");
-					sb.append("WHERE USER_ID = ? ");
-					sb.append("AND RECIPE_ID = ? ");
-					node.put("bookmark", false); //deleted
+				if(bookmark.next()){ // since sessionUserId and followingId together make the primary key, it is guaranteed that there is either one or no matches
+					sb.append("DELETE FROM FOLLOW ");
+					sb.append("WHERE FOLLOWER_ID = ? ");
+					sb.append("AND FOLLOWING_ID = ? ");
+					node.put("follow", false); //deleted
 				}
 				else{
-					sb.append("INSERT INTO BOOKMARK (USER_ID, RECIPE_ID) ");
+					sb.append("INSERT INTO FOLLOW (FOLLOWER_ID, FOLLOWING_ID) ");
 					sb.append("VALUES (?, ?) ");
-					node.put("bookmark", true); //added
+					node.put("follow", true); //added
 				}
 				try(PreparedStatement updateStatement = dbConnection.prepareStatement(sb.toString())){
 					updateStatement.setInt(1, sessionUserId);
-					updateStatement.setInt(2, recipeId);
+					updateStatement.setInt(2, followingId);
 					updateStatement.execute();
-					sb = new StringBuilder();
-					sb.append("SELECT COUNT(USER_ID) AS BOOKMARK_COUNT FROM BOOKMARK ");
-					sb.append("WHERE RECIPE_ID = ? ");
-					try(PreparedStatement countStatement = dbConnection.prepareStatement(sb.toString())){ //rather unsatisfying to use a third
-						countStatement.setInt(1, recipeId);
-						try(ResultSet countSet = countStatement.executeQuery()){
-							if(countSet.next()) {
-								node.put("bookmarkCount", countSet.getInt("BOOKMARK_COUNT")); //new bookmark count
-							}
-							else {
-								node.put("bookmarkCount", "?");
-							}
-							pw.write(mapper.writeValueAsString(node));
-						}
-					}
+					pw.write(mapper.writeValueAsString(node));
 				}
 			}
 		}
 		catch(SQLException ex) {//error checking.
-			log("Bookmark toggle failed: " + ex.getMessage());
+			log("Follow toggle failed: " + ex.getMessage());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().write("{}");
 		}

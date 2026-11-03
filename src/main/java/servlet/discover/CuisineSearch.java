@@ -1,4 +1,4 @@
-package Search;
+package servlet.discover;
 
 import database.DbAccess;
 
@@ -19,8 +19,8 @@ import jakarta.servlet.http.HttpSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@WebServlet("/Ingredients/Search")
-public class IngredientSearch extends HttpServlet {
+@WebServlet("/Cuisines/Search")
+public class CuisineSearch extends HttpServlet {
 	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
 	
 
@@ -31,13 +31,6 @@ public class IngredientSearch extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		String searchTerm = request.getParameter("searchTerm");
 		String excludeString = request.getParameter("excludeString");
-		Boolean imageBoolean;
-		if(request.getParameter("imageBoolean").equals("true")) {
-			imageBoolean=true;
-		}
-		else {
-			imageBoolean=false;
-		}
 		
 		HttpSession session = request.getSession(false);
 		//assumes that if the userId exists, that it is a valid id
@@ -67,20 +60,16 @@ public class IngredientSearch extends HttpServlet {
 		// string building
 		Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT INGREDIENT_ID, INGREDIENT_NAME");
-		if(imageBoolean) {
-			sb.append(", INGREDIENT_IMAGE_PATH");
-		}
-		sb.append(" FROM INGREDIENTS WHERE ");
+		sb.append("SELECT CUISINE_ID, CUISINE_NAME FROM CUISINES WHERE ");
 		if(excludeList.length>0) {
-			sb.append("NOT (INGREDIENT_ID IN (");
+			sb.append("NOT (CUISINE_ID IN (");
 			for(int i = 0; i < excludeList.length; i++) {
 				sb.append("?, ");
 			}
 			sb.setLength(sb.length()-2);//remove the last comma and space
 			sb.append(")) AND");
 		}
-		sb.append(" (INGREDIENT_NAME LIKE ? OR INGREDIENT_NAME LIKE ?) ORDER BY INGREDIENT_NAME LIMIT 5");
+		sb.append(" (CUISINE_NAME LIKE ? OR CUISINE_NAME LIKE ?) ORDER BY CUISINE_NAME LIMIT 5");
 		
 		//connection
 		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
@@ -89,8 +78,8 @@ public class IngredientSearch extends HttpServlet {
 			}
     		statement.setString(excludeList.length+1, searchTerm + "%");
     		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
-    		try(    		
-    		ResultSet ingredients = statement.executeQuery();
+    		try(
+    	    ResultSet ingredients = statement.executeQuery();
     	    PrintWriter pw = response.getWriter();
     		){
         		ObjectNode outerNode = mapper.createObjectNode();
@@ -98,16 +87,12 @@ public class IngredientSearch extends HttpServlet {
         		
         		// formatting data into json
         		while(ingredients.next()) {
-        			Integer ingredientId = ingredients.getInt("ingredient_id");
-        			String ingredientName = ingredients.getString("ingredient_name");
+        			Integer ingredientId = ingredients.getInt("cuisine_id");
+        			String ingredientName = ingredients.getString("cuisine_name");
         			ObjectNode innerNode = mapper.createObjectNode();
         			
         			innerNode.put("id",ingredientId);
         			innerNode.put("name",ingredientName);
-        			if(imageBoolean) {
-            			String ingredientImage = ingredients.getString("ingredient_image_path");
-            			innerNode.put("image",ingredientImage);
-        			}
         			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
         			counter++;
         		}
@@ -117,7 +102,7 @@ public class IngredientSearch extends HttpServlet {
     		}
 		}
 		catch(SQLException ex) {//error checking
-			log("Ingredient search failed: " + ex.getMessage());
+			log("Cuisine search failed: " + ex.getMessage());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().write("{}");
 		}

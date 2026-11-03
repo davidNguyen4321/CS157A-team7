@@ -1,4 +1,4 @@
-package Search;
+package servlet.discover;
 
 import database.DbAccess;
 
@@ -19,8 +19,8 @@ import jakarta.servlet.http.HttpSession;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-@WebServlet("/DishTypes/Search")
-public class DishTypeSearch extends HttpServlet {
+@WebServlet("/Ingredients/Search")
+public class IngredientSearch extends HttpServlet {
 	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
 	
 
@@ -31,6 +31,13 @@ public class DishTypeSearch extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		String searchTerm = request.getParameter("searchTerm");
 		String excludeString = request.getParameter("excludeString");
+		Boolean imageBoolean;
+		if(request.getParameter("imageBoolean").equals("true")) {
+			imageBoolean=true;
+		}
+		else {
+			imageBoolean=false;
+		}
 		
 		HttpSession session = request.getSession(false);
 		//assumes that if the userId exists, that it is a valid id
@@ -60,16 +67,20 @@ public class DishTypeSearch extends HttpServlet {
 		// string building
 		Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT DISH_TYPE_ID, DISH_TYPE_NAME FROM DISH_TYPES WHERE ");
+		sb.append("SELECT INGREDIENT_ID, INGREDIENT_NAME");
+		if(imageBoolean) {
+			sb.append(", INGREDIENT_IMAGE_PATH");
+		}
+		sb.append(" FROM INGREDIENTS WHERE ");
 		if(excludeList.length>0) {
-			sb.append("NOT (DISH_TYPE_ID IN (");
+			sb.append("NOT (INGREDIENT_ID IN (");
 			for(int i = 0; i < excludeList.length; i++) {
 				sb.append("?, ");
 			}
 			sb.setLength(sb.length()-2);//remove the last comma and space
 			sb.append(")) AND");
 		}
-		sb.append(" (DISH_TYPE_NAME LIKE ? OR DISH_TYPE_NAME LIKE ?) ORDER BY DISH_TYPE_NAME LIMIT 5");
+		sb.append(" (INGREDIENT_NAME LIKE ? OR INGREDIENT_NAME LIKE ?) ORDER BY INGREDIENT_NAME LIMIT 5");
 		
 		//connection
 		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
@@ -78,7 +89,7 @@ public class DishTypeSearch extends HttpServlet {
 			}
     		statement.setString(excludeList.length+1, searchTerm + "%");
     		statement.setString(excludeList.length+2, "% "+ searchTerm + "%");
-    		try(
+    		try(    		
     		ResultSet ingredients = statement.executeQuery();
     	    PrintWriter pw = response.getWriter();
     		){
@@ -87,12 +98,16 @@ public class DishTypeSearch extends HttpServlet {
         		
         		// formatting data into json
         		while(ingredients.next()) {
-        			Integer ingredientId = ingredients.getInt("dish_type_id");
-        			String ingredientName = ingredients.getString("dish_type_name");
+        			Integer ingredientId = ingredients.getInt("ingredient_id");
+        			String ingredientName = ingredients.getString("ingredient_name");
         			ObjectNode innerNode = mapper.createObjectNode();
         			
         			innerNode.put("id",ingredientId);
         			innerNode.put("name",ingredientName);
+        			if(imageBoolean) {
+            			String ingredientImage = ingredients.getString("ingredient_image_path");
+            			innerNode.put("image",ingredientImage);
+        			}
         			outerNode.put(counter.toString(), mapper.writeValueAsString(innerNode));
         			counter++;
         		}
@@ -102,7 +117,7 @@ public class DishTypeSearch extends HttpServlet {
     		}
 		}
 		catch(SQLException ex) {//error checking
-			log("Dish type search failed: " + ex.getMessage());
+			log("Ingredient search failed: " + ex.getMessage());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().write("{}");
 		}
