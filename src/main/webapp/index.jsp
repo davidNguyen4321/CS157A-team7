@@ -79,7 +79,11 @@
 	<script>
 		function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
 			self.classList.add("card-bookmark");
-			self.setAttribute("onclick", "toggleBookmark(this, " + recId + ");");
+			self.onclick = function(event) {
+			    event.stopPropagation();
+			    toggleBookmark(self, recId);
+			}; 
+			// to make sure clicking bookmark only bookmarks, not opens recipe card
 			self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
 			self.textContent=bookmarkCount;
 			let bookmarkImage = document.createElement("img");
@@ -930,6 +934,18 @@
 				            	let recipeCard = document.createElement("article");
 				            	recipeCard.classList.add("search-recipe-card");
 				            	
+				            	recipeCard.style.cursor = "pointer";
+
+				            	recipeCard.addEventListener("click", function(event) {
+				            	    if (event.target.closest(".card-bookmark")) {
+				            	        return;
+				            	    }
+
+				            	    window.location.href =
+				            	        "${pageContext.request.contextPath}/recipe.jsp?recipeId="
+				            	        + recipeId;
+				            	});
+				            	
 				            	let recipeImageContainer = document.createElement("div");
 				            	recipeImageContainer.classList.add("recipe-card-img");
 				            	let recipeImage = document.createElement("img");
@@ -1096,7 +1112,9 @@
 					 	                                String rating = String.format("%.1f", recipes.getFloat("AVERAGE_RATING"));
 					 %>
 	
-					    		<article class="recipe-card">
+					    		<article class="recipe-card"
+								         style="cursor: pointer;"
+								         onclick="window.location.href='recipe.jsp?recipeId=<%=recipes.getInt("RECIPE_ID")%>'">
 					    		    <div class="recipe-card-img">
 					    		        <img src="${pageContext.request.contextPath}<%=recipeImagePath%>" alt="Recipe">
 	
@@ -1171,7 +1189,7 @@
 	                   <%
 	                   if (dbConnection != null) {
 	                   	                       String reviewSql =
-	                   	                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+	                   	                           "SELECT r.RECIPE_ID, r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
 	                   	                           "v.REVIEW_DESCRIPTION, v.RATING, " +
 	                   	                           "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
 	                   	                           "u.USER_IMAGE_PATH FROM REVIEWS v " +
@@ -1199,7 +1217,9 @@
 	                   	                       				reviewerAvatar = "/images/users/user-placeholder.png";
 	                   	                       			}
 	                   %>
-	                   <article class="review-card">
+	                   <article class="review-card"
+						         style="cursor: pointer;"
+						         onclick="window.location.href='recipe.jsp?recipeId=<%=reviews.getInt("RECIPE_ID")%>'">
 	                       <div class="review-thumb">
 	                           <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
 	                       </div>
@@ -1308,7 +1328,9 @@
 	                   	                                   }
 	                   	                                   String rating = String.format("%.1f", popularRecipes.getFloat("AVERAGE_RATING"));
 	                   %>
-	                   <article class="recipe-card">
+	                   <article class="recipe-card"
+						         style="cursor: pointer;"
+						         onclick="window.location.href='recipe.jsp?recipeId=<%=popularRecipes.getInt("RECIPE_ID")%>'">
 	                       <div class="recipe-card-img">
 	                           <img src="${pageContext.request.contextPath}<%=popularImage%>" alt="Recipe" />
 	                           <div class="rank-badge">#<%=rank%></div>

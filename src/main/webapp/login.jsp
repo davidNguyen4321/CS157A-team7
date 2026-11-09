@@ -25,6 +25,8 @@
                 return;
             }
         } catch (Exception ex) {
+        	ex.printStackTrace();
+        	error = ex.getClass().getSimpleName() +": " + ex.getMessage();
             error = "Something went wrong. Please try again.";
         }
     }
