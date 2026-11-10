@@ -1,6 +1,6 @@
 package servlet.discover;
 
-import database.DbAccess;
+import auth.ServletSecurity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,32 +27,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @WebServlet("/Recipes/Search")
 public class RecipeSearch extends HttpServlet {
-	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
 	
-
-	@Override //Mandatory get method for fetch requests
+	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		//verification checks
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
+
+		Integer sessionUserId = ServletSecurity.getAuthenticatedUserId(request, response);
 		
-		HttpSession session = request.getSession(false);
-		Integer sessionUserId;
-		//assumes that if the userId exists, that it is a valid id
-		if(!request.isRequestedSessionIdValid() || session == null || (sessionUserId = (Integer) session.getAttribute("userId")) == null) {
-			log("Invalid session.");
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.getWriter().write("{}");
-			return;
-		}
+		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
+		if(dbConnection == null) return;
 		
-		Connection dbConnection = DbAccess.getConnection();
-		if(dbConnection==null) {
-			log("No dbConnection available.");
-			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-			response.getWriter().write("{}");
-			return;
-		}
 		RecipeSearchRequest requestInfo = readRequest(request, response);
 		try{
 			requestInfo.filterIdsNotCourses.put("Dietary Restriction",
@@ -100,32 +83,22 @@ public class RecipeSearch extends HttpServlet {
 	}
 	
 	private RecipeSearchRequest readRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
-		//get parameters
-		HashMap<String, Object> parameterMap = new HashMap<String, Object>();
 		String[] parameters = {"searchTerm", "sortOrder", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
-		for (String parameter : parameters) {
-			String value = request.getParameter(parameter);
-			if(value==null){
-				log("No " + parameter + " provided.");
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				response.getWriter().write("{}");
-				return null;
-			}
-			parameterMap.put(parameter, value);
-		}
+	    Map<String, String> parameterMap = ServletSecurity.getValidatedParameters(request, response, parameters, true);
+	    if (parameterMap == null) return null; 
 		
 		// map
 		ObjectMapper mapper = new ObjectMapper();
-		String searchTerm = parameterMap.get("searchTerm").toString().trim();
-		String[] sortOrder = mapper.readValue(parameterMap.get("sortOrder").toString(), String[].class);
+		String searchTerm = parameterMap.get("searchTerm").trim();
+		String[] sortOrder = mapper.readValue(parameterMap.get("sortOrder"), String[].class);
 		
 		HashMap<String, HashMap<String, String>> sortOptions = mapper.readValue(
-				parameterMap.get("sortOptions").toString(),
+				parameterMap.get("sortOptions"),
 				new TypeReference<HashMap<String, HashMap<String, String>>>() {});
 		
 		// filterIds
 		HashMap<String, String[]> filterIds = mapper.readValue(
-				parameterMap.get("filterIds").toString(),
+				parameterMap.get("filterIds"),
 				new TypeReference<HashMap<String, String[]>>() {});
 		HashMap<String, Integer[]> filterIdsNotCourses = new HashMap<String, Integer[]>();
 		String[] courses = {}; // placeholder array
@@ -144,17 +117,17 @@ public class RecipeSearch extends HttpServlet {
 		}
 		
 		HashMap<String, Integer> tolerances = mapper.readValue(
-				parameterMap.get("tolerances").toString(),
+				parameterMap.get("tolerances"),
 				new TypeReference<HashMap<String, Integer>>() {}
 				);
 		
 		HashMap<String, HashMap<String, Integer>> ranges = mapper.readValue(
-				parameterMap.get("ranges").toString(),
+				parameterMap.get("ranges"),
 				new TypeReference<HashMap<String, HashMap<String, Integer>>>() {}
 				);
 		
 		HashMap<String, Boolean> options = mapper.readValue(
-				parameterMap.get("options").toString(),
+				parameterMap.get("options"),
 				new TypeReference<HashMap<String, Boolean>>() {}
 				);
 		
