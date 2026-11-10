@@ -38,8 +38,10 @@
                     </a>
                     <div class="user-avatar" title="Account">
                         <% if (hdrPic != null && !hdrPic.isEmpty()) { %>
-                            <img src="${pageContext.request.contextPath}<%= hdrPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-                        <% } else { %>👤<% } %>
+						    <img src="${pageContext.request.contextPath}<%= hdrPic %>" alt="Profile" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+						<% } else { %>
+						    <img src="${pageContext.request.contextPath}/images/users/user-placeholder.png" alt="Profile Placeholder" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+						<% } %>
                     </div>
                     <a href="logout.jsp" class="author-link" style="margin-left:.75rem;">Log out</a>
                 </div>
