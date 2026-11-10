@@ -541,11 +541,11 @@
 							filterIds.set(key, []);
 						}
 						
-						addSearchListenerWithImage('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '${pageContext.request.contextPath}/DishTypes/Search?', false);
-						addSearchListenerWithImage('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '${pageContext.request.contextPath}/Cuisines/Search?', false);
-						addSearchListenerWithImage('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '${pageContext.request.contextPath}/Ingredients/Search?', true);
-						addSearchListenerWithImage('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '${pageContext.request.contextPath}/Appliances/Search?', true);
-						addSearchListenerWithImage('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '${pageContext.request.contextPath}/Users/Search?', true);
+						addDropdownListener('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '${pageContext.request.contextPath}/DishTypes/Search?');
+						addDropdownListener('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '${pageContext.request.contextPath}/Cuisines/Search?');
+						addDropdownListener('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '${pageContext.request.contextPath}/Ingredients/Search?');
+						addDropdownListener('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '${pageContext.request.contextPath}/Appliances/Search?');
+						addDropdownListener('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '${pageContext.request.contextPath}/Users/Search?');
 						
 						const tolerances = new Map();
 						for (let key of ["Ingredient", "Appliance"]){
@@ -659,7 +659,7 @@
 							}
 						}
 						
-						function addSearchListenerWithImage(searchId, type, panelSearchContainerId, panelContainerId, url, imageBoolean){
+						function addDropdownListener(searchId, type, panelSearchContainerId, panelContainerId, url){
 							let input = document.getElementById(searchId);
 							let timeout = null;
 							input.addEventListener('keyup', function (e) {//tracking keyboard input
@@ -667,7 +667,7 @@
 								    timeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
 								    	let searchTerm = input.value;
 								    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
-								    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url, imageBoolean);
+								    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url);
 								    	}
 								    	else{
 								        	removeFilterPanelSearchResults(panelSearchContainerId);
@@ -676,11 +676,10 @@
 							});
 						}
 						
-						async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url, imageBoolean){
+						async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url){
 				    		searchTerm = searchTerm.trim();
 					        let parameters = new URLSearchParams();
 					        parameters.append('searchTerm', searchTerm);
-					        parameters.append('imageBoolean', imageBoolean);
 					        parameters.append('excludeArray', JSON.stringify(filterIds.get(type)));
 					        
 					        //connect to web server
@@ -698,7 +697,7 @@
 					        }
 				        	let objects = await response.json(); // Creates a JSON object
 				        	removeFilterPanelSearchResults(panelSearchContainerId);
-				        	newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId, imageBoolean);
+				        	newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId);
 						}
 						
 						function removeFilterPanelSearchResults(panelSearchContainerId){ //clear results to make way for an updated version
@@ -709,33 +708,41 @@
 							}
 						}
 						
-						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId, imageBoolean){
-			            	let panel = document.getElementById(panelSearchContainerId);
-			            	//create a result for each object
-							for (let objectString of Object.values(objects)){
-								//initialization
-				            	let object = JSON.parse(objectString);
-				            	let id = object["id"];
-				            	let name = object["name"];
-				            	
-								//the base element
-				            	let newElement = document.createElement("button");
-				            	newElement.classList.add("filter-panel-search-autocomplete");
-				            	newElement.setAttribute('type','button');
-				            	
-				            					            	
-				            	if(imageBoolean){
-					            	let image = object["image"];
-					            	let newPic = document.createElement("img");
-					            	newPic.classList.add("mini-pic");
-					            	newPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
-					            	newPic.setAttribute('alt', "'" + type + "'");
-					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', '" + image + "', '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"');");
-					            	newElement.append(newPic);
-				            	}
-				            	else{
-					            	newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + false + ", '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"');");
-				            	}
+						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId){
+						    let panel = document.getElementById(panelSearchContainerId);
+						    
+						    // Define default placeholders dynamically based on the dropdown type
+						    const placeholderMap = {
+						        'Author': '/images/users/user-placeholder.png',
+						    };
+
+						    for (let objectString of Object.values(objects)){
+						        let object = JSON.parse(objectString);
+						        let id = object["id"];
+						        let name = object["name"];
+						        
+						        let newElement = document.createElement("button");
+						        newElement.classList.add("filter-panel-search-autocomplete");
+						        newElement.setAttribute('type','button');
+						        
+						        // Check if the "image" key exists in the backend response
+						        if ('image' in object) {
+						            let image = object["image"]; // Can be a string path or null
+						            let effectiveImage = image || placeholderMap[type]; // Uses DB image, or falls back to map
+						            
+						            if (effectiveImage) {
+						                let newPic = document.createElement("img");
+						                newPic.classList.add("mini-pic");
+						                newPic.setAttribute('src', "${pageContext.request.contextPath}" + effectiveImage);
+						                newPic.setAttribute('alt', "'" + type + "'");
+						                newElement.append(newPic);
+						            }
+						            
+						            newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + (effectiveImage ? "'" + effectiveImage + "'" : "null") + ", '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"');");
+						        } else {
+						            // The "image" key doesn't exist at all for this servlet
+						            newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', null, '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"');");
+						        }
 				            	
 				            	//the text element
 				            	let newName = document.createElement("p");
