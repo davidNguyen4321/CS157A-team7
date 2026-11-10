@@ -3,7 +3,7 @@ package servlet.discover;
 import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet("/Appliances/Search")
-public class ApplianceSearch extends AbstractSearch {
+public class ApplianceDropdown extends DropdownSearch {
     @Override protected String getTable() { return "APPLIANCES"; }
     @Override protected String getIdCol() { return "APPLIANCE_ID"; }
     @Override protected String getNameCol() { return "APPLIANCE_NAME"; }

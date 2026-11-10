@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public abstract class AbstractSearch extends HttpServlet {
+public abstract class DropdownSearch extends HttpServlet {
 
 		protected abstract String getTable();
 	    protected abstract String getIdCol();
