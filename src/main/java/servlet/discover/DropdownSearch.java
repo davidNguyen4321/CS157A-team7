@@ -37,15 +37,14 @@ public abstract class DropdownSearch extends HttpServlet {
 		    Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
 		    if (dbConnection == null) return;
 		    
-		    Map<String, String> requiredMap = ServletSecurity.getValidatedParameters(request, response, new String[] {"searchTerm", "imageBoolean", "excludeString"}, false);
+		    Map<String, String> requiredMap = ServletSecurity.getValidatedParameters(request, response, new String[] {"searchTerm", "excludeArray"}, false);
 		    if (requiredMap == null) return;
 		    
 		    String searchTerm = requiredMap.get("searchTerm");	
-		    String excludeString = requiredMap.get("excludeString");
-		    boolean imageBoolean = Boolean.parseBoolean(requiredMap.get("imageBoolean"));
+		    String excludeArray = requiredMap.get("excludeArray");
 		    
 		    ObjectMapper mapper = new ObjectMapper();
-			Integer[] excludeList = mapper.readValue(excludeString, Integer[].class);
+			Integer[] excludeList = mapper.readValue(excludeArray, Integer[].class);
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT * FROM ")
@@ -63,7 +62,7 @@ public abstract class DropdownSearch extends HttpServlet {
 			String activeCol = getActiveCol();
 			if (activeCol != null) {
                 sb.append(activeCol)
-                  .append(" = 1 AND ");
+                  .append(" = 'Active' AND ");
             }
 			
 			sb.append("(")
@@ -96,8 +95,9 @@ public abstract class DropdownSearch extends HttpServlet {
 	                    innerNode.put("id", id);
 	                    innerNode.put("name", name);
 
-	                    if (imageBoolean) {
-	                        String imagePath = rs.getString(getImageCol());
+	                    String imageCol = getImageCol();
+	                    if (imageCol != null) {
+	                        String imagePath = rs.getString(imageCol);
 	                        innerNode.put("image", imagePath);
 	                    }
 

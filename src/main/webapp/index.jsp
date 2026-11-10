@@ -681,7 +681,7 @@
 					        let parameters = new URLSearchParams();
 					        parameters.append('searchTerm', searchTerm);
 					        parameters.append('imageBoolean', imageBoolean);
-					        parameters.append('excludeString', JSON.stringify(filterIds.get(type)));
+					        parameters.append('excludeArray', JSON.stringify(filterIds.get(type)));
 					        
 					        //connect to web server
 							let response = await fetch(url + parameters.toString(), {
