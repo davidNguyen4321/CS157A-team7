@@ -39,6 +39,7 @@ public class RecipeSearch extends HttpServlet {
 		if(dbConnection == null) return;
 		
 		RecipeSearchRequest requestInfo = readRequest(request, response);
+		
 		try{
 			requestInfo.filterIdsNotCourses.put("Dietary Restriction",
 					recurseBaseElement(

@@ -524,15 +524,15 @@
 						</div>
 	                      </div>
 						<script>
-						const sortOrder = [];
-						const sortOptions = new Map(); // use an array that is just the sort option AND a map that contains whether it ascends or not
+						const sortOptions = new Map(); 
 						for (let key of ["Publication Date", "Bookmarks", "Reviews", "Ratings"]){
 							let elementBaseId = key.replace(" ", "");
 							let object = {
-									sort: "ascending",
-									sortTextId: elementBaseId+"SortText"
-								}
-							sortOptions.set(key	, object); //True or false refers to ascending (True) or descending (False)
+								sort: "ascending",
+								order: null, // Initially unselected
+								sortTextId: elementBaseId + "SortText"
+							}
+							sortOptions.set(key	, object);
 						}
 						
 						sortSelect(document.getElementById("PublicationDateSortOption"), "PublicationDateSortText", "Publication Date");
@@ -603,50 +603,64 @@
 					        }
 						}
 						
-						function sortSelect(self, textElement, type){
-							if (self.classList.contains('descending')){ // State 1: descending --> ascending
+						function sortSelect(self, textElement, type) {
+							let option = sortOptions.get(type);
+							if (self.classList.contains('descending')) { // State 1: descending --> ascending
 								self.classList.remove('descending');
 								self.classList.add('ascending');
-								sortOptions.get(type).sort='ascending';
-								updateSortSelectIndex(type);
+								option.sort='ascending';
+								if (option.order === null) assignNextOrder(type);
 							}
-							else if (self.classList.contains('ascending')){ // State 2: ascending --> not sorted
+							else if (self.classList.contains('ascending')) { // State 2: ascending --> not sorted
 								self.classList.remove('ascending');
-								sortOptions.get(type).sort=null;
-								let index = sortOrder.indexOf(type);
-								if (index !== -1){
-									sortOrder.splice(index, 1);
+								option.sort = null;
+								option.order = null;
+								reindexOrders();
 								}
 							}
-							else{ // State 3: not sorted --> descending
+							else { // State 3: not sorted --> descending
 								self.classList.add('descending');
-								sortOptions.get(type).sort='descending';
-								updateSortSelectIndex(type);
-							}
-							updateSortTextElements();
-						}
-						
-						function updateSortSelectIndex(type){
-							let index = sortOrder.indexOf(type);
-							if (index !== -1){
-								sortOrder.splice(index, 1);
-							}
-							sortOrder.push(type);
-							updateSortTextElements();
-						}
-						
-						function updateSortTextElements(){
-							for (let key of sortOptions.keys()){
-								let element = document.getElementById(sortOptions.get(key).sortTextId);
-								let sortPosition = sortOrder.indexOf(key)+1;
-								if(sortPosition == 0){
-									element.textContent = key;
-									continue;
+								option.sort = 'descending';
+								if (option.order === null) {
+									assignNextOrder(type);
 								}
-								element.textContent = sortPosition+ " " + key  +": " + sortOptions.get(key).sort;
-								element.innerHTML = element.innerHTML.replace(sortPosition, "<span style='color: #1E4E3B;'>"+sortPosition+"</span>");
 							}
+							updateSortTextElements();
 						}
+						
+    					let activeSortCount = 0;
+    					
+				    	function assignNextOrder(type){
+				    		activeSortCount++;
+				    	    sortOptions.get(type).order = activeSortCount;
+				    	}
+				    	
+				    	function reindexOrders() {
+				    	    let activeOptions = Array.from(sortOptions.values())
+				    	        .filter(opt => opt.order !== null)
+				    	        .sort((a, b) => a.order - b.order);
+				    	    let idx = 1;
+				    	    for (let opt of activeOptions) opt.order = idx++;
+				    	}
+						
+				    	function updateSortTextElements() {
+				    	    for (let [key, opt] of sortOptions.entries()) {
+				    	        let element = document.getElementById(opt.sortTextId);
+				    	        
+				    	        if (opt.order === null) {
+				    	            element.innerHTML = `<span>${key}</span>`;
+				    	            element.classList.remove("active-sort-chip");
+				    	        } else {
+				    	            let arrow = opt.sort === 'ascending' ? '↑' : '↓';
+				    	            element.innerHTML = `
+				    	                <span class="filter-label">${key}</span>
+				    	                <span class="priority-badge">${opt.order}</span>
+				    	                <span class="direction-arrow">${arrow}</span>
+				    	            `;
+				    	            element.classList.add("active-sort-chip");
+				    	        }
+				    	    }
+				    	}
 						
 						function toggleBasicFilter(self, type, id){
 							if(self.classList.contains('active')){

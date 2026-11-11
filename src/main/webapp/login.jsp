@@ -9,14 +9,13 @@
     String loginValue = "";
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         request.setCharacterEncoding("UTF-8");
-        loginValue = request.getParameter("login") == null ? "" : request.getParameter("login").trim();
+        loginValue = request.getParameter("login");
+        loginValue = (loginValue == null) ? "" : loginValue.trim();
         String password = request.getParameter("password");
         try {
-            UserDAO.User u = (loginValue.isEmpty() || password == null || password.isEmpty())
-                    ? null : UserDAO.authenticate(loginValue, password);
-            if (u == null) {
-                error = "Invalid username/email or password.";
-            } else {
+            UserDAO.User u = (loginValue.isEmpty() || password == null || password.isEmpty()) ? null : UserDAO.authenticate(loginValue, password);
+            if (u == null) error = "Invalid username/email or password.";
+            else {
                 request.changeSessionId(); // prevents session fixation
                 session.setAttribute("userId", u.id);
                 session.setAttribute("username", u.name);
@@ -26,7 +25,6 @@
             }
         } catch (Exception ex) {
         	ex.printStackTrace();
-        	error = ex.getClass().getSimpleName() +": " + ex.getMessage();
             error = "Something went wrong. Please try again.";
         }
     }

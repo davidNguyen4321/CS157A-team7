@@ -31,7 +31,7 @@ public class UserDAO {
 
     /** Returns the user if credentials are valid and the account is Active, else null. */
     public static User authenticate(String login, String password) throws SQLException {
-        String sql = "SELECT * FROM USERS WHERE USER_NAME = ? OR EMAIL = ?";
+        String sql = "SELECT * FROM USERS WHERE (USER_NAME = ? OR EMAIL = ?) AND USER_STATUS = 'Active'";
         try (PreparedStatement ps = DbAccess.getConnection().prepareStatement(sql)) {
             ps.setString(1, login);
             ps.setString(2, login);
@@ -39,7 +39,7 @@ public class UserDAO {
                 if (!rs.next()) return null;
                 if (!PasswordHasher.verify(password, rs.getString("PASSWORD_HASH"))) return null;
                 User u = map(rs);
-                return "Active".equals(u.status) ? u : null;
+                return u;
             }
         }
     }
@@ -72,8 +72,7 @@ public class UserDAO {
     }
     
     public static User findById(int id) throws SQLException {
-        try (PreparedStatement ps = DbAccess.getConnection()
-                .prepareStatement("SELECT * FROM USERS WHERE USER_ID = ?")) {
+        try (PreparedStatement ps = DbAccess.getConnection().prepareStatement("SELECT * FROM USERS WHERE USER_ID = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? map(rs) : null;

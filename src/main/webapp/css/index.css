@@ -100,6 +100,35 @@ input:valid + span::after {
   .header-inner { padding-left: 1rem; padding-right: 1rem; }
 }
 
+/* Base chip container styling */
+.active-sort-chip {
+    background-color: #f0fdf4;
+    border: 1px solid #1E4E3B;
+    color: #1E4E3B;
+}
+
+/* Rounded priority pill */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background-color: #1E4E3B;
+    color: #ffffff;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+/* Directional arrow styling */
+.direction-arrow {
+    margin-left: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
 /* Header & Layout */
 header {
   position: static;
