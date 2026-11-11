@@ -220,8 +220,8 @@
 		                    	</h1>
 		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
 		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date');">
-		                    		<p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Publication Date
-		                    	</button>
+								    <p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Publication Date
+								</button>
 		                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks');">
 									<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Bookmarks
 								</button>
@@ -522,14 +522,13 @@
 						for (let key of ["Publication Date", "Bookmarks", "Reviews", "Ratings"]){
 							let elementBaseId = key.replace(" ", "");
 							let object = {
-								sort: "ascending",
+								sort: null,
 								order: null, // Initially unselected
 								sortTextId: elementBaseId + "SortText"
 							}
 							sortOptions.set(key	, object);
 						}
 						
-						sortSelect(document.getElementById("PublicationDateSortOption"), "PublicationDateSortText", "Publication Date");
 						const filterIds = new Map();
 						for (let key of ["Ingredient", "Appliance", "Author", "Cuisine", "Dish Type", "Dietary Restriction", "Course"]){
 							filterIds.set(key, []);

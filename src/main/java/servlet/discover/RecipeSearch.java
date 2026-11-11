@@ -549,6 +549,8 @@ public class RecipeSearch extends HttpServlet {
 	    }
 	    if (orderBy.length() > 0) {
 	        sb.append(" ORDER BY ").append(orderBy);
+	    } else {
+	        sb.append(" ORDER BY rec.RECIPE_ACTIVE_TIMESTAMP DESC");
 	    }
 	}
 	
