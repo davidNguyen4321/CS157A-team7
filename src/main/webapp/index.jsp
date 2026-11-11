@@ -620,7 +620,15 @@
 							}
 							updateSortTextElements();
 						}
-						    					
+						
+						function assignNextOrder(type) {
+						    let max = 0;
+						    for (let opt of sortOptions.values()) {
+						        if (opt.order !== null) max = Math.max(max, opt.order);
+						    }
+						    sortOptions.get(type).order = max + 1;
+						}
+						
 						function getActiveSortEntries() {
 						    return Array.from(sortOptions.entries())
 						        .filter(([key, opt]) => opt.order !== null)
@@ -635,24 +643,23 @@
 						    return Object.fromEntries(getActiveSortEntries().map(([key, opt]) => [key, opt.sort]));
 						}
 						
-				    	function updateSortTextElements() {
-				    	    for (let [key, opt] of sortOptions.entries()) {
-				    	        let element = document.getElementById(opt.sortTextId);
-				    	        
-				    	        if (opt.order === null) {
-				    	            element.innerHTML = `<span>${key}</span>`;
-				    	            element.classList.remove("active-sort-chip");
-				    	        } else {
-				    	            let arrow = opt.sort === 'ascending' ? '↑' : '↓';
-				    	            element.innerHTML = `
-				    	                <span class="filter-label">${key}</span>
-				    	                <span class="priority-badge">${opt.order}</span>
-				    	                <span class="direction-arrow">${arrow}</span>
-				    	            `;
-				    	            element.classList.add("active-sort-chip");
-				    	        }
-				    	    }
-				    	}
+						function updateSortTextElements() {
+						    for (let [key, opt] of sortOptions.entries()) {
+						        let element = document.getElementById(opt.sortTextId);
+
+						        if (opt.order === null) {
+						            element.innerHTML = '<span>' + key + '</span>';
+						            element.classList.remove("active-sort-chip");
+						        } else {
+						            let arrow = opt.sort === 'ascending' ? '↑' : '↓';
+						            element.innerHTML =
+						                '<span class="filter-label">' + key + '</span>' +
+						                '<span class="priority-badge">' + opt.order + '</span>' +
+						                '<span class="direction-arrow">' + arrow + '</span>';
+						            element.classList.add("active-sort-chip");
+						        }
+						    }
+						}
 						
 						function toggleBasicFilter(self, type, id){
 							if(self.classList.contains('active')){
