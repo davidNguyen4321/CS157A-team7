@@ -43,41 +43,43 @@ public class RecipeSearch extends HttpServlet {
 		RecipeSearchRequest requestInfo = new RecipeSearchRequest(parameterMap);
 		Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 		
-		try{
+		try {
 			filterIdMap.put("Dietary Restriction",
-					recurseBaseElement(
-							filterIdMap.get("Dietary Restriction"),
-							"DIETARY_RESTRICTION_ID",
-							"BASE_DIETARY_RESTRICTION_ID",
-							"DIETARY_RESTRICTIONS",
-							dbConnection
-							)
-					);
+				recurseUniDir( // Recurse up
+					filterIdMap.get("Dietary Restriction"),
+					/* curLevelCol: */ "DIETARY_RESTRICTION_ID",
+					/* nextLevelCol: */ "BASE_DIETARY_RESTRICTION_ID",
+					"DIETARY_RESTRICTIONS",
+					dbConnection
+				).toArray(Integer[]::new)
+			);
 			filterIdMap.put("Cuisine",
-					recurseBaseElement(
-							filterIdMap.get("Cuisine"),
-							"BASE_CUISINE_ID", //special case where more specific cuisines are permissible but more general cuisines are not necessarily
-							"CUISINE_ID",
-							"CUISINES",
-							dbConnection
-							)
-					);
+				recurseUniDir( // Recurse down
+					filterIdMap.get("Cuisine"),
+					/* nextLevelCol: */ "BASE_CUISINE_ID",
+					/* nextLevelCol: */ "CUISINE_ID",
+					"CUISINES",
+					dbConnection
+				).toArray(Integer[]::new)
+			);
 			filterIdMap.put("Dish Type",
-					recurseBaseElement(
-							filterIdMap.get("Dish Type"),
-							"BASE_DISH_TYPE_ID", //special case where more specific dish types are permissible but more general dish types are not necessarily
-							"DISH_TYPE_ID",
-							"DISH_TYPES",
-							dbConnection
-							)
-					);
+				recurseUniDir( // Recurse down
+					filterIdMap.get("Dish Type"),
+					/* curLevelCol: */ "BASE_DISH_TYPE_ID",
+					/* nextLevelCol: */ "DISH_TYPE_ID",
+					"DISH_TYPES",
+					dbConnection
+				).toArray(Integer[]::new)
+			);
 			requestInfo.getFilterIdMap().put("Ingredient", 
-					recurseBaseIngredient(
-							requestInfo.getFilterIdMap().get("Ingredient"), 
-							requestInfo.getFilterIdMap().get("Dietary Restriction"), 
-							dbConnection
-							)
-					);
+				recurseBiDir(	
+					filterIdMap.get("Ingredient"),
+					/* colName: */ "INGREDIENT_ID",
+					/* baseColName: */ "BASE_INGREDIENT_ID",
+					"INGREDIENTS",
+					dbConnection
+				).toArray(Integer[]::new)
+			);
 			searchRecipe(requestInfo, dbConnection, response, sessionUserId);
 		}
 		catch(Exception ex) {//error checking
@@ -88,134 +90,51 @@ public class RecipeSearch extends HttpServlet {
 		}
 	}
 	
-	// Made into own query due to recursion
-	private Integer[] recurseBaseIngredient(Integer[] providedIngredientIds, Integer[] dietaryRestrictions, Connection dbConnection) throws SQLException{
-		if(providedIngredientIds.length==0) { // unfortunately, an empty tuple is not allowed. This exists to guard against that edge case.
-			return providedIngredientIds; //vacuously compliant
-		}
+	private HashSet<Integer> recurseUniDir(Integer[] providedElementIds, String curLevelCol, String nextLevelCol, String tableName, Connection dbConnection) throws SQLException {
+		if(providedElementIds.length == 0) return new HashSet<Integer>(); 
 		
-		HashSet<Integer> permissibleProvidedIngredientIds = new HashSet<Integer>();
-		ArrayList<Integer> uniqueNewIngredientIds = new ArrayList<Integer>();
+		HashSet<Integer> closureSet = new HashSet<Integer>(Arrays.asList(providedElementIds));
+		ArrayList<Integer> newIdsToRecurse = new ArrayList<Integer>(Arrays.asList(providedElementIds));
 		
-		//build query
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT DISTINCT i.INGREDIENT_ID, i.BASE_INGREDIENT_ID FROM INGREDIENTS i ");
-		sb.append("WHERE i.INGREDIENT_ID IN (");
-			for(int i = 0; i < providedIngredientIds.length; i++) {
-				sb.append("?, ");
-			}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-		sb.append(") ");
-		if(dietaryRestrictions.length>0) {
-			sb.append("AND NOT EXISTS ( SELECT 1 FROM INGREDIENTS_VIOLATE_DIETARY_RESTRICTIONS ivds "); //Only have to do one check for compliancy because if the child is compliant, then can substitute parent for child.
-				sb.append("WHERE i.INGREDIENT_ID = ivds.INGREDIENT_ID ");
-				sb.append("AND ivds.DIETARY_RESTRICTION_ID IN (");
-					for(int i = 0; i < dietaryRestrictions.length; i++) {
-						sb.append("?, ");
-					}
-					sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(") ) ");
-		}
-		
-		//sql connection
-		try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
-			int counter = 1;
-			for(Integer id : providedIngredientIds) {
-				statement.setInt(counter++, id);// prevents sql injection
-			}
-			for(Integer id : dietaryRestrictions) {
-				statement.setInt(counter++, id);// prevents sql injection
-			}
-			//read and store results
-    		try(ResultSet ingredients = statement.executeQuery();){
-    			HashSet<Integer> newIngredientIds = new HashSet<Integer>(); // specifically to root out non-distinct base_ingredient_ids in the first query
-    			while(ingredients.next()) {
-    				permissibleProvidedIngredientIds.add(ingredients.getInt("INGREDIENT_ID")); //add results
-    				Integer baseIngredientId = ingredients.getInt("BASE_INGREDIENT_ID");
-    				if (baseIngredientId!=0) { // 0 is null for integers
-    					newIngredientIds.add(baseIngredientId);
-    				}
-    			}
-    			for (Integer baseIngredientId : newIngredientIds) {//checking if the base ingredient is unique
-    				if(permissibleProvidedIngredientIds.add(baseIngredientId)) {
-    					uniqueNewIngredientIds.add(baseIngredientId);
-    				}
-    			}
-    		}
-		}
-		
-		// if there is an exception, it is thrown, so only states that have not yet encountered an issue will arrive here
-		while(!uniqueNewIngredientIds.isEmpty()) { //recursion means that multiple queries are needed
-			sb = new StringBuilder();
-			sb.append("SELECT DISTINCT BASE_INGREDIENT_ID FROM INGREDIENTS "); // sadly, distinct only applies to the INGREDIENT_ID, BASE_INGREDIENT_ID tuple
-			sb.append("WHERE INGREDIENT_ID IN (");
-				for(int i = 0; i < uniqueNewIngredientIds.size(); i++) {
-					sb.append("?, ");
-				}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(")"); // does not have to check for compliancy because child ingredient (already verified to be compliant or have a compliant descendant) can be used in place of base ingredient.
-			try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
-				int counter = 1;
-				for(Integer id : uniqueNewIngredientIds) {
-					statement.setInt(counter++, id);// prevents sql injection
-				}
-	    		try(ResultSet ingredients = statement.executeQuery();){
-	    			uniqueNewIngredientIds = new ArrayList<Integer>();
-	    			while(ingredients.next()) {
-	    				Integer baseIngredientId = ingredients.getInt("BASE_INGREDIENT_ID");
-	    				//check if base ingredient is null [0 is null for integers] (to prevent adding null to the list) and unique (to reduce repeated searches)
-	    				if (baseIngredientId!=0 && permissibleProvidedIngredientIds.add(baseIngredientId)) {
-	    					uniqueNewIngredientIds.add(baseIngredientId);
-	    				}
-	    			}
-	    		}
-			}
-		}
-		return permissibleProvidedIngredientIds.toArray(new Integer[permissibleProvidedIngredientIds.size()]);
-	}
-	
-	// Made into own query due to recursion
-	private Integer[] recurseBaseElement(Integer[] providedElementIds, String idName, String baseIdName, String tableName, Connection dbConnection) throws SQLException{
-		if(providedElementIds.length==0) { // unfortunately, an empty tuple is not allowed. This exists to guard against that edge case.
-			return providedElementIds; // vacuously compliant
-		}
-		
-		HashSet<Integer> permissibleProvidedIds = new HashSet<Integer>(Arrays.asList(providedElementIds));
-		ArrayList<Integer> uniqueNewIds = new ArrayList<Integer>(Arrays.asList(providedElementIds));
-		StringBuilder sb;
-		// if there is an exception, it is thrown, so only states that have not yet encountered an issue will arrive here
-		while(!uniqueNewIds.isEmpty()) { // recursion means that multiple queries are needed
-			sb = new StringBuilder();
+		while(!newIdsToRecurse.isEmpty()) {
+			StringBuilder sb = new StringBuilder();
+			
 			sb.append("SELECT DISTINCT ");
-			sb.append(baseIdName);
+			sb.append(nextLevelCol);
 			sb.append(" FROM ");
 			sb.append(tableName);
 			sb.append(" WHERE ");
-			sb.append(idName);
-			sb.append(" IN (");
-				for(int i = 0; i < uniqueNewIds.size(); i++) {
-					sb.append("?, ");
-				}
-			sb.setLength(sb.length()-2);//remove the last comma and space
+			sb.append(curLevelCol);
+			sb.append(" IN (");	
+			for(int i = 0; i < newIdsToRecurse.size(); i++) sb.append("?, ");
+			sb.setLength(sb.length() - 2); // remove the last comma and space
 			sb.append(")");
-			try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());){
+			
+			try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString());) {
 				int counter = 1;
-				for(Integer id : uniqueNewIds) {
-					statement.setInt(counter++, id);// prevents sql injection
-				}
-	    		try(ResultSet elements = statement.executeQuery();){
-	    			uniqueNewIds = new ArrayList<Integer>();
-	    			while(elements.next()) {
-	    				Integer baseElementId = elements.getInt(baseIdName);
-	    				//check if base element is null [0 is null for integers] (to prevent adding null to the list) and unique (to reduce repeated searches)
-	    				if (baseElementId!=0 && permissibleProvidedIds.add(baseElementId)) {
-	    					uniqueNewIds.add(baseElementId);
+				for(Integer id : newIdsToRecurse) statement.setInt(counter++, id); 
+	    		
+				try(ResultSet nextLevelIds = statement.executeQuery();) {
+	    			newIdsToRecurse = new ArrayList<Integer>();
+	    			while(nextLevelIds.next()) {
+	    				Integer nextLevelId = nextLevelIds.getInt(nextLevelCol);
+	    				if (!nextLevelIds.wasNull() && closureSet.add(nextLevelId)) { // ignore null values and duplicates
+	    					newIdsToRecurse.add(nextLevelId);
 	    				}
 	    			}
 	    		}
 			}
 		}
-		return permissibleProvidedIds.toArray(new Integer[permissibleProvidedIds.size()]);
+		
+		return closureSet;
+	}
+	
+	private HashSet<Integer> recurseBiDir(Integer[] providedElementIds, String colName, String baseColName, String tableName, Connection dbConnection) throws SQLException {
+		HashSet<Integer> recurseUp = recurseUniDir(providedElementIds, colName, baseColName, tableName, dbConnection);
+		HashSet<Integer> recurseDown = recurseUniDir(providedElementIds, baseColName, colName, tableName, dbConnection);
+		
+		recurseUp.addAll(recurseDown);
+	    return recurseUp;
 	}
 	
 	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response, int sessionUserId) throws SQLException, IOException{
