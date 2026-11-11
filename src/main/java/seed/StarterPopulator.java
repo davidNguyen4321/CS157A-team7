@@ -19,7 +19,7 @@ public class StarterPopulator {
 	public void populateEntitySets() throws SQLException {
 		String usersSql = String.format(
 			    """
-			    INSERT INTO USERS (USER_NAME, USER_IMAGE_PATH, USER_DESCRIPTION, USER_ACTIVE_TIMESTAMP, USER_REMOVE_TIMESTAMP, USER_STATUS, ROLE, TIMEZONE, PASSWORD_HASH, EMAIL) VALUES
+			    INSERT INTO users (user_name, user_image_path, user_description, user_active_timestamp, user_remove_timestamp, user_status, role, timezone, password_hash, email) VALUES
 			        (
 			            'Jeremy Lin', 
 			            '/images/users/jeremy_lin.jpg', 
@@ -182,7 +182,7 @@ public class StarterPopulator {
 		String[] codeblocks = {
 				usersSql,
 				"""
-				INSERT INTO APPLIANCES (APPLIANCE_NAME, APPLIANCE_IMAGE_PATH, APPLIANCE_DESCRIPTION) VALUES
+				INSERT INTO appliances (appliance_name, appliance_image_path, appliance_description) VALUES
 					(
 						'Rice Cooker', 
 						'/images/appliances/rice_cooker.jpg', 
@@ -235,7 +235,7 @@ public class StarterPopulator {
 					);
 				""",
 				"""
-				INSERT INTO INGREDIENTS (INGREDIENT_NAME, INGREDIENT_IMAGE_PATH, INGREDIENT_DESCRIPTION, BASE_INGREDIENT_ID) VALUES
+				INSERT INTO ingredients (ingredient_name, ingredient_image_path, ingredient_description, base_ingredient_id) VALUES
 				    ('Rice', '/images/ingredients/rice.jpg', 'Food grain cultivated predominantly in flooded paddies.', NULL),
 				    ('White Rice', '/images/ingredients/white_rice.jpg', 'Rice refined to remove outer fibrous layers, leaving only the starchy inside.', 1),
 				    ('Flour', '/images/ingredients/flour.jpg', 'Powder made by grinding raw grains, used in baking and thickening.', NULL),
@@ -297,7 +297,7 @@ public class StarterPopulator {
 				    ('Basil', '/images/ingredients/basil.jpg', 'Aromatic herb with sweet, herbal pepper notes.', NULL);
 				""",
 				"""
-				INSERT INTO DISH_TYPES (DISH_TYPE_NAME, DISH_TYPE_DESCRIPTION, BASE_DISH_TYPE_ID) VALUES
+				INSERT INTO dish_types (dish_type_name, dish_type_description, base_dish_type_id) VALUES
 				    ('Beverage', 'Drinks and liquid refreshments.', NULL),
 				    ('Smoothie', 'A thick, creamy beverage made from blended fruit, vegetables, and liquids.', 1),
 				    ('Soup', 'A primarily liquid food, served warm or hot, made by combining ingredients.', NULL),
@@ -313,7 +313,7 @@ public class StarterPopulator {
 				    ('Meat', 'Dishes centered around primary cuts of meat like grilled steak.', NULL);
 				""",
 				"""
-				INSERT INTO CUISINES (CUISINE_NAME, CUISINE_DESCRIPTION, BASE_CUISINE_ID) VALUES
+				INSERT INTO cuisines (cuisine_name, cuisine_description, base_cuisine_id) VALUES
 				    ('Asian', 'Include China, India, Philippines, and other parts of Asia.', NULL),
 				    ('East Asian', 'Include Japan, Korea, China, and other parts of East Asia.', 1),
 				    ('South Asian', 'Include India, Pakistan, and other parts of South Asia.', 1),
@@ -327,7 +327,7 @@ public class StarterPopulator {
 				    ('Italian', 'Featuring pasta, tomatoes, olive oil, and more.', 10);
 				""",
 				"""
-				INSERT INTO DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_NAME, DIETARY_RESTRICTION_DESCRIPTION, BASE_DIETARY_RESTRICTION_ID) VALUES
+				INSERT INTO dietary_restrictions (dietary_restriction_name, dietary_restriction_description, base_dietary_restriction_id) VALUES
 				    ('Pescatarian', 'Diets that include plant-based foods, dairy, eggs, and fish/seafood, but exclude meat and poultry.', NULL),
 				    ('Vegetarian', 'Diets that exclude meat, poultry, and seafood, but may include dairy and eggs.', 1),
 				    ('Vegan', 'Strict plant-based diets that exclude all animal products including dairy, eggs, and honey.', 2),
@@ -341,7 +341,7 @@ public class StarterPopulator {
 				    ('Paleo', 'A low-carb diet based on whole foods presumed to have been eaten by early humans, excluding grains, legumes, and dairy.', 10);
 				""",
 				"""
-				INSERT INTO RECIPES (RECIPE_NAME, RECIPE_IMAGE_PATH, RECIPE_DESCRIPTION, RECIPE_ACTIVE_TIMESTAMP, RECIPE_REMOVE_TIMESTAMP, RECIPE_STATUS, INSTRUCTIONS, TOTAL_MINUTES, COURSE, AI_GEN_DESCRIPTION, AI_GEN_APPLIANCES, AI_GEN_CUISINES, AI_GEN_DISH_TYPES, AI_GEN_TOTAL_MINUTES, AI_GEN_COURSE, AUTHOR_ID) VALUES
+				INSERT INTO recipes (recipe_name, recipe_image_path, recipe_description, recipe_active_timestamp, recipe_remove_timestamp, recipe_status, instructions, total_minutes, course, ai_gen_description, ai_gen_appliances, ai_gen_cuisines, ai_gen_dish_types, ai_gen_total_minutes, ai_gen_course, author_id) VALUES
 					( 
 						'Comforting Vegan Congee for Stomach Relief',
 						'/images/recipes/comforting_congee.jpg',
@@ -454,7 +454,7 @@ public class StarterPopulator {
 					);
 				""",
 				"""
-				INSERT INTO REVIEWS (REVIEW_NAME, REVIEW_IMAGE_PATH, REVIEW_DESCRIPTION, REVIEW_ACTIVE_TIMESTAMP, REVIEW_REMOVE_TIMESTAMP, REVIEW_STATUS, RATING, RECIPE_ID, REVIEWER_ID) VALUES
+				INSERT INTO reviews (review_name, review_image_path, review_description, review_active_timestamp, review_remove_timestamp, review_status, rating, recipe_id, reviewer_id) VALUES
 				    (
 				        'Anyone who eats this is out of their mind',
 				        NULL,
@@ -547,7 +547,7 @@ public class StarterPopulator {
 				    );	    
 				""",
 				"""
-			    INSERT INTO REPORTS (REPORT_DESCRIPTION, REPORT_ACTIVE_TIMESTAMP, REPORT_STATUS, REASON, REJECTION_DESCRIPTION, SNAPSHOT_NAME, SNAPSHOT_IMAGE_PATH, SNAPSHOT_DESCRIPTION, SNAPSHOT_ACTIVE_TIMESTAMP, ACCUSED_ID, REPORTER_ID, MODERATOR_ID) VALUES
+			    INSERT INTO reports (report_description, report_active_timestamp, report_status, reason, rejection_description, snapshot_name, snapshot_image_path, snapshot_description, snapshot_active_timestamp, accused_id, reporter_id, moderator_id) VALUES
 				    (
 				        'Insects shouldnt be on the website because it is disgusting.',
 				        '2024-04-05 11:00:00',
@@ -690,7 +690,7 @@ public class StarterPopulator {
 				    );
 				""",
 				"""
-				INSERT INTO RECIPE_REPORTS (SNAPSHOT_RECIPE_ID, SNAPSHOT_APPLIANCES, SNAPSHOT_INGREDIENTS, SNAPSHOT_CUISINES, SNAPSHOT_DISH_TYPES, SNAPSHOT_INSTRUCTIONS, SNAPSHOT_TOTAL_MINUTES, SNAPSHOT_COURSE, SNAPSHOT_AI_GEN_DESCRIPTION, SNAPSHOT_AI_GEN_APPLIANCES, SNAPSHOT_AI_GEN_CUISINES, SNAPSHOT_AI_GEN_DISH_TYPES, SNAPSHOT_AI_GEN_TOTAL_MINUTES, SNAPSHOT_AI_GEN_COURSE, REPORT_ID) VALUES
+				INSERT INTO recipe_reports (snapshot_recipe_id, snapshot_appliances, snapshot_ingredients, snapshot_cuisines, snapshot_dish_types, snapshot_instructions, snapshot_total_minutes, snapshot_course, snapshot_ai_gen_description, snapshot_ai_gen_appliances, snapshot_ai_gen_cuisines, snapshot_ai_gen_dish_types, snapshot_ai_gen_total_minutes, snapshot_ai_gen_course, report_id) VALUES
 				    (
 				        3, 
 				        'Air Fryer', 
@@ -741,14 +741,14 @@ public class StarterPopulator {
 				    );
 				""",
 				"""
-				INSERT INTO REVIEW_REPORTS (SNAPSHOT_REVIEW_ID, SNAPSHOT_RATING, SNAPSHOT_RECIPE_ID, REPORT_ID) VALUES
+				INSERT INTO review_reports (snapshot_review_id, snapshot_rating, snapshot_recipe_id, report_id) VALUES
 				    (6, 5, 8, 4),  -- Valerie Vance reporting Grill Boss's 5-star review (Report ID 4)
 				    (1, 1, 3, 7),  -- Peter Parker reporting 67_67's abusive review (Report ID 7)
 				    (2, 1, 8, 8),  -- Sue mei reporting 67_67's hostile review (Report ID 8)
 				    (5, 2, 3, 10); -- Peter Parker reporting Jeremy Lin's review (Report ID 10)
 				""",
 				"""
-				INSERT INTO VIOLATIONS (VIOLATION_DESCRIPTION, VIOLATION_ACTIVE_TIMESTAMP, VIOLATION_STATUS, SEVERITY, SUSPENSION_STATUS, EXPIRE_TIMESTAMP, VIOLATOR_ID, REPORT_ID) VALUES
+				INSERT INTO violations (violation_description, violation_active_timestamp, violation_status, severity, suspension_status, expire_timestamp, violator_id, report_id) VALUES
 				    (
 				        'Abuse of report feature by submitting frivolous reports based on personal taste preferences.',
 				        '2024-04-08 14:00:00', -- Created 3 days after her April 5, 2024 report
@@ -851,7 +851,7 @@ public class StarterPopulator {
 				    );
 				""",
 				"""
-				INSERT INTO APPEALS (APPEAL_DESCRIPTION, APPEAL_ACTIVE_TIMESTAMP, APPEAL_STATUS, DECISION_DESCRIPTION, RESOLVED_TIMESTAMP, AUDITOR_ID, VIOLATION_ID) VALUES
+				INSERT INTO appeals (appeal_description, appeal_active_timestamp, appeal_status, decision_description, resolved_timestamp, auditor_id, violation_id) VALUES
 				    (
 				        'My avatar was me when I was little. "I am a predator" meant I like raw meat, not children',
 				        '2025-06-13 10:00:00',
@@ -951,7 +951,7 @@ public class StarterPopulator {
 	public void populateRelationships() throws SQLException {
 		String[] codeblocks = {
 				"""
-				INSERT INTO BOOKMARK (USER_ID, RECIPE_ID) VALUES
+				INSERT INTO bookmark (user_id, recipe_id) VALUES
 				    (1, 5), -- Jeremy Lin -> Deep Forest Smoothie
 				    (1, 6), -- Jeremy Lin -> Microwave Tomato Soup
 				    (2, 1), -- Mary Baker -> Comforting Vegan Congee for Stomach Relief
@@ -967,7 +967,7 @@ public class StarterPopulator {
 				    (7, 7); -- Steph Curry -> Grilled Steak
 				""",
 				"""
-				INSERT INTO FOLLOW (FOLLOWER_ID, FOLLOWING_ID) VALUES
+				INSERT INTO follow (follower_id, following_id) VALUES
 				    (2, 1), -- Mary Baker follows Jeremy Lin
 				    (3, 5), -- Peter Parker follows Grill Boss
 				    (3, 6), -- Peter Parker follows Sue mei
@@ -980,7 +980,7 @@ public class StarterPopulator {
 				    (7, 5); -- Steph Curry follows Grill Boss
 				""",
 				"""
-				INSERT INTO RECIPES_COOK_INGREDIENTS (RECIPE_ID, INGREDIENT_ID, AMOUNT, AMOUNT_UNIT) VALUES
+				INSERT INTO recipes_cook_ingredients (recipe_id, ingredient_id, amount, amount_unit) VALUES
 				    -- 1. Comforting Vegan Congee for Stomach Relief
 				    (1, 1, 1.00, 'cup'),        -- Rice
 				    (1, 7, 2.00, 'leaves'),     -- Cabbage
@@ -1073,7 +1073,7 @@ public class StarterPopulator {
 				    (11, 59, 0.25, 'cup');      -- Basil
 				""",
 				"""
-				INSERT INTO RECIPES_HAS_DISH_TYPES (RECIPE_ID, DISH_TYPE_ID) VALUES
+				INSERT INTO recipes_has_dish_types (recipe_id, dish_type_id) VALUES
 				    (1, 10),     -- Rice
 				    (2, 12),     -- Cookie
 				    (3, 13),     -- Meat
@@ -1088,7 +1088,7 @@ public class StarterPopulator {
 				    (11, 9);     -- Pasta & Noodles
 				""",
 				"""
-				INSERT INTO RECIPES_FEATURE_CUISINES (RECIPE_ID, CUISINE_ID) VALUES
+				INSERT INTO recipes_feature_cuisines (recipe_id, cuisine_id) VALUES
 				    (1, 4),      -- Chinese
 				    (2, 8),      -- Western
 				    (3, 5),      -- Korean
@@ -1104,7 +1104,7 @@ public class StarterPopulator {
 				    (11, 11);    -- Italian
 				""",
 				"""
-				INSERT INTO RECIPES_USE_APPLIANCES (RECIPE_ID, APPLIANCE_ID) VALUES
+				INSERT INTO recipes_use_appliances (recipe_id, appliance_id) VALUES
 				    (1, 1),      -- Rice Cooker
 				    (2, 2),      -- Oven
 				    (2, 9),      -- Mixer
@@ -1121,7 +1121,7 @@ public class StarterPopulator {
 				    (11, 4);     -- Stovetop
 				""",
 				"""
-				INSERT INTO INGREDIENTS_VIOLATE_DIETARY_RESTRICTIONS (INGREDIENT_ID, DIETARY_RESTRICTION_ID) VALUES
+				INSERT INTO ingredients_violate_dietary_restrictions (ingredient_id, dietary_restriction_id) VALUES
 				    (27, 1),     -- Silkworm Pupae (Pescatarian violation)
 				    (28, 1),     -- Steak (Pescatarian violation)
 				    (29, 2),     -- Sashimi Salmon (Vegetarian violation)
