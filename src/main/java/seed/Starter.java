@@ -79,180 +79,180 @@ public class Starter {
 	public void createEntitySets() throws SQLException {
 		String[] codeblocks = {
 		        """
-		        CREATE TABLE IF NOT EXISTS APPLIANCES (
-		        	APPLIANCE_ID INT PRIMARY KEY AUTO_INCREMENT,
-		        	APPLIANCE_NAME VARCHAR(100) NOT NULL UNIQUE,
-		        	APPLIANCE_IMAGE_PATH VARCHAR(500) NOT NULL,
-		        	APPLIANCE_DESCRIPTION TEXT NOT NULL
+		        CREATE TABLE IF NOT EXISTS appliances (
+		        	appliance_id INT PRIMARY KEY AUTO_INCREMENT,
+		        	appliance_name VARCHAR(100) NOT NULL UNIQUE,
+		        	appliance_image_path VARCHAR(500) NOT NULL,
+		        	appliance_description TEXT NOT NULL
 		        )
 		        """, // Not required in recipes, admin managed
 		        """
-		        CREATE TABLE IF NOT EXISTS INGREDIENTS (
-		            INGREDIENT_ID INT PRIMARY KEY AUTO_INCREMENT,
-		            INGREDIENT_NAME VARCHAR(100) NOT NULL UNIQUE,
-		            INGREDIENT_IMAGE_PATH VARCHAR(500) NOT NULL,
-		            INGREDIENT_DESCRIPTION TEXT NOT NULL,
-		          	BASE_INGREDIENT_ID INT NULL,
-		            FOREIGN KEY (BASE_INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID) ON DELETE SET NULL
+		        CREATE TABLE IF NOT EXISTS ingredients (
+		            ingredient_id INT PRIMARY KEY AUTO_INCREMENT,
+		            ingredient_name VARCHAR(100) NOT NULL UNIQUE,
+		            ingredient_image_path VARCHAR(500) NOT NULL,
+		            ingredient_description TEXT NOT NULL,
+		         	base_ingredient_id INT NULL,
+		            FOREIGN KEY (base_ingredient_id) REFERENCES ingredients (ingredient_id) ON DELETE SET NULL
 		        )
 		        """, // Required in recipes, admin managed
 		        """
-		        CREATE TABLE IF NOT EXISTS DIETARY_RESTRICTIONS (
-				    DIETARY_RESTRICTION_ID INT PRIMARY KEY AUTO_INCREMENT,
-				    DIETARY_RESTRICTION_NAME VARCHAR(100) NOT NULL UNIQUE,
-				    DIETARY_RESTRICTION_DESCRIPTION TEXT NOT NULL,
-				    BASE_DIETARY_RESTRICTION_ID INT NULL,
-				    FOREIGN KEY (BASE_DIETARY_RESTRICTION_ID) REFERENCES DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_ID) ON DELETE SET NULL
+		        CREATE TABLE IF NOT EXISTS dietary_restrictions (
+				    dietary_restriction_id INT PRIMARY KEY AUTO_INCREMENT,
+				    dietary_restriction_name VARCHAR(100) NOT NULL UNIQUE,
+				    dietary_restriction_description TEXT NOT NULL,
+				    base_dietary_restriction_id INT NULL,
+				    FOREIGN KEY (base_dietary_restriction_id) REFERENCES dietary_restrictions (dietary_restriction_id) ON DELETE SET NULL
 				)
 		        """, // Calculated using ingredients
 		        """
-		        CREATE TABLE IF NOT EXISTS CUISINES (
-		            CUISINE_ID INT PRIMARY KEY AUTO_INCREMENT,
-		            CUISINE_NAME VARCHAR(100) NOT NULL UNIQUE,
-		            CUISINE_DESCRIPTION TEXT NOT NULL,
-		            BASE_CUISINE_ID INT NULL,
-		        	FOREIGN KEY (BASE_CUISINE_ID) REFERENCES CUISINES (CUISINE_ID) ON DELETE SET NULL
+		        CREATE TABLE IF NOT EXISTS cuisines (
+		            cuisine_id INT PRIMARY KEY AUTO_INCREMENT,
+		            cuisine_name VARCHAR(100) NOT NULL UNIQUE,
+		            cuisine_description TEXT NOT NULL,
+		            base_cuisine_id INT NULL,
+		        	FOREIGN KEY (base_cuisine_id) REFERENCES cuisines (cuisine_id) ON DELETE SET NULL
 		        )
 		        """, // User input, AI predict based on ingredients / instructions, or blank
 		        """
-		        CREATE TABLE IF NOT EXISTS DISH_TYPES (
-				    DISH_TYPE_ID INT PRIMARY KEY AUTO_INCREMENT,
-				    DISH_TYPE_NAME VARCHAR(100) NOT NULL UNIQUE,
-				    DISH_TYPE_DESCRIPTION TEXT NOT NULL,
-				    BASE_DISH_TYPE_ID INT NULL,
-				    FOREIGN KEY (BASE_DISH_TYPE_ID) REFERENCES DISH_TYPES (DISH_TYPE_ID) ON DELETE SET NULL
+		        CREATE TABLE IF NOT EXISTS dish_types (
+				    dish_type_id INT PRIMARY KEY AUTO_INCREMENT,
+				    dish_type_name VARCHAR(100) NOT NULL UNIQUE,
+				    dish_type_description TEXT NOT NULL,
+				    base_dish_type_id INT NULL,
+				    FOREIGN KEY (base_dish_type_id) REFERENCES dish_types (dish_type_id) ON DELETE SET NULL
 				)
 		        """, // User, AI predict based on ingredients / instructions
 		        """
-		        CREATE TABLE IF NOT EXISTS USERS (
-		        	USER_ID INT PRIMARY KEY AUTO_INCREMENT,
-		        	USER_NAME VARCHAR(100) NOT NULL UNIQUE,
-		        	USER_IMAGE_PATH VARCHAR(500) NULL,
-		        	USER_DESCRIPTION TEXT NULL,
-		        	USER_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-		        	USER_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		        	USER_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
-		        	ROLE ENUM('User', 'Moderator', 'Admin') NOT NULL,
-		        	TIMEZONE VARCHAR(30) NOT NULL,
-		            PASSWORD_HASH VARCHAR(254) NOT NULL,
-		        	EMAIL VARCHAR(254) NOT NULL UNIQUE
+		        CREATE TABLE IF NOT EXISTS users (
+		        	user_id INT PRIMARY KEY AUTO_INCREMENT,
+		        	user_name VARCHAR(100) NOT NULL UNIQUE,
+		        	user_image_path VARCHAR(500) NULL,
+		        	user_description TEXT NULL,
+		        	user_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		        	user_remove_timestamp TIMESTAMP NULL,
+		        	user_status ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		        	role ENUM('User', 'Moderator', 'Admin') NOT NULL,
+		        	timezone VARCHAR(30) NOT NULL,
+		            password_hash VARCHAR(254) NOT NULL,
+		        	email VARCHAR(254) NOT NULL UNIQUE
 		        )
 		        """, // Soft delete only
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES (
-		            RECIPE_ID INT PRIMARY KEY AUTO_INCREMENT,
-		            RECIPE_NAME VARCHAR(100) NOT NULL,
-		            RECIPE_IMAGE_PATH VARCHAR(500) NULL,
-		            RECIPE_DESCRIPTION TEXT NULL,
-		            RECIPE_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-		            RECIPE_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		            RECIPE_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
-		            INSTRUCTIONS TEXT NOT NULL,
-		            TOTAL_MINUTES INT NULL,
-		            COURSE ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
-		            AI_GEN_DESCRIPTION BOOLEAN NOT NULL,
-				    AI_GEN_APPLIANCES BOOLEAN NOT NULL,
-				    AI_GEN_CUISINES BOOLEAN NOT NULL,
-				    AI_GEN_DISH_TYPES BOOLEAN NOT NULL,
-				    AI_GEN_TOTAL_MINUTES BOOLEAN NOT NULL,
-		            AI_GEN_COURSE BOOLEAN NOT NULL,
-		            AUTHOR_ID INT NULL,
-		            FOREIGN KEY (AUTHOR_ID) REFERENCES USERS (USER_ID)
+		        CREATE TABLE IF NOT EXISTS recipes (
+		            recipe_id INT PRIMARY KEY AUTO_INCREMENT,
+		            recipe_name VARCHAR(100) NOT NULL,
+		            recipe_image_path VARCHAR(500) NULL,
+		            recipe_description TEXT NULL,
+		            recipe_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		            recipe_remove_timestamp TIMESTAMP NULL,
+		            recipe_status ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		            instructions TEXT NOT NULL,
+		            total_minutes INT NULL,
+		            course ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
+		            ai_gen_description BOOLEAN NOT NULL,
+				    ai_gen_appliances BOOLEAN NOT NULL,
+				    ai_gen_cuisines BOOLEAN NOT NULL,
+				    ai_gen_dish_types BOOLEAN NOT NULL,
+				    ai_gen_total_minutes BOOLEAN NOT NULL,
+		            ai_gen_course BOOLEAN NOT NULL,
+		            author_id INT NULL,
+		            FOREIGN KEY (author_id) REFERENCES users (user_id)
 		        )
 		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option 
 		        """
-		        CREATE TABLE IF NOT EXISTS REVIEWS (
-		            REVIEW_ID INT PRIMARY KEY AUTO_INCREMENT,
-		            REVIEW_NAME VARCHAR(100) NOT NULL,
-		            REVIEW_IMAGE_PATH VARCHAR(500) NULL,
-		            REVIEW_DESCRIPTION TEXT NOT NULL,
-		            REVIEW_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-		            REVIEW_REMOVE_TIMESTAMP TIMESTAMP NULL,
-		            REVIEW_STATUS ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
-		            RATING INT NOT NULL,
-		            RECIPE_ID INT NOT NULL,
-		            REVIEWER_ID INT NULL,
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
-		        	FOREIGN KEY (REVIEWER_ID) REFERENCES USERS (USER_ID),
-		        	UNIQUE (RECIPE_ID, REVIEWER_ID)
+		        CREATE TABLE IF NOT EXISTS reviews (
+		            review_id INT PRIMARY KEY AUTO_INCREMENT,
+		            review_name VARCHAR(100) NOT NULL,
+		            review_image_path VARCHAR(500) NULL,
+		            review_description TEXT NOT NULL,
+		            review_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		            review_remove_timestamp TIMESTAMP NULL,
+		            review_status ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		            rating INT NOT NULL,
+		            recipe_id INT NOT NULL,
+		            reviewer_id INT NULL,
+		            FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
+		        	FOREIGN KEY (reviewer_id) REFERENCES users (user_id),
+		        	UNIQUE (recipe_id, reviewer_id)
 		        )
 		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option
 		        """
-		        CREATE TABLE IF NOT EXISTS REPORTS (
-				    REPORT_ID INT PRIMARY KEY AUTO_INCREMENT,
-				    REPORT_DESCRIPTION TEXT NULL,
-				    REPORT_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-				    REPORT_STATUS ENUM('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
-				    REASON ENUM('Spam', 'Inappropriate Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Health Concerns') NOT NULL,
-				    REJECTION_DESCRIPTION TEXT NULL,
-				    SNAPSHOT_NAME VARCHAR(100) NOT NULL,
-				    SNAPSHOT_IMAGE_PATH VARCHAR(500) NULL,
-				    SNAPSHOT_DESCRIPTION TEXT NULL,
-				    SNAPSHOT_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL,
-				    ACCUSED_ID INT NOT NULL,
-				    REPORTER_ID INT NOT NULL,
-				    MODERATOR_ID INT NULL,
-				    FOREIGN KEY (ACCUSED_ID) REFERENCES USERS (USER_ID),
-				    FOREIGN KEY (REPORTER_ID) REFERENCES USERS (USER_ID),
-				    FOREIGN KEY (MODERATOR_ID) REFERENCES USERS (USER_ID)
+		        CREATE TABLE IF NOT EXISTS reports (
+				    report_id INT PRIMARY KEY AUTO_INCREMENT,
+				    report_description TEXT NULL,
+				    report_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+				    report_status ENUM('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
+				    reason ENUM('Spam', 'Inappropriate Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Health Concerns') NOT NULL,
+				    rejection_description TEXT NULL,
+				    snapshot_name VARCHAR(100) NOT NULL,
+				    snapshot_image_path VARCHAR(500) NULL,
+				    snapshot_description TEXT NULL,
+				    snapshot_active_timestamp TIMESTAMP NOT NULL,
+				    accused_id INT NOT NULL,
+				    reporter_id INT NOT NULL,
+				    moderator_id INT NULL,
+				    FOREIGN KEY (accused_id) REFERENCES users (user_id),
+				    FOREIGN KEY (reporter_id) REFERENCES users (user_id),
+				    FOREIGN KEY (moderator_id) REFERENCES users (user_id)
 				)		
 		        """, // Never deleted unless spam
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPE_REPORTS (
-				    SNAPSHOT_RECIPE_ID INT NOT NULL,
-				    SNAPSHOT_APPLIANCES TEXT NULL,
-				    SNAPSHOT_INGREDIENTS TEXT NOT NULL,
-				    SNAPSHOT_CUISINES TEXT NULL,
-				    SNAPSHOT_DISH_TYPES TEXT NOT NULL,
-				    SNAPSHOT_INSTRUCTIONS TEXT NOT NULL,
-				    SNAPSHOT_TOTAL_MINUTES INT NULL,
-				    SNAPSHOT_COURSE ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
-				    SNAPSHOT_AI_GEN_DESCRIPTION BOOLEAN NOT NULL,
-				    SNAPSHOT_AI_GEN_APPLIANCES BOOLEAN NOT NULL,
-				    SNAPSHOT_AI_GEN_CUISINES BOOLEAN NOT NULL,
-				    SNAPSHOT_AI_GEN_DISH_TYPES BOOLEAN NOT NULL,
-				    SNAPSHOT_AI_GEN_TOTAL_MINUTES BOOLEAN NOT NULL,
-		            SNAPSHOT_AI_GEN_COURSE BOOLEAN NOT NULL,
-		            REPORT_ID INT PRIMARY KEY,
-				    FOREIGN KEY (REPORT_ID) REFERENCES REPORTS (REPORT_ID)
+		        CREATE TABLE IF NOT EXISTS recipe_reports (
+				    snapshot_recipe_id INT NOT NULL,
+				    snapshot_appliances TEXT NULL,
+				    snapshot_ingredients TEXT NOT NULL,
+				    snapshot_cuisines TEXT NULL,
+				    snapshot_dish_types TEXT NOT NULL,
+				    snapshot_instructions TEXT NOT NULL,
+				    snapshot_total_minutes INT NULL,
+				    snapshot_course ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
+				    snapshot_ai_gen_description BOOLEAN NOT NULL,
+				    snapshot_ai_gen_appliances BOOLEAN NOT NULL,
+				    snapshot_ai_gen_cuisines BOOLEAN NOT NULL,
+				    snapshot_ai_gen_dish_types BOOLEAN NOT NULL,
+				    snapshot_ai_gen_total_minutes BOOLEAN NOT NULL,
+		            snapshot_ai_gen_course BOOLEAN NOT NULL,
+		            report_id INT PRIMARY KEY,
+				    FOREIGN KEY (report_id) REFERENCES reports (report_id)
 				)
 				""", // Subclass of reports
 				"""
-				CREATE TABLE IF NOT EXISTS REVIEW_REPORTS (
-				    SNAPSHOT_REVIEW_ID INT NOT NULL,
-		            SNAPSHOT_RATING INT NOT NULL,
-		            SNAPSHOT_RECIPE_ID INT NOT NULL,
-		            REPORT_ID INT PRIMARY KEY,
-				    FOREIGN KEY (REPORT_ID) REFERENCES REPORTS (REPORT_ID)
+				CREATE TABLE IF NOT EXISTS review_reports (
+				    snapshot_review_id INT NOT NULL,
+		            snapshot_rating INT NOT NULL,
+		            snapshot_recipe_id INT NOT NULL,
+		            report_id INT PRIMARY KEY,
+				    FOREIGN KEY (report_id) REFERENCES reports (report_id)
 				)	
 				""", // Subclass of reports
 		        """
-			    CREATE TABLE IF NOT EXISTS VIOLATIONS (
-			        VIOLATION_ID INT PRIMARY KEY AUTO_INCREMENT,
-			        VIOLATION_DESCRIPTION TEXT NOT NULL,
-			        VIOLATION_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-			        VIOLATION_STATUS ENUM('Active', 'Expired', 'Reversed', 'Permanent') NOT NULL,
-				    SEVERITY ENUM('Minor', 'Moderate', 'Severe') NOT NULL,
-				    SUSPENSION_STATUS ENUM('Review', 'Recipe', 'All', 'N/A'),
-					EXPIRE_TIMESTAMP TIMESTAMP NULL,
-				    VIOLATOR_ID INT NOT NULL,
-				    REPORT_ID INT NULL UNIQUE,
-				    FOREIGN KEY (VIOLATOR_ID) REFERENCES USERS (USER_ID),
-				    FOREIGN KEY (REPORT_ID) REFERENCES REPORTS (REPORT_ID)
+			    CREATE TABLE IF NOT EXISTS violations (
+			        violation_id INT PRIMARY KEY AUTO_INCREMENT,
+			        violation_description TEXT NOT NULL,
+			        violation_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+			        violation_status ENUM('Active', 'Expired', 'Reversed', 'Permanent') NOT NULL,
+				    severity ENUM('Minor', 'Moderate', 'Severe') NOT NULL,
+				    suspension_status ENUM('Review', 'Recipe', 'All', 'N/A'),
+					expire_timestamp TIMESTAMP NULL,
+				    violator_id INT NOT NULL,
+				    report_id INT NULL UNIQUE,
+				    FOREIGN KEY (violator_id) REFERENCES users (user_id),
+				    FOREIGN KEY (report_id) REFERENCES reports (report_id)
 				)
 		        """, // Never deleted
 		        """
-		        CREATE TABLE IF NOT EXISTS APPEALS (
-		        	APPEAL_ID INT PRIMARY KEY AUTO_INCREMENT,
-		        	APPEAL_DESCRIPTION TEXT NOT NULL,
-		        	APPEAL_ACTIVE_TIMESTAMP TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
-		        	APPEAL_STATUS ENUM ('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
-		        	DECISION_DESCRIPTION TEXT NULL,
-		        	RESOLVED_TIMESTAMP TIMESTAMP NULL,
-		        	AUDITOR_ID INT NULL,
-				    VIOLATION_ID INT NOT NULL UNIQUE,
-				    FOREIGN KEY (AUDITOR_ID) REFERENCES USERS (USER_ID),
-				    FOREIGN KEY (VIOLATION_ID) REFERENCES VIOLATIONS (VIOLATION_ID)
+		        CREATE TABLE IF NOT EXISTS appeals (
+		        	appeal_id INT PRIMARY KEY AUTO_INCREMENT,
+		        	appeal_description TEXT NOT NULL,
+		        	appeal_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		        	appeal_status ENUM ('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
+		        	decision_description TEXT NULL,
+		        	resolved_timestamp TIMESTAMP NULL,
+		        	auditor_id INT NULL,
+				    violation_id INT NOT NULL UNIQUE,
+				    FOREIGN KEY (auditor_id) REFERENCES users (user_id),
+				    FOREIGN KEY (violation_id) REFERENCES violations (violation_id)
 		        )
 		        """ // Never deleted
 		};
@@ -262,64 +262,183 @@ public class Starter {
 	
 	public void createRelationshipSets() throws SQLException {
 		String[] codeblocks = {
+		        """
+		        CREATE TABLE IF NOT EXISTS appliances (
+		        	appliance_id INT PRIMARY KEY AUTO_INCREMENT,
+		        	appliance_name VARCHAR(100) NOT NULL UNIQUE,
+		        	appliance_image_path VARCHAR(500) NOT NULL,
+		        	appliance_description TEXT NOT NULL
+		        )
+		        """, // Not required in recipes, admin managed
+		        """
+		        CREATE TABLE IF NOT EXISTS ingredients (
+		            ingredient_id INT PRIMARY KEY AUTO_INCREMENT,
+		            ingredient_name VARCHAR(100) NOT NULL UNIQUE,
+		            ingredient_image_path VARCHAR(500) NOT NULL,
+		            ingredient_description TEXT NOT NULL,
+		         	base_ingredient_id INT NULL,
+		            FOREIGN KEY (base_ingredient_id) REFERENCES ingredients (ingredient_id) ON DELETE SET NULL
+		        )
+		        """, // Required in recipes, admin managed
+		        """
+		        CREATE TABLE IF NOT EXISTS dietary_restrictions (
+				    dietary_restriction_id INT PRIMARY KEY AUTO_INCREMENT,
+				    dietary_restriction_name VARCHAR(100) NOT NULL UNIQUE,
+				    dietary_restriction_description TEXT NOT NULL,
+				    base_dietary_restriction_id INT NULL,
+				    FOREIGN KEY (base_dietary_restriction_id) REFERENCES dietary_restrictions (dietary_restriction_id) ON DELETE SET NULL
+				)
+		        """, // Calculated using ingredients
+		        """
+		        CREATE TABLE IF NOT EXISTS cuisines (
+		            cuisine_id INT PRIMARY KEY AUTO_INCREMENT,
+		            cuisine_name VARCHAR(100) NOT NULL UNIQUE,
+		            cuisine_description TEXT NOT NULL,
+		            base_cuisine_id INT NULL,
+		        	FOREIGN KEY (base_cuisine_id) REFERENCES cuisines (cuisine_id) ON DELETE SET NULL
+		        )
+		        """, // User input, AI predict based on ingredients / instructions, or blank
+		        """
+		        CREATE TABLE IF NOT EXISTS dish_types (
+				    dish_type_id INT PRIMARY KEY AUTO_INCREMENT,
+				    dish_type_name VARCHAR(100) NOT NULL UNIQUE,
+				    dish_type_description TEXT NOT NULL,
+				    base_dish_type_id INT NULL,
+				    FOREIGN KEY (base_dish_type_id) REFERENCES dish_types (dish_type_id) ON DELETE SET NULL
+				)
+		        """, // User, AI predict based on ingredients / instructions
+		        """
+		        CREATE TABLE IF NOT EXISTS users (
+		        	user_id INT PRIMARY KEY AUTO_INCREMENT,
+		        	user_name VARCHAR(100) NOT NULL UNIQUE,
+		        	user_image_path VARCHAR(500) NULL,
+		        	user_description TEXT NULL,
+		        	user_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		        	user_remove_timestamp TIMESTAMP NULL,
+		        	user_status ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		        	role ENUM('User', 'Moderator', 'Admin') NOT NULL,
+		        	timezone VARCHAR(30) NOT NULL,
+		            password_hash VARCHAR(254) NOT NULL,
+		        	email VARCHAR(254) NOT NULL UNIQUE
+		        )
+		        """, // Soft delete only
+		        """
+		        CREATE TABLE IF NOT EXISTS recipes (
+		            recipe_id INT PRIMARY KEY AUTO_INCREMENT,
+		            recipe_name VARCHAR(100) NOT NULL,
+		            recipe_image_path VARCHAR(500) NULL,
+		            recipe_description TEXT NULL,
+		            recipe_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		            recipe_remove_timestamp TIMESTAMP NULL,
+		            recipe_status ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		            instructions TEXT NOT NULL,
+		            total_minutes INT NULL,
+		            course ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
+		            ai_gen_description BOOLEAN NOT NULL,
+				    ai_gen_appliances BOOLEAN NOT NULL,
+				    ai_gen_cuisines BOOLEAN NOT NULL,
+				    ai_gen_dish_types BOOLEAN NOT NULL,
+				    ai_gen_total_minutes BOOLEAN NOT NULL,
+		            ai_gen_course BOOLEAN NOT NULL,
+		            author_id INT NULL,
+		            FOREIGN KEY (author_id) REFERENCES users (user_id)
+		        )
+		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option 
+		        """
+		        CREATE TABLE IF NOT EXISTS reviews (
+		            review_id INT PRIMARY KEY AUTO_INCREMENT,
+		            review_name VARCHAR(100) NOT NULL,
+		            review_image_path VARCHAR(500) NULL,
+		            review_description TEXT NOT NULL,
+		            review_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		            review_remove_timestamp TIMESTAMP NULL,
+		            review_status ENUM('Active', 'Deleted', 'Banned') NOT NULL DEFAULT 'Active',
+		            rating INT NOT NULL,
+		            recipe_id INT NOT NULL,
+		            reviewer_id INT NULL,
+		            FOREIGN KEY (recipe_id) REFERENCES recipes (recipe_id) ON DELETE CASCADE,
+		        	FOREIGN KEY (reviewer_id) REFERENCES users (user_id),
+		        	UNIQUE (recipe_id, reviewer_id)
+		        )
+		        """, // Hard delete after 30 days or appeal rejection, anonymize after 30 days if user delete and choose this option
+		        """
+		        CREATE TABLE IF NOT EXISTS reports (
+				    report_id INT PRIMARY KEY AUTO_INCREMENT,
+				    report_description TEXT NULL,
+				    report_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+				    report_status ENUM('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
+				    reason ENUM('Spam', 'Inappropriate Content', 'Malicious Links', 'Copyright', 'Misinformation', 'Harassment', 'Scam', 'Health Concerns') NOT NULL,
+				    rejection_description TEXT NULL,
+				    snapshot_name VARCHAR(100) NOT NULL,
+				    snapshot_image_path VARCHAR(500) NULL,
+				    snapshot_description TEXT NULL,
+				    snapshot_active_timestamp TIMESTAMP NOT NULL,
+				    accused_id INT NOT NULL,
+				    reporter_id INT NOT NULL,
+				    moderator_id INT NULL,
+				    FOREIGN KEY (accused_id) REFERENCES users (user_id),
+				    FOREIGN KEY (reporter_id) REFERENCES users (user_id),
+				    FOREIGN KEY (moderator_id) REFERENCES users (user_id)
+				)		
+		        """, // Never deleted unless spam
+		        """
+		        CREATE TABLE IF NOT EXISTS recipe_reports (
+				    snapshot_recipe_id INT NOT NULL,
+				    snapshot_appliances TEXT NULL,
+				    snapshot_ingredients TEXT NOT NULL,
+				    snapshot_cuisines TEXT NULL,
+				    snapshot_dish_types TEXT NOT NULL,
+				    snapshot_instructions TEXT NOT NULL,
+				    snapshot_total_minutes INT NULL,
+				    snapshot_course ENUM('Main Course', 'Appetizer / Side', 'Dessert') NULL,
+				    snapshot_ai_gen_description BOOLEAN NOT NULL,
+				    snapshot_ai_gen_appliances BOOLEAN NOT NULL,
+				    snapshot_ai_gen_cuisines BOOLEAN NOT NULL,
+				    snapshot_ai_gen_dish_types BOOLEAN NOT NULL,
+				    snapshot_ai_gen_total_minutes BOOLEAN NOT NULL,
+		            snapshot_ai_gen_course BOOLEAN NOT NULL,
+		            report_id INT PRIMARY KEY,
+				    FOREIGN KEY (report_id) REFERENCES reports (report_id)
+				)
+				""", // Subclass of reports
 				"""
-		        CREATE TABLE IF NOT EXISTS RECIPES_USE_APPLIANCES (
-		            RECIPE_ID INT, APPLIANCE_ID INT,
-		            PRIMARY KEY (RECIPE_ID, APPLIANCE_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
-		            FOREIGN KEY (APPLIANCE_ID) REFERENCES APPLIANCES (APPLIANCE_ID)
-		        )
-		        """,
+				CREATE TABLE IF NOT EXISTS review_reports (
+				    snapshot_review_id INT NOT NULL,
+		            snapshot_rating INT NOT NULL,
+		            snapshot_recipe_id INT NOT NULL,
+		            report_id INT PRIMARY KEY,
+				    FOREIGN KEY (report_id) REFERENCES reports (report_id)
+				)	
+				""", // Subclass of reports
 		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_COOK_INGREDIENTS (
-		            RECIPE_ID INT, INGREDIENT_ID INT,
-		            PRIMARY KEY (RECIPE_ID, INGREDIENT_ID),
-					FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
-					FOREIGN KEY (INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID),
-					AMOUNT DECIMAL(5,2) NULL,
-					AMOUNT_UNIT VARCHAR(25) NULL
-		        )
-		        """,
+			    CREATE TABLE IF NOT EXISTS violations (
+			        violation_id INT PRIMARY KEY AUTO_INCREMENT,
+			        violation_description TEXT NOT NULL,
+			        violation_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+			        violation_status ENUM('Active', 'Expired', 'Reversed', 'Permanent') NOT NULL,
+				    severity ENUM('Minor', 'Moderate', 'Severe') NOT NULL,
+				    suspension_status ENUM('Review', 'Recipe', 'All', 'N/A'),
+					expire_timestamp TIMESTAMP NULL,
+				    violator_id INT NOT NULL,
+				    report_id INT NULL UNIQUE,
+				    FOREIGN KEY (violator_id) REFERENCES users (user_id),
+				    FOREIGN KEY (report_id) REFERENCES reports (report_id)
+				)
+		        """, // Never deleted
 		        """
-		        CREATE TABLE IF NOT EXISTS INGREDIENTS_VIOLATE_DIETARY_RESTRICTIONS (
-		            INGREDIENT_ID INT, DIETARY_RESTRICTION_ID INT,
-		            PRIMARY KEY (INGREDIENT_ID, DIETARY_RESTRICTION_ID),
-		            FOREIGN KEY (INGREDIENT_ID) REFERENCES INGREDIENTS (INGREDIENT_ID),
-		            FOREIGN KEY (DIETARY_RESTRICTION_ID) REFERENCES DIETARY_RESTRICTIONS (DIETARY_RESTRICTION_ID)
+		        CREATE TABLE IF NOT EXISTS appeals (
+		        	appeal_id INT PRIMARY KEY AUTO_INCREMENT,
+		        	appeal_description TEXT NOT NULL,
+		        	appeal_active_timestamp TIMESTAMP NOT NULL DEFAULT (UTC_TIMESTAMP),
+		        	appeal_status ENUM ('Active', 'Approved', 'Dismissed') NOT NULL DEFAULT 'Active',
+		        	decision_description TEXT NULL,
+		        	resolved_timestamp TIMESTAMP NULL,
+		        	auditor_id INT NULL,
+				    violation_id INT NOT NULL UNIQUE,
+				    FOREIGN KEY (auditor_id) REFERENCES users (user_id),
+				    FOREIGN KEY (violation_id) REFERENCES violations (violation_id)
 		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_FEATURE_CUISINES (
-		            RECIPE_ID INT, CUISINE_ID INT,
-		            PRIMARY KEY (RECIPE_ID, CUISINE_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
-		            FOREIGN KEY (CUISINE_ID) REFERENCES CUISINES (CUISINE_ID)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS RECIPES_HAS_DISH_TYPES (
-		            RECIPE_ID INT, DISH_TYPE_ID INT,
-		            PRIMARY KEY (RECIPE_ID, DISH_TYPE_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE,
-		            FOREIGN KEY (DISH_TYPE_ID) REFERENCES DISH_TYPES (DISH_TYPE_ID)
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS BOOKMARK (
-		            USER_ID INT, RECIPE_ID INT, 
-		            PRIMARY KEY (USER_ID, RECIPE_ID),
-		            FOREIGN KEY (USER_ID) REFERENCES USERS (USER_ID),
-		            FOREIGN KEY (RECIPE_ID) REFERENCES RECIPES (RECIPE_ID) ON DELETE CASCADE
-		        )
-		        """,
-		        """
-		        CREATE TABLE IF NOT EXISTS FOLLOW (
-		            FOLLOWER_ID INT, FOLLOWING_ID INT,
-		            PRIMARY KEY (FOLLOWER_ID, FOLLOWING_ID),
-		            FOREIGN KEY (FOLLOWER_ID) REFERENCES USERS (USER_ID),
-		            FOREIGN KEY (FOLLOWING_ID) REFERENCES USERS (USER_ID)
-		        )
-		        """
+		        """ // Never deleted
 		};
 
 		executeAll(codeblocks);
