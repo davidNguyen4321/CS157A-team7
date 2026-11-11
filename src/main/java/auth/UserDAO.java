@@ -1,12 +1,15 @@
 package auth;
 
+import database.DbAccess;
+
+import java.util.regex.Pattern;
+
+import java.time.ZoneId;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.time.ZoneId;
-import java.util.regex.Pattern;
-import database.DbAccess;
 
 public class UserDAO {
     public static class User {

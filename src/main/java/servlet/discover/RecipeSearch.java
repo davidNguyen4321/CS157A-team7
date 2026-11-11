@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.util.Map;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +20,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -38,40 +36,45 @@ public class RecipeSearch extends HttpServlet {
 		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
 		if(dbConnection == null) return;
 		
-		RecipeSearchRequest requestInfo = readRequest(request, response);
+		String[] parameters = {"searchTerm", "sortOrder", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
+	    Map<String, String> parameterMap = ServletSecurity.getValidatedParameters(request, response, parameters, true);
+	    if (parameterMap == null) return;
+		
+		RecipeSearchRequest requestInfo = new RecipeSearchRequest(parameterMap);
+		Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 		
 		try{
-			requestInfo.filterIdsNotCourses.put("Dietary Restriction",
+			filterIdMap.put("Dietary Restriction",
 					recurseBaseElement(
-							requestInfo.filterIdsNotCourses.get("Dietary Restriction"),
+							filterIdMap.get("Dietary Restriction"),
 							"DIETARY_RESTRICTION_ID",
 							"BASE_DIETARY_RESTRICTION_ID",
 							"DIETARY_RESTRICTIONS",
 							dbConnection
 							)
 					);
-			requestInfo.filterIdsNotCourses.put("Cuisine",
+			filterIdMap.put("Cuisine",
 					recurseBaseElement(
-							requestInfo.filterIdsNotCourses.get("Cuisine"),
+							filterIdMap.get("Cuisine"),
 							"BASE_CUISINE_ID", //special case where more specific cuisines are permissible but more general cuisines are not necessarily
 							"CUISINE_ID",
 							"CUISINES",
 							dbConnection
 							)
 					);
-			requestInfo.filterIdsNotCourses.put("Dish Type",
+			filterIdMap.put("Dish Type",
 					recurseBaseElement(
-							requestInfo.filterIdsNotCourses.get("Dish Type"),
+							filterIdMap.get("Dish Type"),
 							"BASE_DISH_TYPE_ID", //special case where more specific dish types are permissible but more general dish types are not necessarily
 							"DISH_TYPE_ID",
 							"DISH_TYPES",
 							dbConnection
 							)
 					);
-			requestInfo.filterIdsNotCourses.put("Ingredient", 
+			requestInfo.getFilterIdMap().put("Ingredient", 
 					recurseBaseIngredient(
-							requestInfo.filterIdsNotCourses.get("Ingredient"), 
-							requestInfo.filterIdsNotCourses.get("Dietary Restriction"), 
+							requestInfo.getFilterIdMap().get("Ingredient"), 
+							requestInfo.getFilterIdMap().get("Dietary Restriction"), 
 							dbConnection
 							)
 					);
@@ -85,95 +88,6 @@ public class RecipeSearch extends HttpServlet {
 		}
 	}
 	
-	private RecipeSearchRequest readRequest(HttpServletRequest request, HttpServletResponse response) throws IOException{
-		String[] parameters = {"searchTerm", "sortOrder", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
-	    Map<String, String> parameterMap = ServletSecurity.getValidatedParameters(request, response, parameters, true);
-	    if (parameterMap == null) return null; 
-		
-		// map
-		ObjectMapper mapper = new ObjectMapper();
-		String searchTerm = parameterMap.get("searchTerm").trim();
-		String[] sortOrder = mapper.readValue(parameterMap.get("sortOrder"), String[].class);
-		
-		HashMap<String, HashMap<String, String>> sortOptions = mapper.readValue(
-				parameterMap.get("sortOptions"),
-				new TypeReference<HashMap<String, HashMap<String, String>>>() {});
-		
-		// filterIds
-		HashMap<String, String[]> filterIds = mapper.readValue(
-				parameterMap.get("filterIds"),
-				new TypeReference<HashMap<String, String[]>>() {});
-		HashMap<String, Integer[]> filterIdsNotCourses = new HashMap<String, Integer[]>();
-		String[] courses = {}; // placeholder array
-		for (HashMap.Entry<String, String[]> set : filterIds.entrySet()) {
-			String[] stringArray = set.getValue();
-			if(set.getKey().equals("Course")) {//courses is the only non-integer id (because it is not an id, and is a string)
-				courses = stringArray;
-			}
-			else {
-				Integer[] idArray = new Integer[stringArray.length];
-				for(int i = 0; i<stringArray.length; i++) {
-					idArray[i]=Integer.parseInt(stringArray[i]);
-				}
-				filterIdsNotCourses.put(set.getKey(), idArray);
-			}
-		}
-		
-		HashMap<String, Integer> tolerances = mapper.readValue(
-				parameterMap.get("tolerances"),
-				new TypeReference<HashMap<String, Integer>>() {}
-				);
-		
-		HashMap<String, HashMap<String, Integer>> ranges = mapper.readValue(
-				parameterMap.get("ranges"),
-				new TypeReference<HashMap<String, HashMap<String, Integer>>>() {}
-				);
-		
-		HashMap<String, Boolean> options = mapper.readValue(
-				parameterMap.get("options"),
-				new TypeReference<HashMap<String, Boolean>>() {}
-				);
-		
-		return new RecipeSearchRequest(searchTerm,
-				sortOrder,
-				sortOptions,
-				filterIdsNotCourses,
-				courses,
-				tolerances,
-				ranges,
-				options);
-	}
-	
-	private class RecipeSearchRequest{
-		private String searchTerm;
-		private String[] sortOrder;
-		private HashMap<String, HashMap<String, String>> sortOptions;
-		private HashMap<String, Integer[]> filterIdsNotCourses; //for the sake of not having to parse int every time
-		private String[] courses;
-		private HashMap<String, Integer> tolerances;
-		private HashMap<String, HashMap<String, Integer>> ranges;
-		private HashMap<String, Boolean> options;
-		
-		private RecipeSearchRequest(
-				String searchTerm,
-				String[] sortOrder,
-				HashMap<String, HashMap<String, String>> sortOptions,
-				HashMap<String, Integer[]> filterIdsNotCourses,
-				String[] courses,
-				HashMap<String, Integer> tolerances,
-				HashMap<String, HashMap<String, Integer>> ranges,
-				HashMap<String, Boolean> options
-				){
-			this.searchTerm=searchTerm;
-			this.sortOrder=sortOrder;
-			this.sortOptions=sortOptions;
-			this.filterIdsNotCourses=filterIdsNotCourses;
-			this.courses=courses;
-			this.tolerances=tolerances;
-			this.ranges=ranges;
-			this.options=options;
-		}
-	}
 	// Made into own query due to recursion
 	private Integer[] recurseBaseIngredient(Integer[] providedIngredientIds, Integer[] dietaryRestrictions, Connection dbConnection) throws SQLException{
 		if(providedIngredientIds.length==0) { // unfortunately, an empty tuple is not allowed. This exists to guard against that edge case.
@@ -307,67 +221,70 @@ public class RecipeSearch extends HttpServlet {
 	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response, int sessionUserId) throws SQLException, IOException{
 		try (PreparedStatement statement = dbConnection.prepareStatement(buildRecipeQuery(requestInfo));){
 			int counter = 1;
-			
+			String searchTerm = requestInfo.getSearchTerm();
+			Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
+			Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
+		    Map<String, Integer> tolerances = requestInfo.getTolerances();
+
 			// ingredient filters
-			for(Integer id : requestInfo.filterIdsNotCourses.get("Ingredient")) {
+			for(Integer id : filterIdMap.get("Ingredient")) {
 	    			statement.setInt(counter++, id);
 	    		}
-    		for(Integer id : requestInfo.filterIdsNotCourses.get("Dietary Restriction")) {
+    		for(Integer id : filterIdMap.get("Dietary Restriction")) {
     			statement.setInt(counter++, id);
     		}
-    		if((requestInfo.filterIdsNotCourses.get("Ingredient").length>0) || (requestInfo.tolerances.get("Ingredient")>0)) {
-    	    	statement.setInt(counter++, requestInfo.tolerances.get("Ingredient"));
+    		if((filterIdMap.get("Ingredient").length>0) || (tolerances.get("Ingredient")>0)) {
+    	    	statement.setInt(counter++, tolerances.get("Ingredient"));
     		}
     		
     		//review count and average rating
-			statement.setInt(counter++, requestInfo.ranges.get("Reviews").get("min"));
-			statement.setInt(counter++, requestInfo.ranges.get("Reviews").get("max"));
-			statement.setInt(counter++, requestInfo.ranges.get("Ratings").get("min"));
-			statement.setInt(counter++, requestInfo.ranges.get("Ratings").get("max"));    		
+			statement.setInt(counter++, ranges.get("Reviews").get("min"));
+			statement.setInt(counter++, ranges.get("Reviews").get("max"));
+			statement.setInt(counter++, ranges.get("Ratings").get("min"));
+			statement.setInt(counter++, ranges.get("Ratings").get("max"));    		
 			
 			//bookmarks
 			statement.setInt(counter++, sessionUserId);
-			statement.setInt(counter++, requestInfo.ranges.get("Bookmarks").get("min"));
-			statement.setInt(counter++, requestInfo.ranges.get("Bookmarks").get("max"));
+			statement.setInt(counter++, ranges.get("Bookmarks").get("min"));
+			statement.setInt(counter++, ranges.get("Bookmarks").get("max"));
 			
 			// author
-    		for(Integer id : requestInfo.filterIdsNotCourses.get("Author")) {
+    		for(Integer id : filterIdMap.get("Author")) {
     			statement.setInt(counter++, id);
     		}
 			
     		//search term
-			if(!requestInfo.searchTerm.isEmpty()) {
-    			statement.setString(counter++, requestInfo.searchTerm + "%");
-        		statement.setString(counter++, "% "+ requestInfo.searchTerm + "%");
+			if(!searchTerm.isEmpty()) {
+    			statement.setString(counter++, searchTerm + "%");
+        		statement.setString(counter++, "% "+ searchTerm + "%");
     		}
 			
 			//appliance tolerance
-			if (requestInfo.filterIdsNotCourses.get("Appliance").length>0 || requestInfo.tolerances.get("Appliance")>0) {
-	    		for(Integer id : requestInfo.filterIdsNotCourses.get("Appliance")) {
+			if (filterIdMap.get("Appliance").length>0 || tolerances.get("Appliance")>0) {
+	    		for(Integer id : filterIdMap.get("Appliance")) {
 	    			statement.setInt(counter++, id);
 	    		}
-	    		statement.setInt(counter++, requestInfo.tolerances.get("Appliance"));
+	    		statement.setInt(counter++, tolerances.get("Appliance"));
 			}
     		
 			//cooking time
-			if(requestInfo.ranges.get("Cooking Time").get("min")!=0 || requestInfo.ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
-				statement.setInt(counter++, requestInfo.ranges.get("Cooking Time").get("min"));
-				statement.setInt(counter++, requestInfo.ranges.get("Cooking Time").get("max"));
+			if(ranges.get("Cooking Time").get("min")!=0 || ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
+				statement.setInt(counter++, ranges.get("Cooking Time").get("min"));
+				statement.setInt(counter++, ranges.get("Cooking Time").get("max"));
 			}
 			
 			//dish type
-    		for(Integer id : requestInfo.filterIdsNotCourses.get("Dish Type")) {
+    		for(Integer id : filterIdMap.get("Dish Type")) {
     			statement.setInt(counter++, id);
     		}    	
     		
 			//cuisine
-    		for(Integer id : requestInfo.filterIdsNotCourses.get("Cuisine")) {
+    		for(Integer id : filterIdMap.get("Cuisine")) {
     			statement.setInt(counter++, id);
     		}    
     		
-			//courses
-    		for(String name : requestInfo.courses) {
-    			statement.setString(counter++, name);
+    		for(Integer id : filterIdMap.get("Course")) {
+    		    statement.setInt(counter++, id);
     		}
     		
 	    	try(
@@ -385,10 +302,15 @@ public class RecipeSearch extends HttpServlet {
 		sb.append("recRevSubquery.averageRating, recBookSubquery.bookmarkCount, recBookSubquery.userbookmarked, ");
 		sb.append("recAuthSubquery.USER_ID, recAuthSubquery.USER_NAME, recAuthSubquery.USER_IMAGE_PATH FROM RECIPES rec ");
 		
+		String searchTerm = requestInfo.getSearchTerm();
+		Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
+		Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
+	    Map<String, Integer> tolerances = requestInfo.getTolerances();
+		
 		//ingredient filter
-		int ingredientsLength = requestInfo.filterIdsNotCourses.get("Ingredient").length;
-		int dietaryRestrictionsLength = requestInfo.filterIdsNotCourses.get("Dietary Restriction").length;
-		boolean ingredientToleranceAboveZero = requestInfo.tolerances.get("Ingredient")>0;
+		int ingredientsLength = filterIdMap.get("Ingredient").length;
+		int dietaryRestrictionsLength = filterIdMap.get("Dietary Restriction").length;
+		boolean ingredientToleranceAboveZero = tolerances.get("Ingredient")>0;
 		if((ingredientsLength>0)
 				|| (dietaryRestrictionsLength>0)
 				|| (ingredientToleranceAboveZero)
@@ -409,38 +331,38 @@ public class RecipeSearch extends HttpServlet {
 		sb.append(") recBookSubquery ON rec.RECIPE_ID = recBookSubquery.RECIPE_ID ");
 		
 		// authors
-		buildRecipeAuthorSubquery(sb, requestInfo.filterIdsNotCourses.get("Author").length, "recAuthSubquery");
+		buildRecipeAuthorSubquery(sb, filterIdMap.get("Author").length, "recAuthSubquery");
 		
 		// moderation status
 		sb.append("WHERE rec.RECIPE_STATUS = 'Active' ");
 		
 		//search term
-		if(!requestInfo.searchTerm.isEmpty()) {
+		if(!searchTerm.isEmpty()) {
 			sb.append("AND (rec.RECIPE_NAME LIKE ? OR rec.RECIPE_NAME LIKE ?) ");
 		}
 		
 		// appliance tolerance
-		buildApplianceCondition(sb, requestInfo.filterIdsNotCourses.get("Appliance").length, requestInfo.tolerances.get("Appliance")>0);
+		buildApplianceCondition(sb, filterIdMap.get("Appliance").length, tolerances.get("Appliance")>0);
 		
 		// cooking time. if the requested range encompasses the entire possible range, then any null cooking times are permissible 
-		if(requestInfo.ranges.get("Cooking Time").get("min")!=0 || requestInfo.ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
+		if(ranges.get("Cooking Time").get("min")!=0 || ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
 			buildCookingTimeCondition(sb);
 		}
 		
 		// dish type
-		buildDishTypeCondition(sb, requestInfo.filterIdsNotCourses.get("Dish Type").length);
+		buildDishTypeCondition(sb, filterIdMap.get("Dish Type").length);
 		
 		// cuisine
-		buildCuisineCondition(sb, requestInfo.filterIdsNotCourses.get("Cuisine").length);
+		buildCuisineCondition(sb, filterIdMap.get("Cuisine").length);
 		
 		// courses
-		buildCourseCondition(sb, requestInfo.courses.length);
+		buildCourseCondition(sb, filterIdMap.get("Course").length);
 		
 		// options
-		buildCheckboxConditions(sb, requestInfo.options);
+		buildCheckboxConditions(sb, requestInfo.getOptions());
 		
 		// sort order
-		buildSortOrder(sb, requestInfo.sortOrder, requestInfo.sortOptions);
+		buildSortOrder(sb, requestInfo.getSortOptions());
 		
 		//limit
 		sb.append(" LIMIT 10");
@@ -590,7 +512,7 @@ public class RecipeSearch extends HttpServlet {
 		}
 	}
 	
-	private void buildCheckboxConditions(StringBuilder sb, HashMap<String, Boolean> options) {
+	private void buildCheckboxConditions(StringBuilder sb, Map<String, Boolean> options) {
 		if(!options.get("Ai Generated Description")) {
 			sb.append("AND rec.AI_GEN_DESCRIPTION = FALSE ");
 		}
@@ -611,35 +533,35 @@ public class RecipeSearch extends HttpServlet {
 		}
 	}
 	
-	private void buildSortOrder(StringBuilder sb, String[] sortOrder, HashMap<String, HashMap<String, String>> sortOptions) {
-		if(sortOrder.length>0) {
-			sb.append(" ORDER BY ");
-			for(String sortKey : sortOrder) {
-				switch (sortKey){
-					case "Publication Date":
-						sb.append("rec.RECIPE_ACTIVE_TIMESTAMP ");
-						break;
-					case "Bookmarks":
-						sb.append("recBookSubquery.bookmarkCount ");
-						break;
-					case "Reviews":
-						sb.append("recRevSubquery.reviewCount ");
-						break;
-					default:// assumption: the value is a valid key
-						sb.append("recRevSubquery.averageRating ");
-				}
-				String order;
-				if(sortOptions.get(sortKey).get("sort").equals("ascending")) {
-					order = "ASC";
-				}
-				else {
-					order = "DESC";
-				}
-				sb.append(order);
-				sb.append(", ");
-			}
-			sb.setLength(sb.length()-2); // Remove last comma and space
-		}
+	private void buildSortOrder(StringBuilder sb, Map<String, Map<String, String>> sortOptions) {
+	    if (sortOptions != null && !sortOptions.isEmpty()) {
+	        sb.append(" ORDER BY ");
+	        for (String sortKey : sortOptions.keySet()) {
+	            switch (sortKey){
+	                case "Publication Date":
+	                    sb.append("rec.RECIPE_ACTIVE_TIMESTAMP ");
+	                    break;
+	                case "Bookmarks":
+	                    sb.append("recBookSubquery.bookmarkCount ");
+	                    break;
+	                case "Reviews":
+	                    sb.append("recRevSubquery.reviewCount ");
+	                    break;
+	                default:// assumption: the value is a valid key
+	                    sb.append("recRevSubquery.averageRating ");
+	            }
+	            String order;
+	            Map<String, String> innerMap = sortOptions.get(sortKey);
+	            if (innerMap != null && "ascending".equals(innerMap.get("sort"))) {
+	                order = "ASC";
+	            } else {
+	                order = "DESC";
+	            }
+	            sb.append(order);
+	            sb.append(", ");
+	        }
+	        sb.setLength(sb.length() - 2); // Remove last comma and space
+	    }
 	}
 	
 	private void writeRecipeResults(ResultSet recipes, PrintWriter pw) throws SQLException, IOException{

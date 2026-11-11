@@ -336,36 +336,30 @@
 			                    	<div class="filter-panel-container">
 			                    		<%
 			                    		if (dbConnection != null) {
-			                    					       						String sql = 
-			                    			     					    				"SELECT DISTINCT COURSE " +
-			                    			     					    				"FROM RECIPES " +
-			                    			     					    				"WHERE COURSE IS NOT NULL " +
-			                    			     					    				"ORDER BY COURSE ASC";
-			                    					     					    try (
-			                    					     	                            PreparedStatement popularStatement =
-			                    					                                    dbConnection.prepareStatement(sql);
-			                    					                                ResultSet popularRecipes =
-			                    					                                    popularStatement.executeQuery()
-			                    					                            ) {
-			                    					     					    	
-			                    					     					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
-			                    					     					    	ResultSet dietaryRestrictions = statement.executeQuery();
-			                    					     					    	
-			                    					     					    	while(dietaryRestrictions.next()){
-			                    					     					    		String course = dietaryRestrictions.getString("COURSE");
-			                    		%>
-			                    			<button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Course', '<%=course%>' )">
-			                    				<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
-												<%=course%>
-						                    	</h2>
-			                    			</button>
-			                    		<%
-			                    		}
-			                    			                    				}
-			                    					     					   	catch (Exception error){
-			                    					   					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
-			                    					   					    	}
-			                    			                    			}
+			                    			String sql = "SELECT DISTINCT COURSE, COURSE + 0 AS COURSE_ID " +
+			                    			     		 "FROM RECIPES " +
+			                    			     		 "WHERE COURSE IS NOT NULL " +
+			                    			     		 "ORDER BY COURSE + 0 ASC";
+			                    			try (
+			                    				PreparedStatement courseStatement = dbConnection.prepareStatement(sql);
+			                    				ResultSet courseResults = courseStatement.executeQuery()
+			                    			) {
+			                    				while(courseResults.next()){
+			                    		            int courseId = courseResults.getInt("COURSE_ID");
+			                    		            String courseName = courseResults.getString("COURSE");
+						                    		%>
+													    <button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
+													        <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+													            <%=courseName%>
+													        </h2>
+													    </button>
+													<%
+		                    					}
+		                    				}
+				     					   	catch (Exception error) {
+				   					    		out.println("<p>Database error: " +error.getMessage() + "</p>");
+				   					    	}
+		                    			}
 			                    		%>
 									</div>
 	                    		</div>
