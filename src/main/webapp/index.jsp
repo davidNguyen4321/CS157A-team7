@@ -610,7 +610,6 @@
 								option.sort = null;
 								option.order = null;
 								reindexOrders();
-								}
 							}
 							else { // State 3: not sorted --> descending
 								self.classList.add('descending');
@@ -621,21 +620,20 @@
 							}
 							updateSortTextElements();
 						}
-						
-    					let activeSortCount = 0;
-    					
-				    	function assignNextOrder(type){
-				    		activeSortCount++;
-				    	    sortOptions.get(type).order = activeSortCount;
-				    	}
-				    	
-				    	function reindexOrders() {
-				    	    let activeOptions = Array.from(sortOptions.values())
-				    	        .filter(opt => opt.order !== null)
-				    	        .sort((a, b) => a.order - b.order);
-				    	    let idx = 1;
-				    	    for (let opt of activeOptions) opt.order = idx++;
-				    	}
+						    					
+						function getActiveSortEntries() {
+						    return Array.from(sortOptions.entries())
+						        .filter(([key, opt]) => opt.order !== null)
+						        .sort((a, b) => a[1].order - b[1].order);
+						}
+
+						function reindexOrders() {
+						    getActiveSortEntries().forEach(([key, opt], i) => opt.order = i + 1);
+						}
+
+						function activeSortOptions() {
+						    return Object.fromEntries(getActiveSortEntries().map(([key, opt]) => [key, opt.sort]));
+						}
 						
 				    	function updateSortTextElements() {
 				    	    for (let [key, opt] of sortOptions.entries()) {
@@ -898,8 +896,7 @@
 					    		searchTerm = searchBar.value.trim();
 						        let parameters = new URLSearchParams();
 						        parameters.append('searchTerm', searchTerm);
-						        parameters.append('sortOrder', JSON.stringify(sortOrder));
-						        parameters.append('sortOptions', JSON.stringify(Object.fromEntries(sortOptions)));
+						        parameters.append('sortOptions', JSON.stringify(activeSortOptions()));
 						        parameters.append('filterIds', JSON.stringify(Object.fromEntries(filterIds)));
 						        parameters.append('tolerances', JSON.stringify(Object.fromEntries(tolerances)));
 						        parameters.append('ranges', JSON.stringify(Object.fromEntries(ranges)));

@@ -36,7 +36,7 @@ public class RecipeSearch extends HttpServlet {
 		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
 		if(dbConnection == null) return;
 		
-		String[] parameters = {"searchTerm", "sortOrder", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
+		String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
 	    Map<String, String> parameterMap = ServletSecurity.getValidatedParameters(request, response, parameters, true);
 	    if (parameterMap == null) return;
 		
@@ -533,34 +533,22 @@ public class RecipeSearch extends HttpServlet {
 		}
 	}
 	
-	private void buildSortOrder(StringBuilder sb, Map<String, Map<String, String>> sortOptions) {
-	    if (sortOptions != null && !sortOptions.isEmpty()) {
-	        sb.append(" ORDER BY ");
-	        for (String sortKey : sortOptions.keySet()) {
-	            switch (sortKey){
-	                case "Publication Date":
-	                    sb.append("rec.RECIPE_ACTIVE_TIMESTAMP ");
-	                    break;
-	                case "Bookmarks":
-	                    sb.append("recBookSubquery.bookmarkCount ");
-	                    break;
-	                case "Reviews":
-	                    sb.append("recRevSubquery.reviewCount ");
-	                    break;
-	                default:// assumption: the value is a valid key
-	                    sb.append("recRevSubquery.averageRating ");
-	            }
-	            String order;
-	            Map<String, String> innerMap = sortOptions.get(sortKey);
-	            if (innerMap != null && "ascending".equals(innerMap.get("sort"))) {
-	                order = "ASC";
-	            } else {
-	                order = "DESC";
-	            }
-	            sb.append(order);
-	            sb.append(", ");
+	private void buildSortOrder(StringBuilder sb, Map<String, String> sortOptions) {
+	    StringBuilder orderBy = new StringBuilder();
+	    for (Map.Entry<String, String> entry : sortOptions.entrySet()) {
+	        String column;
+	        switch (entry.getKey()) {
+	            case "Publication Date": column = "rec.RECIPE_ACTIVE_TIMESTAMP"; break;
+	            case "Bookmarks":        column = "recBookSubquery.bookmarkCount"; break;
+	            case "Reviews":          column = "recRevSubquery.reviewCount"; break;
+	            case "Ratings":          column = "recRevSubquery.averageRating"; break;
+	            default: continue; // ignore unknown keys
 	        }
-	        sb.setLength(sb.length() - 2); // Remove last comma and space
+	        if (orderBy.length() > 0) orderBy.append(", ");
+	        orderBy.append(column).append("ascending".equals(entry.getValue()) ? " ASC" : " DESC");
+	    }
+	    if (orderBy.length() > 0) {
+	        sb.append(" ORDER BY ").append(orderBy);
 	    }
 	}
 	

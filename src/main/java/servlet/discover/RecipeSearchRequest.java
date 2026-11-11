@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class RecipeSearchRequest {
     private String searchTerm;
-    private Map<String, Map<String, String>> sortOptions;
+    private Map<String, String> sortOptions;
     private Map<String, Integer[]> filterIdMap;
     private Map<String, Integer> tolerances;
     private Map<String, Map<String, Integer>> ranges;
@@ -20,8 +20,8 @@ public class RecipeSearchRequest {
         this.searchTerm = parameterMap.get("searchTerm").trim();
         
         this.sortOptions = mapper.readValue(
-        		parameterMap.get("sortOptions"), 
-        		new TypeReference<Map<String, Map<String, String>>>() {}
+                parameterMap.get("sortOptions"),
+                new TypeReference<Map<String, String>>() {}
         );
         
         this.filterIdMap = mapper.readValue(
@@ -46,7 +46,7 @@ public class RecipeSearchRequest {
     }
 
     protected String getSearchTerm() { return searchTerm; }
-    protected Map<String, Map<String, String>> getSortOptions() { return sortOptions; }
+    protected Map<String, String> getSortOptions() { return sortOptions; }
     protected Map<String, Integer[]> getFilterIdMap() { return filterIdMap; }
     protected Map<String, Integer> getTolerances() { return tolerances; }
     protected Map<String, Map<String, Integer>> getRanges() { return ranges; }
