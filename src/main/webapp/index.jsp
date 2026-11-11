@@ -214,9 +214,9 @@
 	                      </div>
 	                      
 						<div id="GeneralPanel" class="filter-panel">
-							<div class="filter-panel-container-no-grid" style="align-items: center;">
+							<div class="filter-panel-container-no-grid sort-row" style="align-items: center;">
 								<h1 class="filter-panel-name">
-								General Filters
+								Sort By
 		                    	</h1>
 		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
 		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date');">
@@ -228,7 +228,7 @@
 		                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews');">
 		                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Reviews
 		                    	</button>
-		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Ratings');">
+		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'RatingsSortText', 'Ratings');">
 		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Ratings
 		                    	</button>
 	                    	</div>
@@ -646,18 +646,13 @@
 						function updateSortTextElements() {
 						    for (let [key, opt] of sortOptions.entries()) {
 						        let element = document.getElementById(opt.sortTextId);
+						        let active = opt.order !== null;
+						        let arrow = opt.sort === 'ascending' ? '↑' : '↓';
 
-						        if (opt.order === null) {
-						            element.innerHTML = '<span>' + key + '</span>';
-						            element.classList.remove("active-sort-chip");
-						        } else {
-						            let arrow = opt.sort === 'ascending' ? '↑' : '↓';
-						            element.innerHTML =
-						                '<span class="filter-label">' + key + '</span>' +
-						                '<span class="priority-badge">' + opt.order + '</span>' +
-						                '<span class="direction-arrow">' + arrow + '</span>';
-						            element.classList.add("active-sort-chip");
-						        }
+						        element.innerHTML =
+						            '<span class="priority-badge' + (active ? '' : ' sort-hidden') + '">' + (active ? opt.order : 1) + '</span>' +
+						            '<span class="sort-label">' + key + '</span>' +
+						            '<span class="direction-arrow' + (active ? '' : ' sort-hidden') + '">' + (active ? arrow : '↓') + '</span>';
 						    }
 						}
 						
