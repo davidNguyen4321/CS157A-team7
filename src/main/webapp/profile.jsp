@@ -61,7 +61,7 @@ int profileId;
     <section class="profile-section">
         <div class="profile-section-head">
             <h2>Recipes</h2>
-            <a class="see-all" href="profile_recipes.jsp?id=<%= profileId %>">See all &rarr;</a>
+            <a class="see-all">See all &rarr;</a>
         </div>
         <div id="recipeGrid" class="profile-grid">
       <script>      	
@@ -292,7 +292,7 @@ int profileId;
     <section class="profile-section">
         <div class="profile-section-head">
             <h2>Reviews</h2>
-            <a class="see-all" href="profile_reviews.jsp?id=<%= profileId %>">See all &rarr;</a>
+            <a class="see-all">See all &rarr;</a>
         </div>
         <div class="profile-grid">
         <%

@@ -60,33 +60,9 @@ body {
   padding-right: 1.5rem;
 }
 
-hr.hdashed-divider {
-  border-top: 3px dashed #bbb;
-}
-
-hr.hdotted-divider {
-  border-top: 3px dotted #bbb;
-}
-
-hr.hsolid-divider {
-  border-top: 3px solid #bbb;
-}
-
 hr.hrounded-divider {
   border-top: 3px solid #bbb;
   border-radius: 3px;
-}
-
-.vdashed-divider {
-  border-left: 3px dashed #bbb;
-}
-
-.vdotted-divider {
-  border-left: 3px dotted #bbb;
-}
-
-.vsolid-divider {
-  border-left: 3px solid #bbb;
 }
 
 .vrounded-divider {
@@ -794,7 +770,6 @@ nav.main-nav {
   font-size: 0.85rem;
 }
 
-.recipe-card,
 .search-recipe-card {
   flex-shrink: 0;
   width: 20rem;
@@ -807,7 +782,6 @@ nav.main-nav {
   transition: box-shadow 0.2s;
 }
 
-.recipe-card:hover,
 .search-recipe-card:hover {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -833,11 +807,6 @@ nav.main-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.375rem;
-}
-
-.card-badge-group {
-  display: flex;
   gap: 0.375rem;
 }
 
@@ -913,25 +882,6 @@ nav.main-nav {
   font-weight: 500;
   color: var(--muted-foreground);
   min-width: 0;
-}
-
-.card-avatar {
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 9999px;
-  background-color: var(--secondary);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem;
-  flex-shrink: 0;
-}
-
-.card-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
 .card-stats {

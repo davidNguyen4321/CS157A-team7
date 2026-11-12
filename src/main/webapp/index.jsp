@@ -7,9 +7,7 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.sql.DriverManager" %>
 <%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
-<%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.HashMap" %>
@@ -29,10 +27,6 @@
 <body>
 
     <%
-        // Retrieve username from session or database (e.g., session.getAttribute("username"))
-        String dbUsername = (String) session.getAttribute("username");
-        String displayUsername = (dbUsername != null && !dbUsername.trim().isEmpty()) ? dbUsername : "Username";
-
         // Tracks which tab is currently selected
         String currentTab = request.getParameter("tab");
         if (currentTab == null || currentTab.trim().isEmpty()) {
@@ -41,40 +35,9 @@
     %>
     <%-- reuses connection that DbInit opened at startup --%>
     <%
-    Connection dbConnection = DbAccess.getConnection();
-        boolean isConnected = false;
-        if(dbConnection!=null){
-        	isConnected=true;
-        }
+    	Connection dbConnection = DbAccess.getConnection();
         int sessionUserId = (Integer) session.getAttribute("userId");
     %>
-
-    <%
-    String dbURL = "jdbc:mysql://localhost:3306/recipegenie?serverTimezone=UTC";
-            String dbUser = "root";
-            String dbPassword = request.getParameter("dbPassword");
-            if (isConnected==false && dbPassword != null) {
-                try {
-                    Class.forName("com.mysql.cj.jdbc.Driver");
-                    dbConnection = DriverManager.getConnection(dbURL, dbUser, dbPassword);
-                    isConnected = true;
-                    DbAccess.setConnection(dbConnection);
-                } catch (Exception e) {
-                    // Connection failed (wrong password, etc.)
-                }
-            }
-    %>
-
-    <!-- Temporary Password Prompt Box (if not connected yet) -->
-    <% if (!isConnected) { %>
-        <div style="background: #f8d7da; padding: 15px; text-align: center; border-bottom: 1px solid #f5c6cb;">
-            <form method="post" action="index.jsp?tab=<%= currentTab %>">
-                <label for="dbPassword"><strong>Enter MySQL Root Password to Connect:</strong></label>
-                <input type="password" id="dbPassword" name="dbPassword" required>
-                <button type="submit">Connect Database</button>
-            </form>
-        </div>
-    <% } %>
 
     <!--
       =========================================================================
@@ -234,23 +197,17 @@
 			                    	<div class="filter-panel-container">
 			                    		<%
 			                    		if (dbConnection != null) {
-			                    					       						String sql = 
-			                    			     					    				"SELECT DIETARY_RESTRICTION_ID, DIETARY_RESTRICTION_NAME " +
-			                    			     					    				"FROM DIETARY_RESTRICTIONS " +
-			                    			     					    				"ORDER BY DIETARY_RESTRICTION_NAME ASC";
-			                    					     					    try (
-			                    					     	                            PreparedStatement popularStatement =
-			                    					                                    dbConnection.prepareStatement(sql);
-			                    					                                ResultSet popularRecipes =
-			                    					                                    popularStatement.executeQuery()
-			                    					                            ) {
-			                    					     					    	
-			                    					     					    	PreparedStatement statement = dbConnection.prepareStatement(sql);
-			                    					     					    	ResultSet dietaryRestrictions = statement.executeQuery();
-			                    					     					    	
-			                    					     					    	while(dietaryRestrictions.next()){
-			                    					     					    		int dietaryRestrictionId = dietaryRestrictions.getInt("DIETARY_RESTRICTION_ID");
-			                    					     					    		String dietaryRestrictionName = dietaryRestrictions.getString("DIETARY_RESTRICTION_NAME");
+				       						String sql = 
+		     					    				"SELECT DIETARY_RESTRICTION_ID, DIETARY_RESTRICTION_NAME " +
+		     					    				"FROM DIETARY_RESTRICTIONS " +
+		     					    				"ORDER BY DIETARY_RESTRICTION_NAME ASC";
+				     					    try (
+				     	                        PreparedStatement statement = dbConnection.prepareStatement(sql);
+				                                ResultSet dietaryRestrictions = statement.executeQuery()
+				                            ) {
+				     					    	while(dietaryRestrictions.next()){
+				     					    		int dietaryRestrictionId = dietaryRestrictions.getInt("DIETARY_RESTRICTION_ID");
+				     					    		String dietaryRestrictionName = dietaryRestrictions.getString("DIETARY_RESTRICTION_NAME");
 			                    		%>
 			                    			<button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Dietary Restriction', <%=dietaryRestrictionId%> )">
 			                    				<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
@@ -861,7 +818,6 @@
 				        	document.getElementById("personalizedStrips").classList.remove("active");
 				        	let resultContainer = document.getElementById("recipeResults")
 				        	resultContainer.classList.add("active");
-				        	let scrollRow = document.getElementById("recipeResultsScrollRow");
 							let previousRecipes = document.querySelectorAll(".search-recipe-card");
 	
 							//removing past recipes
@@ -1054,7 +1010,7 @@
 	                           </p>
 	                           <div class="review-footer">
 	                               <div class="card-author">
-	                                   <img class="mini-pic" src="${pageContext.request.contextPath}<%=reviewerAvatar%>" alt="revieweer"/>
+	                                   <img class="mini-pic" src="<%= request.getContextPath() + reviewerAvatar %>" alt="Reviewer"/>
 	                                 	<%
 	                                 	String an = reviews.getString("USER_NAME"); int aid = reviews.getInt("REVIEWER_ID");
 	                                 	%>
@@ -1140,7 +1096,6 @@
 	                   	                       	try(                           
 	                   	                       		ResultSet popularRecipes =
 	                   	                       				popularStatement.executeQuery()){
-	                   	                               int rank = 1;
 	                   	                            ArrayList<Map<String, Object>> popularRecipesList = new ArrayList<>();
 	                   	                         while (popularRecipes.next()) {
 	                   	                             Map<String, Object> recipe = new HashMap<>();
@@ -1205,15 +1160,10 @@
 	       <script>
 	       		document.getElementById("personalizedStrips").classList.add("active");
 	       </script>
-    </main>
             <%
             } else if ("share".equals(currentTab)) {
             %>
-        	<p>Not Implemented
-        	</p>
-    <main>
-    </main>
-    <main>
+        	<p>Not Implemented</p>
             <%
             } else {
             %> <!-- Fallback: library (also the final option) -->
@@ -1239,7 +1189,6 @@
 			                   	  		  				   "AND u.USER_STATUS = 'Active' " +
 		                   	            			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
 			                   		                   		"LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
-		                   		                           "LEFT JOIN REVIEWS rev ON r.RECIPE_ID = rev.RECIPE_ID " +
 			                   		                   		"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
 				                   		                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
 				                   		                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
@@ -1286,11 +1235,11 @@
 		    	                   	                         }
 		    	                   	                         
 		    	                   	                         ObjectMapper mapper = new ObjectMapper();
-		    	                   	                         String boomarkedRecipesJson = mapper.writeValueAsString(bookmarkedRecipesList);	 
+		    	                   	                         String bookmarkedRecipesJson = mapper.writeValueAsString(bookmarkedRecipesList);	 
 		                   %>
 							<script>
 							{
-							    const bookmarkedRecipesData = <%= boomarkedRecipesJson %>;
+							    const bookmarkedRecipesData = <%= bookmarkedRecipesJson %>;
 							    const sessionUserId = <%= sessionUserId %>;
 							    
 							    bookmarkedRecipesData.forEach((recipe, index) => {
