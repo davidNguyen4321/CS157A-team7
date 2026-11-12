@@ -289,7 +289,7 @@ public class RecipeSearch extends HttpServlet {
 		
 		int minMinutes = ranges.get("Cooking Time").get("min");
 		int maxMinutes = ranges.get("Cooking Time").get("max");
-		if (!(minMinutes == 0 || maxMinutes == Integer.MAX_VALUE)) {
+		if (!(minMinutes == 0 && maxMinutes == Integer.MAX_VALUE)) {
 		    sb.append("AND recipes.total_minutes >= ? AND recipes.total_minutes <= ? ");
 		    sqlParams.add(minMinutes);
 		    sqlParams.add(maxMinutes);
@@ -302,7 +302,7 @@ public class RecipeSearch extends HttpServlet {
 		if (applianceIds.length > 0) {
 		    sb.append("AND (");
 		    	sb.append("SELECT COUNT(*) ");
-		    	sb.append("FROM recipes_use_appliances rua");
+		    	sb.append("FROM recipes_use_appliances rua ");
 		    	sb.append("WHERE rua.recipe_id = recipes.recipe_id AND rua.appliance_id NOT IN (");
 		    		addPlaceholderArray(sb, sqlParams, applianceIds);
 				sb.append(")");
@@ -322,7 +322,7 @@ public class RecipeSearch extends HttpServlet {
 		Integer[] dishTypeIds = filterIdMap.get("Dish Type");
 		if (dishTypeIds.length > 0) {
 		    sb.append("AND EXISTS (");
-		    	sb.append("SELECT 1");
+		    	sb.append("SELECT 1 ");
 		    	sb.append("FROM recipes_has_dish_types rhdt ");
 		    	sb.append("WHERE rhdt.recipe_id = recipes.recipe_id AND rhdt.dish_type_id IN (");
 		    		addPlaceholderArray(sb, sqlParams, dishTypeIds);
@@ -332,9 +332,9 @@ public class RecipeSearch extends HttpServlet {
 		
 		// Dish type filter: Recipe must have at least one of the selected dish types.
 		Integer[] cuisineIds = filterIdMap.get("Cuisine");
-		if (dishTypeIds.length > 0) {
+		if (cuisineIds.length > 0) {
 		    sb.append("AND EXISTS (");
-		    	sb.append("SELECT 1");
+		    	sb.append("SELECT 1 ");
 		    	sb.append("FROM recipes_feature_cuisines rfc ");
 		    	sb.append("WHERE rfc.recipe_id = recipes.recipe_id AND rfc.cuisine_id IN (");
 		    		addPlaceholderArray(sb, sqlParams, cuisineIds);

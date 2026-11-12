@@ -661,8 +661,7 @@
 						        'Author': '/images/users/user-placeholder.png',
 						    };
 
-						    for (let objectString of Object.values(objects)){
-						        let object = JSON.parse(objectString);
+						    for (let object of objects){
 						        let id = object["id"];
 						        let name = object["name"];
 						        
@@ -866,15 +865,14 @@
 					    	for (let previousRecipe of previousRecipes) {
 					    		previousRecipe.remove();
 					    	}
-				        	for (let recipeString of Object.values(objects)){
-				            	let recipe = JSON.parse(recipeString);
-				            	addRecipeCard("recipeResultsScrollRow", recipe["recipeId"], recipe["recipeName"], 
-				            			recipe["recipeImagePath"], recipe["recipeDescription"],
-				            			recipe["recipeTotalMinutes"], recipe["recipeActiveTimestamp"], 
-				            			recipe["reviewCount"], recipe["averageRating"], recipe["bookmarkCount"],
-				            			recipe["userBookmarked"], recipe["userId"],
-				            			recipe["userName"], recipe["userImagePath"], <%=sessionUserId%>)
-				        	}
+							for (let recipe of objects){
+							    addRecipeCard("recipeResultsScrollRow", recipe["recipeId"], recipe["recipeName"], 
+							            recipe["recipeImagePath"], recipe["recipeDescription"],
+							            recipe["recipeTotalMinutes"], recipe["recipeActiveTimestamp"], 
+							            recipe["reviewCount"], recipe["averageRating"], recipe["bookmarkCount"],
+							            recipe["userBookmarked"], recipe["userId"],
+							            recipe["userName"], recipe["userImagePath"], <%=sessionUserId%>);
+							}
 						}
 						</script>
 	                   </form>
