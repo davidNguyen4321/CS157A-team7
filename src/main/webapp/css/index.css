@@ -637,7 +637,7 @@ nav.main-nav {
 
 .mini-container {
   align-items: center;
-  background-color: #D4782A;
+  background-color: #F2C38F;
   max-width: 100%;
   height: 40px;
   border-radius: 25px;
@@ -669,7 +669,7 @@ nav.main-nav {
 }
 
 .mini-container-toggleable.active {
-  background-color: #D4782A;
+  background-color: #F2C38F;
 }
 
 .mini-pic {
@@ -944,18 +944,23 @@ nav.main-nav {
   color: var(--muted-foreground);
 }
 
-.card-bookmark,
-.card-rating,
-.card-follow {
+.card-rating {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
+.card-bookmark, .card-follow{
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	background: #FFF6ED;
+}
+
 .card-bookmark.active,
 .card-rating.active,
 .card-follow.active {
-  background: #FFD966;
+  background: #FFF1B8;
 }
 
 .stars {

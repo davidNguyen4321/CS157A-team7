@@ -1,0 +1,196 @@
+<link rel="stylesheet" type="text/css" href="css/index.css">
+<script>
+	function addRecipeCard(containerId, recipeId, recipeName, 
+			recipeImagePath, recipeDescription,
+			recipeTotalMinutes, recipeActiveTimestamp, reviewCount,
+			averageRating, bookmarkCount, userBookmarked, userId,
+			userName, userImagePath, sessionUserId, showUser){
+			let container = document.getElementById(containerId);	    	
+	    	let recipeCard = document.createElement("article");
+	    	recipeCard.classList.add("search-recipe-card");
+	    	
+	    	recipeCard.style.cursor = "pointer";
+	
+	    	recipeCard.addEventListener("click", function(event) {
+	    	    if (event.target.closest(".card-bookmark")) {
+	    	        return;
+	    	    }
+	
+	    	    window.location.href =
+	    	        "${pageContext.request.contextPath}/recipe.jsp?recipeId="
+	    	        + recipeId;
+	    	});
+	    	
+	    	let recipeImageContainer = document.createElement("div");
+	    	recipeImageContainer.classList.add("recipe-card-img");
+	    	let recipeImage = document.createElement("img");
+			if(recipeImagePath){
+				recipeImage.setAttribute('src', "${pageContext.request.contextPath}"+recipeImagePath);
+			}
+			else{
+				recipeImage.setAttribute('src', "${pageContext.request.contextPath}/images/recipes/recipe-placeholder.jpg");
+			}
+			recipeImage.setAttribute('alt', "Recipe");
+	    	recipeImageContainer.append(recipeImage);
+	    	
+	    	let recipeBadges = document.createElement("div");
+	    	recipeBadges.classList.add("recipe-card-badges");
+			let cookingTimeBadgePill = document.createElement("span");
+			cookingTimeBadgePill.classList.add("badge-pill");
+			if (recipeTotalMinutes){
+				cookingTimeBadgePill.textContent=recipeTotalMinutes + "m";
+			}
+			else{
+				cookingTimeBadgePill.textContent="N/A";
+			}
+			recipeBadges.append(cookingTimeBadgePill);
+			let publicationDateBadgePill = document.createElement("span");
+			publicationDateBadgePill.classList.add("badge-pill");
+			publicationDateBadgePill.textContent=recipeActiveTimestamp;
+			recipeBadges.append(cookingTimeBadgePill);
+			recipeBadges.append(publicationDateBadgePill);
+			recipeImageContainer.append(recipeBadges);
+	    	recipeCard.append(recipeImageContainer);
+			
+			let cardBody = document.createElement("div");
+			cardBody.classList.add("recipe-card-body");
+			let cardTitle = document.createElement("h3");
+			cardTitle.classList.add("recipe-card-title");
+			cardTitle.textContent=recipeName;
+			let cardDescription = document.createElement("p");
+			cardDescription.classList.add("recipe-card-desc");
+			cardDescription.textContent=recipeDescription;
+			cardBody.append(cardTitle);
+			cardBody.append(cardDescription);
+			
+			let cardFooter = document.createElement("div");
+			cardFooter.classList.add("recipe-card-footer");
+			
+			if(showUser){
+				let cardAuthor = document.createElement("div");
+				cardAuthor.classList.add("card-author");
+				let authorImage = document.createElement("img");
+				authorImage.classList.add("mini-pic");
+				if(userImagePath){
+					authorImage.setAttribute('src', "${pageContext.request.contextPath}"+userImagePath);
+				}
+				else{
+					authorImage.setAttribute('src', "${pageContext.request.contextPath}/images/users/user-placeholder.png");
+				}
+				authorImage.setAttribute('alt', "Author");
+		
+				let authorName;
+				if(userName&&userId){
+					authorName = document.createElement("a");
+					authorName.classList.add("author-link");
+					authorName.setAttribute("href", "profile.jsp?id="+userId);
+					authorName.textContent=userName;
+				}
+				else{
+					authorName = document.createElement("span");
+					authorName.textContent="Anonymous";
+				}
+				cardAuthor.append(authorImage);
+				cardAuthor.append(authorName);
+				cardFooter.append(cardAuthor);
+			}
+			
+			let reviewMeta = document.createElement("div");
+			reviewMeta.classList.add("review-meta");
+			let ratings = document.createElement("span");
+			ratings.classList.add("card-rating");
+			ratings.textContent="Reviews: "+averageRating+"/5";
+			stars = document.createElement("span");
+			stars.classList.add("stars");
+			stars.setAttribute("style", "--rating: " + averageRating);
+			stars.setAttribute("aria-label", averageRating + " out of 5 stars");
+			let reviews = document.createElement("span");
+			reviews.classList.add("card-rating");
+			reviews.textContent=" (" + reviewCount +")";
+			ratings.append(stars);
+			ratings.append(reviews);
+			reviewMeta.append(ratings);
+			cardFooter.append(reviewMeta);
+			
+			if (sessionUserId!==userId){
+				let cardStats = document.createElement("div");
+				cardStats.classList.add("card-stats");
+				let cardBookmark = document.createElement("button");
+				createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
+				cardStats.append(cardBookmark);
+				cardFooter.append(cardStats);
+			}
+			
+			cardBody.append(cardFooter);
+			recipeCard.append(cardBody);
+			container.append(recipeCard);
+			
+			return recipeCard
+	}
+	function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
+		self.classList.add("card-bookmark");
+		self.onclick = function(event) {
+		    event.stopPropagation();
+		    toggleBookmark(self, recId);
+		}; 
+		// to make sure clicking bookmark only bookmarks, not opens recipe card
+		self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
+		self.textContent=bookmarkCount;
+		let bookmarkImage = document.createElement("img");
+		bookmarkImage.classList.add("bookmark-icon");
+		bookmarkImage.setAttribute('alt', "Bookmark icon");
+		bookmarkImage.setAttribute('width', "16");
+		bookmarkImage.setAttribute('height', "16");
+		bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
+		if(userBookmarked){
+			bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
+			self.classList.add("active");
+		}
+		else{
+			bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
+		}
+		self.append(bookmarkImage);
+	}
+	
+    bookmarkTimeout = null;
+	function toggleBookmark(self, recId){
+		let url = "${pageContext.request.contextPath}/Bookmark/Toggle";
+	    clearTimeout(bookmarkTimeout);
+	    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
+			let response = await fetch(url, {
+	        	method:'POST',
+	        	body: JSON.stringify({
+					recipeId: recId
+	        	}),
+	        	headers:{
+	                "Content-Type": "application/json; charset=UTF-8",
+	                "Accept": "application/json; charset=UTF-8"
+	        	}
+	        });
+			if (!response.ok) {
+	        	throw new Error('Network response was not ok');
+	        }
+        	let objects = await response.json(); // Creates a JSON object
+        	toggleBookmarkElement(self, objects["bookmark"], objects["bookmarkCount"]);
+	    }, 10);
+	}
+	
+	function toggleBookmarkElement(self, toggleOnBoolean, newCount){
+		let bookmarkImage = document.createElement("img");
+		bookmarkImage.classList.add("bookmark-icon");
+		bookmarkImage.setAttribute('alt', "Bookmark icon");
+		bookmarkImage.setAttribute('width', "16");
+		bookmarkImage.setAttribute('height', "16");
+		bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
+		if(toggleOnBoolean){
+			self.classList.add("active");
+			bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
+		}
+		else{
+			self.classList.remove("active");
+			bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon.svg")
+		}
+		self.textContent=newCount;
+		self.append(bookmarkImage);
+	}
+</script>

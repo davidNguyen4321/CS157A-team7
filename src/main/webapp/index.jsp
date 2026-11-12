@@ -8,8 +8,14 @@
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.sql.DriverManager" %>
+<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -76,74 +82,6 @@
       =========================================================================
     -->
     <%@ include file="/WEB-INF/fragments/header.jspf" %>
-	<script>
-		function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
-			self.classList.add("card-bookmark");
-			self.onclick = function(event) {
-			    event.stopPropagation();
-			    toggleBookmark(self, recId);
-			}; 
-			// to make sure clicking bookmark only bookmarks, not opens recipe card
-			self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
-			self.textContent=bookmarkCount;
-			let bookmarkImage = document.createElement("img");
-			bookmarkImage.classList.add("bookmark-icon");
-			bookmarkImage.setAttribute('alt', "Bookmark icon");
-			bookmarkImage.setAttribute('width', "16");
-			bookmarkImage.setAttribute('height', "16");
-			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
-			if(userBookmarked){
-				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
-				self.classList.add("active");
-			}
-			else{
-				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
-			}
-			self.append(bookmarkImage);
-		}
-		
-	    bookmarkTimeout = null;
-		function toggleBookmark(self, recId){
-			let url = "${pageContext.request.contextPath}/Bookmark/Toggle";
-		    clearTimeout(bookmarkTimeout);
-		    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
-				let response = await fetch(url, {
-		        	method:'POST',
-		        	body: JSON.stringify({
-						recipeId: recId
-		        	}),
-		        	headers:{
-		                "Content-Type": "application/json; charset=UTF-8",
-		                "Accept": "application/json; charset=UTF-8"
-		        	}
-		        });
-				if (!response.ok) {
-		        	throw new Error('Network response was not ok');
-		        }
-	        	let objects = await response.json(); // Creates a JSON object
-	        	toggleBookmarkElement(self, objects["bookmark"], objects["bookmarkCount"]);
-		    }, 100);
-		}
-		
-		function toggleBookmarkElement(self, toggleOnBoolean, newCount){
-			let bookmarkImage = document.createElement("img");
-			bookmarkImage.classList.add("bookmark-icon");
-			bookmarkImage.setAttribute('alt', "Bookmark icon");
-			bookmarkImage.setAttribute('width', "16");
-			bookmarkImage.setAttribute('height', "16");
-			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
-			if(toggleOnBoolean){
-				self.classList.add("active");
-				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
-			}
-			else{
-				self.classList.remove("active");
-				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon.svg")
-			}
-			self.textContent=newCount;
-			self.append(bookmarkImage);
-		}
-	</script>
     <!--
       =========================================================================
       DISCOVER TAB MAIN SECTION
@@ -368,7 +306,7 @@
 											Ranges
 				                    	</h2>
 				                    	<div class="filter-panel-mini">
-	`		                    			<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
+			                    			<h2 class="mini-text" style="color:#523F00; font-size: 0.9rem;">
 											Reviews
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
@@ -679,7 +617,7 @@
 								    	else{
 								        	removeFilterPanelSearchResults(panelSearchContainerId);
 								    	}
-								    }, 100);
+								    }, 10);
 							});
 						}
 						
@@ -914,7 +852,7 @@
 						        }
 					        	let objects = await response.json(); // Creates a JSON object
 					        	addResults(objects);
-						    }, 100);
+						    }, 10);
 						}
 											
 						function addResults(objects){
@@ -930,122 +868,12 @@
 					    	}
 				        	for (let recipeString of Object.values(objects)){
 				            	let recipe = JSON.parse(recipeString);
-				            	let recipeId = recipe["recipeId"]; // not used until a later functionality (where clicking on the recipe leads to the recipe page)
-				            	let recipeName = recipe["recipeName"];
-				            	let recipeImagePath = recipe["recipeImagePath"];
-				            	let recipeDescription = recipe["recipeDescription"];
-				            	let recipeTotalMinutes = recipe["recipeTotalMinutes"];
-				            	let recipeActiveTimestamp = recipe["recipeActiveTimestamp"];
-				            	let reviewCount = recipe["reviewCount"];
-				            	let averageRating = recipe["averageRating"];
-				            	let bookmarkCount = recipe["bookmarkCount"];
-				            	let userBookmarked = recipe["userBookmarked"];
-				            	let userId = recipe["userId"]; // not used until a later functionality (where clicking on the user leads to the user page)
-				            	let userName = recipe["userName"];
-				            	let userImagePath = recipe["userImagePath"];
-				            	
-				            	let recipeCard = document.createElement("article");
-				            	recipeCard.classList.add("search-recipe-card");
-				            	
-				            	recipeCard.style.cursor = "pointer";
-
-				            	recipeCard.addEventListener("click", function(event) {
-				            	    if (event.target.closest(".card-bookmark")) {
-				            	        return;
-				            	    }
-
-				            	    window.location.href =
-				            	        "${pageContext.request.contextPath}/recipe.jsp?recipeId="
-				            	        + recipeId;
-				            	});
-				            	
-				            	let recipeImageContainer = document.createElement("div");
-				            	recipeImageContainer.classList.add("recipe-card-img");
-				            	let recipeImage = document.createElement("img");
-				            	recipeImage.setAttribute('src', "${pageContext.request.contextPath}"+recipeImagePath);
-				            	recipeImage.setAttribute('alt', "${pageContext.request.contextPath}/images/recipes/recipe-placeholder.jpg");
-				            	recipeImageContainer.append(recipeImage);
-				            	
-				            	let recipeBadges = document.createElement("div");
-				            	recipeBadges.classList.add("recipe-card-badges");
-								let cookingTimeBadgePill = document.createElement("span");
-								cookingTimeBadgePill.classList.add("badge-pill");
-								cookingTimeBadgePill.textContent=recipeTotalMinutes;
-								recipeBadges.append(cookingTimeBadgePill);
-								let publicationDateBadgePill = document.createElement("span");
-								publicationDateBadgePill.classList.add("badge-pill");
-								publicationDateBadgePill.textContent=recipeActiveTimestamp;
-								recipeBadges.append(cookingTimeBadgePill);
-								recipeBadges.append(publicationDateBadgePill);
-								recipeImageContainer.append(recipeBadges);
-				            	recipeCard.append(recipeImageContainer);
-								
-								let cardBody = document.createElement("div");
-								cardBody.classList.add("recipe-card-body");
-								let cardTitle = document.createElement("h3");
-								cardTitle.classList.add("recipe-card-title");
-								cardTitle.textContent=recipeName;
-								let cardDescription = document.createElement("p");
-								cardDescription.classList.add("recipe-card-desc");
-								cardDescription.textContent=recipeDescription;
-								cardBody.append(cardTitle);
-								cardBody.append(cardDescription);
-								
-								let cardFooter = document.createElement("div");
-								cardFooter.classList.add("recipe-card-footer");
-								let cardAuthor = document.createElement("div");
-								cardAuthor.classList.add("card-author");
-								let authorImage = document.createElement("img");
-								authorImage.classList.add("mini-pic");
-								if(userImagePath){
-									authorImage.setAttribute('src', "${pageContext.request.contextPath}"+userImagePath);
-								}
-								else{
-									authorImage.setAttribute('src', "${pageContext.request.contextPath}/images/users/user-placeholder.png");
-								}
-								authorImage.setAttribute('alt', "Author");
-	
-								let authorName;
-								if(userName&&userId){
-									authorName = document.createElement("a");
-									authorName.classList.add("author-link");
-									authorName.setAttribute("href", "profile.jsp?id="+userId);
-									authorName.textContent=userName;
-								}
-								else{
-									authorName = document.createElement("span");
-									authorName.textContent="Anonymous";
-								}
-								cardAuthor.append(authorImage);
-								cardAuthor.append(authorName);
-								cardFooter.append(cardAuthor);
-								
-								let reviewMeta = document.createElement("div");
-								reviewMeta.classList.add("review-meta");
-								let ratings = document.createElement("span");
-								ratings.classList.add("card-rating");
-								ratings.textContent="Reviews: "+averageRating+"/5";
-								stars = document.createElement("span");
-								stars.classList.add("stars");
-								stars.setAttribute("style", "--rating: " + averageRating);
-								stars.setAttribute("aria-label", averageRating + " out of 5 stars");
-								let reviews = document.createElement("span");
-								reviews.classList.add("card-rating");
-								reviews.textContent=" (" + reviewCount +")";
-								ratings.append(stars);
-								ratings.append(reviews);
-								reviewMeta.append(ratings);
-								cardFooter.append(reviewMeta);
-								
-								let cardStats = document.createElement("div");
-								cardStats.classList.add("card-stats");
-								let cardBookmark = document.createElement("button");
-								createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
-								cardStats.append(cardBookmark);
-								cardFooter.append(cardStats);
-								cardBody.append(cardFooter);
-								recipeCard.append(cardBody);
-								scrollRow.append(recipeCard);
+				            	addRecipeCard("recipeResultsScrollRow", recipe["recipeId"], recipe["recipeName"], 
+				            			recipe["recipeImagePath"], recipe["recipeDescription"],
+				            			recipe["recipeTotalMinutes"], recipe["recipeActiveTimestamp"], 
+				            			recipe["reviewCount"], recipe["averageRating"], recipe["bookmarkCount"],
+				            			recipe["userBookmarked"], recipe["userId"],
+				            			recipe["userName"], recipe["userImagePath"], <%=sessionUserId%>)
 				        	}
 						}
 						</script>
@@ -1072,7 +900,7 @@
 	                   <h2 class="section-title">Your Feed</h2>
 	                   <p class="section-subtitle">Latest recipes from your favorite creators</p>
 	               </div>
-	               <div class="horizontal-scroll-row">
+	               <div id="followedScrollRow" class="horizontal-scroll-row"></div>
 					 <%
 					 if (dbConnection != null) {
 					 		    	String sql =
@@ -1095,7 +923,8 @@
 					 		             			"LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
 					 		  							"INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
 					 		  		  					"AND u.USER_STATUS = 'Active' " +
-					             			  		") b ON r.RECIPE_ID = b.RECIPE_ID " +				    		    "WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+					             			  		") b ON r.RECIPE_ID = b.RECIPE_ID " +
+					 		  		  		"WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
 					 		    		    "r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_IMAGE_PATH, " +
 					 		    		    "r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
 					 				    	"recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING, " +
@@ -1108,88 +937,67 @@
 					 	    			try(
 					 	    				ResultSet recipes = statement.executeQuery();		
 					 					)	{
-					 	    				int counter = 1;
-					 				    	while(recipes.next()){
-					 				    		String recipeImagePath = recipes.getString("RECIPE_IMAGE_PATH");
-					 				    		if(recipeImagePath == null || recipeImagePath.isEmpty()){
-					 				    			recipeImagePath = "/images/recipes/recipe-placeholder.jpg";	
-					 				    		}
-					 				    		String userImagePath = recipes.getString("USER_IMAGE_PATH");
-					 				    		if(userImagePath == null || userImagePath.isEmpty()){
-					 				    			userImagePath = "/images/users/user-placeholder.png";	
-					 				    		}
-					 	                                String bookmarkImage = "/images/bookmark_icon.svg";
-					 	                                if(recipes.getInt("HAS_BOOKMARKED")>0){
-					 	                                	bookmarkImage ="/images/bookmark_icon_active.svg";
-					 	                                }
-					 	                                String rating = String.format("%.1f", recipes.getFloat("AVERAGE_RATING"));
-					 %>
-	
-					    		<article class="recipe-card"
-								         style="cursor: pointer;"
-								         onclick="window.location.href='recipe.jsp?recipeId=<%=recipes.getInt("RECIPE_ID")%>'">
-					    		    <div class="recipe-card-img">
-					    		        <img src="${pageContext.request.contextPath}<%=recipeImagePath%>" alt="Recipe">
-	
-					    		        <div class="recipe-card-badges">
-					    		            <span class="badge-pill">
-					    		                <%=recipes.getObject("TOTAL_MINUTES") == null ? "N/A" : recipes.getInt("TOTAL_MINUTES") + "m"%>
-					    		            </span>
-	
-					    		            <span class="badge-pill">
-					    		                <%=recipes.getTimestamp("RECIPE_ACTIVE_TIMESTAMP")%>
-					    		            </span>
-					    		        </div>
-					    		    </div>
-	
-					    		    <div class="recipe-card-body">
-					    		        <h3 class="recipe-card-title">
-					    		            <%=recipes.getString("RECIPE_NAME")%>
-					    		        </h3>
-	
-					    		        <p class="recipe-card-desc">
-					    		            <%=recipes.getString("RECIPE_DESCRIPTION")%>
-					    		        </p>
-					    		        <div class="recipe-card-footer" style="justify-content: left;">
-					    					<img class="mini-pic" src="${pageContext.request.contextPath}<%=userImagePath%>" alt="Author"/>
-					    		            <%
-					    		            String an = recipes.getString("USER_NAME"); int aid = recipes.getInt("AUTHOR_ID");
-					    		            %>
-											<%
-											if (an != null) {
-											%>
-											    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=WebUtils.esc(an)%></a>
-											<%
-											} else {
-											%><span>Anonymous</span><%
-											}
-											%>
-							    			<span class="card-rating">
-			                                      <span class="stars"
-			                                          style="--rating: <%=rating%>;"
-			                                          aria-label="<%=rating%> out of 5 stars"></span>
-			                                      <%=rating%>/5 (<%=recipes.getInt("REVIEW_COUNT")%>)
-			                                </span>
-					    					<div class="card-stats">
-			                                    <button id="followBookmark<%=counter%>">
-												</button>
-			                                </div>
-					    		        </div>
-					    		    </div>
-					    		</article>
-		            			<script>
-	            				currentBookmarkElement = document.getElementById("followBookmark"+<%=counter%>);
-	            				createNewBookmark(currentBookmarkElement, <%=recipes.getInt("RECIPE_ID")%>, <%=recipes.getInt("BOOKMARK_COUNT")%>, <%=recipes.getInt("HAS_BOOKMARKED")>0%>);
-	            			</script>
-					    		<%
-					    		counter++;
-					    					    		        }
-					    					    }}catch (Exception error){
-					    					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
-					    					    }
-					    					 }
+               	                            ArrayList<Map<String, Object>> followedRecipesList = new ArrayList<>();
+	                   	                         while (recipes.next()) {
+	                   	                        	 Map<String, Object> recipe = new HashMap<>();
+	                   	                        	 recipe.put("id", recipes.getInt("RECIPE_ID"));
+	                   	                        	 recipe.put("name", recipes.getString("RECIPE_NAME"));
+	                   	                        	 recipe.put("image", recipes.getString("RECIPE_IMAGE_PATH"));
+	                   	                        	 recipe.put("description", recipes.getString("RECIPE_DESCRIPTION"));
+	                   	                        	 recipe.put("minutes", recipes.getObject("TOTAL_MINUTES"));
+	                   	                        	 recipe.put("timestamp", recipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
+	                   	                        	 recipe.put("reviews", recipes.getInt("REVIEW_COUNT"));
+	                   	                        	 recipe.put("rating", String.format("%.1f", recipes.getFloat("AVERAGE_RATING")));
+	                   	                        	 recipe.put("bookmarks", recipes.getInt("BOOKMARK_COUNT"));
+	                   	                        	 recipe.put("hasBookmarked", recipes.getInt("HAS_BOOKMARKED")>0);
+	                   	                        	 recipe.put("authorId", recipes.getInt("AUTHOR_ID"));
+	                   	                        	 recipe.put("authorName", recipes.getString("USER_NAME"));
+	                   	                        	 recipe.put("authorImage", recipes.getString("USER_IMAGE_PATH"));
+                  	                             
+	                   	                        	followedRecipesList.add(recipe);
+                  	                         }
+                  	                         
+                  	                         ObjectMapper mapper = new ObjectMapper();
+                  	                         String followedRecipesJson = mapper.writeValueAsString(followedRecipesList);	
 					    		%>
-	               </div>
+					    	<script>
+							{
+							    const followedRecipesData = <%= followedRecipesJson %>;
+							    const sessionUserId = <%= sessionUserId %>;
+							
+							    followedRecipesData.forEach((recipe, index) => {
+							        let recipeCard = addRecipeCard(
+							            "followedScrollRow", 
+							            recipe.id, 
+							            recipe.name, 
+							            recipe.image, 
+							            recipe.description,
+							            recipe.minutes, 
+							            recipe.timestamp,
+							            recipe.reviews, 
+							            parseFloat(recipe.rating),
+							            recipe.bookmarks, 
+							            recipe.hasBookmarked, 
+							            recipe.authorId,
+							            recipe.authorName, 
+							            recipe.authorImage,
+							            sessionUserId,
+							            true
+							        );
+							
+							        let recipeImage = recipeCard.querySelector(".recipe-card-img");
+							        let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
+							        let rankBadge = document.createElement("div");
+							        rankBadge.classList.add("rank-badge");
+							        rankBadge.textContent = "#" + (index + 1);
+							        recipeImage.insertBefore(rankBadge, recipeCardBadges);
+							    });
+							}
+							</script>
+							<% 
+							}}catch (Exception error){
+					    				out.println("<p>Database error: " +error.getMessage() + "</p>");
+					    	}}%>
 	           </section>
 	
 	           <!-- Reviews for You -->
@@ -1291,22 +1099,21 @@
 	                   <h2 class="section-title">Your Most Popular</h2>
 	                   <p class="section-subtitle">Which of your recipes are the most popular</p>
 	               </div>
-	               <div class="horizontal-scroll-row">
+	               <div id="popularScrollRow" class="horizontal-scroll-row"></div>
 	                   <%
 	                   if (dbConnection != null) {
 	                   	                       String popularSql =
 	                   	                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
 	                   	                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
 	                   	                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, " +
-	                   	                           "SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
 	                   	                           "recRevSubquery.AVERAGE_RATING, " +
 	                   	                           "recRevSubquery.REVIEW_COUNT, "+
-	                   	                           "r.RECIPE_ID FROM RECIPES r " +
+	                   	                           "r.RECIPE_ID, r.RECIPE_ACTIVE_TIMESTAMP FROM RECIPES r " +
 	                   	             			   "LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
 	                   		  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
 	                   		  		  				   "AND u.USER_STATUS = 'Active' " +
 	                               			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
-	                   	                   "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+	                   	                   		"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
 	                   	                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
 	                   	                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
 	                   	                		"FROM RECIPES recRevSubquery " +
@@ -1317,7 +1124,7 @@
 	                   	                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
 	                   	                           "WHERE r.RECIPE_STATUS = 'Active' " +
 	                   	                           "AND r.AUTHOR_ID = ? " +
-	                   	                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
+	                   	                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, r.RECIPE_ACTIVE_TIMESTAMP, " +
 	                   	                           "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
 	                   	                           "r.TOTAL_MINUTES, recRevSubquery.AVERAGE_RATING, " +
 	                   	                           "recRevSubquery.REVIEW_COUNT " +
@@ -1328,61 +1135,61 @@
 	                   	                               dbConnection.prepareStatement(popularSql);
 	                   	                       ) {
 	                   	                    	   popularStatement.setInt(1, sessionUserId);
-	                   	                    	   popularStatement.setInt(2, sessionUserId);
 	                   	                       	try(                           
 	                   	                       		ResultSet popularRecipes =
 	                   	                       				popularStatement.executeQuery()){
 	                   	                               int rank = 1;
-	                   	                               while (popularRecipes.next()) {
-	                   	                                   String popularImage =
-	                   	                                		   popularRecipes.getString("RECIPE_IMAGE_PATH");
-	                   	                                   if (popularImage == null || popularImage.isEmpty()) {
-	                   	                                       popularImage = "/images/recipes/recipe-placeholder.jpg";
-	                   	                                   }
-	                   	                                   String rating = String.format("%.1f", popularRecipes.getFloat("AVERAGE_RATING"));
+	                   	                            ArrayList<Map<String, Object>> popularRecipesList = new ArrayList<>();
+	                   	                         while (popularRecipes.next()) {
+	                   	                             Map<String, Object> recipe = new HashMap<>();
+	                   	                             recipe.put("id", popularRecipes.getInt("RECIPE_ID"));
+	                   	                             recipe.put("name", popularRecipes.getString("RECIPE_NAME"));
+	                   	                             recipe.put("image", popularRecipes.getString("RECIPE_IMAGE_PATH"));
+	                   	                             recipe.put("description", popularRecipes.getString("RECIPE_DESCRIPTION"));
+	                   	                             recipe.put("minutes", popularRecipes.getObject("TOTAL_MINUTES"));
+	                   	                             recipe.put("timestamp", popularRecipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
+	                   	                             recipe.put("reviews", popularRecipes.getInt("REVIEW_COUNT"));
+	                   	                             recipe.put("rating", String.format("%.1f", popularRecipes.getFloat("AVERAGE_RATING")));
+	                   	                             recipe.put("bookmarks", popularRecipes.getInt("BOOKMARK_COUNT"));
+	                   	                             popularRecipesList.add(recipe);
+	                   	                         }
+	                   	                         
+	                   	                         ObjectMapper mapper = new ObjectMapper();
+	                   	                         String popularRecipesJson = mapper.writeValueAsString(popularRecipesList);	                   	                            	   
 	                   %>
-	                   <article class="recipe-card"
-						         style="cursor: pointer;"
-						         onclick="window.location.href='recipe.jsp?recipeId=<%=popularRecipes.getInt("RECIPE_ID")%>'">
-	                       <div class="recipe-card-img">
-	                           <img src="${pageContext.request.contextPath}<%=popularImage%>" alt="Recipe" />
-	                           <div class="rank-badge">#<%=rank%></div>
-	                           <div class="recipe-card-badges">
-	                               <div class="card-badge-group">
-	                                   <span class="badge-pill">
-	                                       <%=popularRecipes.getObject("TOTAL_MINUTES") == null ? "N/A" : popularRecipes.getInt("TOTAL_MINUTES") + "m"%>
-	                                   </span>
-	                               </div>
-	                           </div>
-	                       </div>
-	                       <div class="recipe-card-body">
-	                           <h3 class="recipe-card-title">
-	                               <%=WebUtils.esc(popularRecipes.getString("RECIPE_NAME"))%>
-	                           </h3>
-	                           <p class="recipe-card-desc">
-	                               <%=WebUtils.esc(popularRecipes.getString("RECIPE_DESCRIPTION"))%>
-	                           </p>
-	                           <div class="recipe-card-footer">
-                           			<span class="card-rating">
-                                       <span class="stars"
-                                           style="--rating: <%=rating%>;"
-                                           aria-label="<%=rating%> out of 5 stars"></span>
-                                       <%=rating%>/5 (<%=popularRecipes.getInt("REVIEW_COUNT")%>)
-                                   </span>
-	                               <div class="card-stats">
-	                                   <button id="popularBookmark<%=rank%>">
-									</button>
-	                               </div>
-	                           </div>
-	                       </div>
-	                   </article>
-	            			<script>
-	            				currentBookmarkElement = document.getElementById("popularBookmark"+<%=rank%>);
-	            				createNewBookmark(currentBookmarkElement, <%=popularRecipes.getInt("RECIPE_ID")%>, <%=popularRecipes.getInt("BOOKMARK_COUNT")%>, true);
-	            			</script>
+						<script>
+						    const popularRecipesData = <%= popularRecipesJson %>;
+						    const sessionUserId = <%= sessionUserId %>;
+						    
+						    popularRecipesData.forEach((recipe, index) => {
+						        let recipeCard = addRecipeCard(
+						            "popularScrollRow", 
+						            recipe.id, 
+						            recipe.name, 
+						            recipe.image, 
+						            recipe.description,
+						            recipe.minutes, 
+						            recipe.timestamp,
+						            recipe.reviews, 
+						            parseFloat(recipe.rating),
+						            recipe.bookmarks, 
+						            null, 
+						            sessionUserId,
+						            null, // null because never have to be read
+						            null,
+						            sessionUserId,
+						            false
+						        );
+						
+						        let recipeImage = recipeCard.querySelector(".recipe-card-img");
+						        let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
+						        let rankBadge = document.createElement("div");
+						        rankBadge.classList.add("rank-badge");
+						        rankBadge.textContent = "#" + (index + 1);
+						        recipeImage.insertBefore(rankBadge, recipeCardBadges);
+						    });
+						</script>
 	                   <%
-	                   rank++;
-	                   	                            }
 	                   	                        }
 	                   	                       }
 	                   	                       catch (Exception error){
@@ -1390,7 +1197,6 @@
 	                   			    }
 	                   	                   }
 	                   %>
-	               </div>
 	           </section>
 	       </div>
 	       <script>
@@ -1414,33 +1220,33 @@
 		                   <h2 class="section-title">Your Library</h2>
 		                   <p class="section-subtitle">Recipes Too Good to Forget</p>
 		               </div>
-		               <div class="horizontal-scroll-row">
-		                   <%
+		               <div id="libraryScrollRow" class="horizontal-scroll-row"></div>
+		               	<%
 		                   if (dbConnection != null) {
 		                   		                       String bookmarkSql =
 		                   		                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
-		                   		                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
+		                   		                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, " +
 		                   		                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, " +
-		                   		                   "recRevSubquery.REVIEW_COUNT, " +
-		                   				           "recRevSubquery.AVERAGE_RATING, " +
+				                   		                   "recRevSubquery.REVIEW_COUNT, " +
+				                   				           "recRevSubquery.AVERAGE_RATING, " +
 		                   		                           "r.RECIPE_ID, r.AUTHOR_ID, u.USER_NAME, " +
 		                   		                           "u.USER_IMAGE_PATH FROM RECIPES r " +
 		                   		             			   "LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
-		                   	  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
-		                   	  		  				   "AND u.USER_STATUS = 'Active' " +
+			                   	  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
+			                   	  		  				   "AND u.USER_STATUS = 'Active' " +
 		                   	            			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
-		                   		                   "LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
+			                   		                   		"LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
 		                   		                           "LEFT JOIN REVIEWS rev ON r.RECIPE_ID = rev.RECIPE_ID " +
-		                   		                   "INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
-		                   		                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
-		                   		                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
-		                   		                		"FROM RECIPES recRevSubquery " +
-		                   			           			"LEFT JOIN REVIEWS rev ON " +
-		                   			           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
-		                   			            		"AND rev.REVIEW_STATUS = 'Active' " +
-		                   		                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
+			                   		                   		"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
+				                   		                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
+				                   		                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
+				                   		                		"FROM RECIPES recRevSubquery " +
+				                   			           			"LEFT JOIN REVIEWS rev ON " +
+				                   			           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
+				                   			            		"AND rev.REVIEW_STATUS = 'Active' " +
+				                   		                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
 		                   		                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
-		                   		                   "WHERE r.RECIPE_STATUS = 'Active' " +
+		                   		                   			"WHERE r.RECIPE_STATUS = 'Active' " +
 		                   		                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
 		                   		                           "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
 		                   		                           "r.TOTAL_MINUTES, u.USER_ID, u.USER_NAME, " + 
@@ -1457,71 +1263,63 @@
 		                   		                       	try(                           
 		                   		                       		ResultSet bookmarkedRecipes =
 		                   		                       				bookmarkedStatement.executeQuery()){
-		                   		                               int rank = 1;
-		                   		                               while (bookmarkedRecipes.next()) {
-		                   		                                   String bookmarkedImage =
-		                   		                                		   bookmarkedRecipes.getString("RECIPE_IMAGE_PATH");
-		                   		                                   if (bookmarkedImage == null || bookmarkedImage.isEmpty()) {
-		                   		                                	   bookmarkedImage = "/images/recipes/recipe-placeholder.jpg";
-		                   		                                   }
-		                   		                                   String authorAvatar =
-		                   		                                		   bookmarkedRecipes.getString("USER_IMAGE_PATH");
-		                   		                                   if (authorAvatar == null || authorAvatar.isEmpty()) {
-		                   		                                	   authorAvatar = "/images/users/user-placeholder.png";
-		                   		                                   }
-		                   		                                   String rating = String.format("%.1f", bookmarkedRecipes.getFloat("AVERAGE_RATING"));
+			                   	                            ArrayList<Map<String, Object>> bookmarkedRecipesList = new ArrayList<>();
+		      	                   	                         while (bookmarkedRecipes.next()) {
+		      	                   	                        	 Map<String, Object> recipe = new HashMap<>();
+		      	                   	                        	 recipe.put("id", bookmarkedRecipes.getInt("RECIPE_ID"));
+		      	                   	                        	 recipe.put("name", bookmarkedRecipes.getString("RECIPE_NAME"));
+		      	                   	                        	 recipe.put("image", bookmarkedRecipes.getString("RECIPE_IMAGE_PATH"));
+		      	                   	                        	 recipe.put("description", bookmarkedRecipes.getString("RECIPE_DESCRIPTION"));
+		      	                   	                        	 recipe.put("minutes", bookmarkedRecipes.getObject("TOTAL_MINUTES"));
+		      	                   	                        	 recipe.put("timestamp", bookmarkedRecipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
+		      	                   	                        	 recipe.put("reviews", bookmarkedRecipes.getInt("REVIEW_COUNT"));
+		      	                   	                        	 recipe.put("rating", String.format("%.1f", bookmarkedRecipes.getFloat("AVERAGE_RATING")));
+		      	                   	                        	 recipe.put("bookmarks", bookmarkedRecipes.getInt("BOOKMARK_COUNT"));
+		      	                   	                        	 recipe.put("authorId", bookmarkedRecipes.getInt("AUTHOR_ID"));
+		      	                   	                        	 recipe.put("authorName", bookmarkedRecipes.getString("USER_NAME"));
+		      	                   	                        	 recipe.put("authorImage", bookmarkedRecipes.getString("USER_IMAGE_PATH"));
+		    	                   	                             
+		      	                   	                        	 bookmarkedRecipesList.add(recipe);
+		    	                   	                         }
+		    	                   	                         
+		    	                   	                         ObjectMapper mapper = new ObjectMapper();
+		    	                   	                         String boomarkedRecipesJson = mapper.writeValueAsString(bookmarkedRecipesList);	 
 		                   %>
-		                   <article class="recipe-card">
-		                       <div class="recipe-card-img">
-		                           <img src="${pageContext.request.contextPath}<%=bookmarkedImage%>" alt="Recipe" />
-		                           <div class="rank-badge">#<%=rank%></div>
-		                           <div class="recipe-card-badges">
-		                               <div class="card-badge-group">
-		                                   <span class="badge-pill">
-		                                       <%=bookmarkedRecipes.getObject("TOTAL_MINUTES") == null ? "N/A" : bookmarkedRecipes.getInt("TOTAL_MINUTES") + "m"%>
-		                                   </span>
-		                               </div>
-		                           </div>
-		                       </div>
-		                       <div class="recipe-card-body">
-		                           <h3 class="recipe-card-title">
-		                               <%=WebUtils.esc(bookmarkedRecipes.getString("RECIPE_NAME"))%>
-		                           </h3>
-		                           <p class="recipe-card-desc">
-		                               <%=WebUtils.esc(bookmarkedRecipes.getString("RECIPE_DESCRIPTION"))%>
-		                           </p>
-		                           <div class="recipe-card-footer">
-			                           <div class="card-author">
-		                                   <img class="mini-pic" src="${pageContext.request.contextPath}<%=authorAvatar%>" alt="Author"/>
-		                                 	<%
-		                                 	String an = bookmarkedRecipes.getString("USER_NAME"); int aid = bookmarkedRecipes.getInt("AUTHOR_ID");
-		                                 	%>
-										<%
-										if (an != null) {
-										%>
-										    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=WebUtils.esc(an)%></a>
-										<% } else { %><span>Anonymous</span><% } %>
-		                               </div>
-		                               <span class="card-rating">
-	                                       <span class="stars"
-	                                           style="--rating: <%= rating %>;"
-	                                           aria-label="<%= rating %> out of 5 stars"></span>
-	                                       <%= rating %>/5 (<%=bookmarkedRecipes.getInt("REVIEW_COUNT")%>)
-	                                   </span>
-		                               <div class="card-stats">
-		                                   <button id="bookmarkedBookmark<%=rank%>">
-										</button>
-		                               </div>
-		                           </div>
-		                       </div>
-		                   </article>
-		            			<script>
-		            				currentBookmarkElement = document.getElementById("bookmarkedBookmark"+<%=rank%>);
-		            				createNewBookmark(currentBookmarkElement, <%=bookmarkedRecipes.getInt("RECIPE_ID")%>, <%=bookmarkedRecipes.getInt("BOOKMARK_COUNT")%>, true);
-		            			</script>
+							<script>
+							{
+							    const bookmarkedRecipesData = <%= boomarkedRecipesJson %>;
+							    const sessionUserId = <%= sessionUserId %>;
+							    
+							    bookmarkedRecipesData.forEach((recipe, index) => {
+							        let recipeCard = addRecipeCard(
+							            "libraryScrollRow", 
+							            recipe.id, 
+							            recipe.name, 
+							            recipe.image, 
+							            recipe.description,
+							            recipe.minutes, 
+							            recipe.timestamp,
+							            recipe.reviews, 
+							            parseFloat(recipe.rating),
+							            recipe.bookmarks, 
+							            true, 
+							            recipe.authorId,
+							            recipe.authorName, 
+							            recipe.authorImage,
+							            sessionUserId,
+							            true
+							        );
+							
+							        let recipeImage = recipeCard.querySelector(".recipe-card-img");
+							        let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
+							        let rankBadge = document.createElement("div");
+							        rankBadge.classList.add("rank-badge");
+							        rankBadge.textContent = "#" + (index + 1);
+							        recipeImage.insertBefore(rankBadge, recipeCardBadges);
+							    });
+							}
+							</script>
 		                   <%
-		                                rank++;
-		                            }
 		                        }
 		                       }
 		                       catch (Exception error){
@@ -1529,7 +1327,6 @@
 						    }
 		                   }
 		                   %>
-		               </div>
 		           </section>
 		      </div>
 		   <script>

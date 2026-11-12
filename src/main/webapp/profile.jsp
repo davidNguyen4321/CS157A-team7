@@ -9,8 +9,14 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
+<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="java.util.HashMap" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
 
 <%
 int profileId;
@@ -57,7 +63,7 @@ int profileId;
             <h2>Recipes</h2>
             <a class="see-all" href="profile_recipes.jsp?id=<%= profileId %>">See all &rarr;</a>
         </div>
-        <div class="profile-grid">
+        <div id="recipeGrid" class="profile-grid">
       <script>      	
 		function createNewFollow(self, followingId, userFollowed){
 			self.classList.add("card-follow");
@@ -101,7 +107,7 @@ int profileId;
 		        }
 	        	let objects = await response.json(); // Creates a JSON object
 	        	toggleFollowElement(self, objects["follow"]);
-		    }, 100);
+		    }, 10);
 		}
 		
 		function toggleFollowElement(self, toggleOnBoolean){
@@ -165,7 +171,7 @@ int profileId;
 		        }
 	        	let objects = await response.json(); // Creates a JSON object
 	        	toggleBookmarkElement(self, objects["bookmark"], objects["bookmarkCount"]);
-		    }, 100);
+		    }, 10);
 		}
 		
 		function toggleBookmarkElement(self, toggleOnBoolean, newCount){
@@ -206,7 +212,7 @@ int profileId;
         <%}}}
             String rsql = "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
             			  "r.RECIPE_ID, COUNT(b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
-  						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
+  						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING, r.RECIPE_ACTIVE_TIMESTAMP " +
             			  "FROM RECIPES r LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
 	  						  "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
 	  		  				  "AND u.USER_STATUS = 'Active' " +
@@ -230,45 +236,56 @@ int profileId;
                 ps.setInt(1, sessionUserId);
                 ps.setInt(2, profileId);
                 try (ResultSet rs = ps.executeQuery()) {
-                	int counter = 1;
-                    while (rs.next()) {
-                        anyRecipe = true;
-                        String img = WebUtils.or(rs.getString("RECIPE_IMAGE_PATH"), "/images/recipe-placeholder.jpg");
-                        String rating = String.format("%.1f", rs.getFloat("AVERAGE_RATING"));
+                       ArrayList<Map<String, Object>> recipesList = new ArrayList<>();
+                       while (rs.next()) {
+                    	 anyRecipe=true;
+                       	 Map<String, Object> recipe = new HashMap<>();
+                       	 recipe.put("id", rs.getInt("RECIPE_ID"));
+                       	 recipe.put("name", rs.getString("RECIPE_NAME"));
+                       	 recipe.put("image", rs.getString("RECIPE_IMAGE_PATH"));
+                       	 recipe.put("description", rs.getString("RECIPE_DESCRIPTION"));
+                       	 recipe.put("minutes", rs.getObject("TOTAL_MINUTES"));
+                       	 recipe.put("timestamp", rs.getString("RECIPE_ACTIVE_TIMESTAMP"));
+                       	 recipe.put("reviews", rs.getInt("REVIEW_COUNT"));
+                       	 recipe.put("rating", String.format("%.1f", rs.getFloat("AVERAGE_RATING")));
+                       	 recipe.put("bookmarks", rs.getInt("BOOKMARK_COUNT"));
+                         recipe.put("hasBookmarked", rs.getInt("HAS_BOOKMARKED")>0);
+                            
+                       	recipesList.add(recipe);
+                        }
+                        
+                        ObjectMapper mapper = new ObjectMapper();
+                        String recipesJson = mapper.writeValueAsString(recipesList);
 
         %>
-            <article class="recipe-card">
-                <div class="recipe-card-img">
-                    <img src="${pageContext.request.contextPath}<%= img %>" alt="Recipe">
-                    <div class="recipe-card-badges"><span class="badge-pill">
-                        <%= rs.getObject("TOTAL_MINUTES") == null ? "N/A" : rs.getInt("TOTAL_MINUTES") + "m" %>
-                    </span></div>
-                </div>
-                <div class="recipe-card-body">
-                    <h3 class="recipe-card-title"><%= WebUtils.esc(rs.getString("RECIPE_NAME")) %></h3>
-                    <p class="recipe-card-desc"><%= WebUtils.esc(rs.getString("RECIPE_DESCRIPTION")) %></p>
-                   <div class="recipe-card-footer">
-       				   <span class="card-rating">
-                             <span class="stars"
-                                 style="--rating: <%= rating %>;"
-                                 aria-label="<%= rating %> out of 5 stars"></span>
-                             <%= rating %>/5 (<%=rs.getInt("REVIEW_COUNT")%>)
-                       </span>
-                       <div class="card-stats">
-                           <button id="profileBookmark<%=counter%>">
-							</button>
-                       </div>
-                   </div>
-                </div>
-            </article>
-            <script>
-    			currentBookmarkElement = document.getElementById("profileBookmark"+<%=counter%>);
-    			createNewBookmark(currentBookmarkElement, <%=rs.getInt("RECIPE_ID")%>, <%=rs.getInt("BOOKMARK_COUNT")%>, <%=rs.getInt("HAS_BOOKMARKED")>0%>);
-    		</script>
-        <%counter++;      }
-                }
-            }
-            if (!anyRecipe) { %><p>No recipes yet.</p><% } %>
+		<script>
+		{
+		    const recipesData = <%= recipesJson %>;
+		    const sessionUserId = <%= sessionUserId %>;
+		    
+		    recipesData.forEach((recipe) => {
+		        let recipeCard = addRecipeCard(
+		            "recipeGrid", 
+		            recipe.id, 
+		            recipe.name, 
+		            recipe.image, 
+		            recipe.description,
+		            recipe.minutes, 
+		            recipe.timestamp,
+		            recipe.reviews, 
+		            parseFloat(recipe.rating),
+		            recipe.bookmarks, 
+		            recipe.hasBookmarked, 
+		            null,
+		            null, 
+		            null,
+		            sessionUserId,
+		            false
+		        );
+		    });
+		}
+		</script><%
+            if (!anyRecipe) { %><p>No recipes yet.</p><% }}} %>
         </div>
     </section>
 
@@ -317,9 +334,11 @@ int profileId;
                 </div>
             </article>
         <%      }
-                }
-            }
-            if (!anyReview) { %><p>No reviews yet.</p><% } %>
+            if (!anyReview) { %><p>No reviews yet.</p><% }}}
+            catch (Exception error){
+			    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+			    }
+            %>
         </div>
     </section>
 <% } %>
