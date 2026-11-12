@@ -112,14 +112,12 @@
 			reviewMeta.append(ratings);
 			cardFooter.append(reviewMeta);
 			
-			if (sessionUserId!==userId){
-				let cardStats = document.createElement("div");
-				cardStats.classList.add("card-stats");
-				let cardBookmark = document.createElement("button");
-				createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
-				cardStats.append(cardBookmark);
-				cardFooter.append(cardStats);
-			}
+			let cardStats = document.createElement("div");
+			cardStats.classList.add("card-stats");
+			let cardBookmark = document.createElement("button");
+			createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
+			cardStats.append(cardBookmark);
+			cardFooter.append(cardStats);
 			
 			cardBody.append(cardFooter);
 			recipeCard.append(cardBody);

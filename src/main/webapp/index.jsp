@@ -1106,7 +1106,7 @@
 	                   	                       String popularSql =
 	                   	                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
 	                   	                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
-	                   	                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, " +
+	                   	                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
 	                   	                           "recRevSubquery.AVERAGE_RATING, " +
 	                   	                           "recRevSubquery.REVIEW_COUNT, "+
 	                   	                           "r.RECIPE_ID, r.RECIPE_ACTIVE_TIMESTAMP FROM RECIPES r " +
@@ -1136,6 +1136,7 @@
 	                   	                               dbConnection.prepareStatement(popularSql);
 	                   	                       ) {
 	                   	                    	   popularStatement.setInt(1, sessionUserId);
+	                   	                    	   popularStatement.setInt(2, sessionUserId);
 	                   	                       	try(                           
 	                   	                       		ResultSet popularRecipes =
 	                   	                       				popularStatement.executeQuery()){
@@ -1150,6 +1151,7 @@
 	                   	                             recipe.put("minutes", popularRecipes.getObject("TOTAL_MINUTES"));
 	                   	                             recipe.put("timestamp", popularRecipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
 	                   	                             recipe.put("reviews", popularRecipes.getInt("REVIEW_COUNT"));
+	                   	                          	 recipe.put("hasBookmarked", popularRecipes.getInt("HAS_BOOKMARKED")>0);
 	                   	                             recipe.put("rating", String.format("%.1f", popularRecipes.getFloat("AVERAGE_RATING")));
 	                   	                             recipe.put("bookmarks", popularRecipes.getInt("BOOKMARK_COUNT"));
 	                   	                             popularRecipesList.add(recipe);
@@ -1174,7 +1176,7 @@
 						            recipe.reviews, 
 						            parseFloat(recipe.rating),
 						            recipe.bookmarks, 
-						            null, 
+						            recipe.hasBookmarked, 
 						            sessionUserId,
 						            null, // null because never have to be read
 						            null,
