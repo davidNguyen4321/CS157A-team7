@@ -211,18 +211,18 @@
 	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 										Options
 			                    	</h2>
-			                    	<label for="AiGeneratedDescription" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Description</label>
-	   								<input type="checkbox" name="AiGeneratedDescription" id="AiGeneratedDescription"/><br>
-	   								<label for="AiGeneratedAppliances" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Appliances</label>
-			                    	<input type="checkbox" name="AiGeneratedAppliances" id="AiGeneratedAppliances"/><br>
-			                    	<label for="AiGeneratedCuisines" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Cuisines</label>
-			                    	<input type="checkbox" name="AiGeneratedCuisines" id="AiGeneratedCuisines"/><br>
-			                    	<label for="AiGeneratedDishTypes" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Dish Types</label>
-			                    	<input type="checkbox" name="AiGeneratedDishTypes" id="AiGeneratedDishTypes"/><br>
-			                    	<label for="AiGeneratedCookingMinutes" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Cooking Minutes</label>
-			                    	<input type="checkbox" name="AiGeneratedCookingMinutes" id="AiGeneratedCookingMinutes"/><br>
+			                    	<label for="AiGeneratedDescription" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Description</label>
+	   								<input type="checkbox" name="AiGeneratedDescription" id="AiGeneratedDescription" checked/><br>
+	   								<label for="AiGeneratedAppliances" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Appliances</label>
+			                    	<input type="checkbox" name="AiGeneratedAppliances" id="AiGeneratedAppliances" checked/><br>
+			                    	<label for="AiGeneratedCuisines" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Cuisine Tags</label>
+			                    	<input type="checkbox" name="AiGeneratedCuisines" id="AiGeneratedCuisines" checked/><br>
+			                    	<label for="AiGeneratedDishTypes" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Dish Type Tags</label>
+			                    	<input type="checkbox" name="AiGeneratedDishTypes" id="AiGeneratedDishTypes" checked/><br>
+			                    	<label for="AiGeneratedCookingMinutes" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Cooking Minutes</label>
+			                    	<input type="checkbox" name="AiGeneratedCookingMinutes" id="AiGeneratedCookingMinutes" checked/><br>
 			                    	<label for="AiGeneratedCourses" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Courses</label>
-			                    	<input type="checkbox" name="AiGeneratedCourses" id="AiGeneratedCourses"/>
+			                    	<input type="checkbox" name="AiGeneratedCourses" id="AiGeneratedCourses" checked/>
 	                    		</div>
 	                    	</div>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
@@ -505,7 +505,7 @@
 	
 						const options = new Map();
 						for (let key of ["Ai Generated Description", "Ai Generated Appliances", "Ai Generated Cuisines", "Ai Generated Dish Types", "Ai Generated Cooking Minutes", "Ai Generated Courses"]){
-							options.set(key, false);
+							options.set(key, true);
 						}
 						
 						addCheckListener("AiGeneratedDescription", "Ai Generated Description");
@@ -824,7 +824,7 @@
 						function addCheckListener(selfId, key){
 							let self = document.getElementById(selfId);
 							self.addEventListener('input', function (e) {//tracking input
-								options.set(key, !options.get(key));
+								options.set(key, self.checked);
 							});
 						}
 						
