@@ -874,7 +874,7 @@
 							            recipe["recipeTotalMinutes"], recipe["recipeActiveTimestamp"], 
 							            recipe["reviewCount"], recipe["averageRating"], recipe["bookmarkCount"],
 							            recipe["userBookmarked"], recipe["userId"],
-							            recipe["userName"], recipe["userImagePath"], <%=sessionUserId%>);
+							            recipe["userName"], recipe["userImagePath"], <%=sessionUserId%>, true);
 							}
 						}
 						</script>
