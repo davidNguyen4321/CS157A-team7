@@ -404,7 +404,7 @@
 						</div>
 	                   	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                   	<h2 id="IngredientsToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
-							Allow up to 0 missing ingredients
+							Recipe may be missing up to 0 of my selected ingredients
 	                   	</h2>
 						<div class="slidecontainer">
 						  <input id="IngredientsSlider" type="range" min="0" max="3" value="0" class="slider">
@@ -430,7 +430,7 @@
 						</div>
 	                    <hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 						<h2 id="AppliancesToleranceDisplay" class="mini-text" style="color:#1F1800; font-size: 1rem;">
-							Allow up to 0 missing appliances
+							Recipe may need up to 0 appliances I don't have
 	                    </h2>
 						<div class="slidecontainer">
 						  <input id="AppliancesSlider" type="range" min="0" max="3" value="0" class="slider">
@@ -483,8 +483,11 @@
 							tolerances.set(key, "0");
 						}
 						
-						addSliderListener("IngredientsSlider", "IngredientsToleranceDisplay", "Ingredient");
-						addSliderListener("AppliancesSlider", "AppliancesToleranceDisplay", "Appliance");
+						addSliderListener("IngredientsSlider", "IngredientsToleranceDisplay", "Ingredient",
+							    n => "Recipe may be missing up to " + n + " of my selected ingredients");
+
+						addSliderListener("AppliancesSlider", "AppliancesToleranceDisplay", "Appliance",
+						    n => "Recipe may need up to " + n + (n == 1 ? " appliance" : " appliances") + " I don't have");
 						
 						const ranges = new Map();
 						for (let key of ["Bookmarks", "Cooking Time", "Ratings", "Reviews"]){
@@ -736,13 +739,13 @@
 							}
 						}
 						
-						function addSliderListener(sliderId, toleranceDisplayId, name){
-							let slider = document.getElementById(sliderId);
-							let toleranceDisplay = document.getElementById(toleranceDisplayId);
-							slider.oninput = function() {
-								toleranceDisplay.textContent="Allow up to "+ this.value + " missing " + name.toLowerCase() + "s";
-								tolerances.set(name, this.value);
-							}
+						function addSliderListener(sliderId, toleranceDisplayId, name, makeText){
+						    let slider = document.getElementById(sliderId);
+						    let toleranceDisplay = document.getElementById(toleranceDisplayId);
+						    slider.oninput = function() {
+						        toleranceDisplay.textContent = makeText(this.value);
+						        tolerances.set(name, this.value);
+						    }
 						}
 						
 						function addMinMaxListener(selfId, otherId, isMin, minMin, maxMax, key){//expects that self and other both share the same range
