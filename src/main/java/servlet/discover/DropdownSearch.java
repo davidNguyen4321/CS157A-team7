@@ -2,6 +2,8 @@ package servlet.discover;
 
 import auth.ServletSecurity; 
 
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.Map;
 
 import java.sql.Connection;
@@ -17,7 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class DropdownSearch extends HttpServlet {
 
@@ -84,28 +85,23 @@ public abstract class DropdownSearch extends HttpServlet {
 	            try (ResultSet rs = statement.executeQuery();
 	                 PrintWriter pw = response.getWriter()) {
 	                
-	                ObjectNode outerNode = mapper.createObjectNode();
-	                int counter = 0;
+	            	ArrayList<Map<String, Object>> resultsList = new ArrayList<>();
 
 	                while (rs.next()) {
-	                    Integer id = rs.getInt(getIdCol());
-	                    String name = rs.getString(getNameCol());
-	                    ObjectNode innerNode = mapper.createObjectNode();
-
-	                    innerNode.put("id", id);
-	                    innerNode.put("name", name);
+	                	Map<String, Object> resultMap = new LinkedHashMap<>();
+	                	resultMap.put("id", rs.getInt(getIdCol()));
+	                	resultMap.put("name", rs.getString(getNameCol()));
 
 	                    String imageCol = getImageCol();
 	                    if (imageCol != null) {
 	                        String imagePath = rs.getString(imageCol);
-	                        innerNode.put("image", imagePath);
+	                        resultMap.put("image", imagePath);
 	                    }
 
-	                    outerNode.put(String.valueOf(counter), mapper.writeValueAsString(innerNode));
-	                    counter++;
+	                    resultsList.add(resultMap);
 	                }
 
-	                pw.write(mapper.writeValueAsString(outerNode));
+	                pw.write(mapper.writeValueAsString(resultsList));
 	            }
 	        } 
 			catch (SQLException ex) {

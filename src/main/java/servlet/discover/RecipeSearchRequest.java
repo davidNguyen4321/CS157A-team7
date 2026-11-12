@@ -3,8 +3,10 @@ package servlet.discover;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import java.io.IOException;
 
 public class RecipeSearchRequest {
     private String searchTerm;
@@ -14,10 +16,11 @@ public class RecipeSearchRequest {
     private Map<String, Map<String, Integer>> ranges;
     private Map<String, Boolean> options;
     
+    private Map<Integer, Integer[]> ingredientMatches = new LinkedHashMap<>(); // wanted id -> ids that satisfy it
 
     public RecipeSearchRequest(Map<String, String> parameterMap) throws IOException {        
         ObjectMapper mapper = new ObjectMapper();
-        this.searchTerm = parameterMap.get("searchTerm").trim();
+        this.searchTerm = parameterMap.get("searchTerm").replaceAll("[%_]", "").trim(); // These characters are banned in recipe creation
         
         this.sortOptions = mapper.readValue(
                 parameterMap.get("sortOptions"),
@@ -51,4 +54,6 @@ public class RecipeSearchRequest {
     protected Map<String, Integer> getTolerances() { return tolerances; }
     protected Map<String, Map<String, Integer>> getRanges() { return ranges; }
     protected Map<String, Boolean> getOptions() { return options; }
+    
+    protected Map<Integer, Integer[]> getIngredientMatches() { return ingredientMatches; }
 }

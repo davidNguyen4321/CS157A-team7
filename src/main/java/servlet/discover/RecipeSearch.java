@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @WebServlet("/Recipes/Search")
 public class RecipeSearch extends HttpServlet {
@@ -42,6 +42,7 @@ public class RecipeSearch extends HttpServlet {
 		
 		RecipeSearchRequest requestInfo = new RecipeSearchRequest(parameterMap);
 		Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
+		Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
 		
 		try {
 			filterIdMap.put("Dietary Restriction",
@@ -71,25 +72,33 @@ public class RecipeSearch extends HttpServlet {
 					dbConnection
 				).toArray(Integer[]::new)
 			);
-			requestInfo.getFilterIdMap().put("Ingredient", 
-				recurseBiDir(	
-					filterIdMap.get("Ingredient"),
-					/* colName: */ "INGREDIENT_ID",
-					/* baseColName: */ "BASE_INGREDIENT_ID",
-					"INGREDIENTS",
-					dbConnection
-				).toArray(Integer[]::new)
-			);
+			
+			for (Integer wantedId : filterIdMap.get("Ingredient")) {
+			    requestInfo.getIngredientMatches().put(wantedId,
+			        recurseBiDir(new Integer[] { wantedId },
+			            /* colName: */ "INGREDIENT_ID",
+			            /* baseColName: */ "BASE_INGREDIENT_ID",
+			            "INGREDIENTS",
+			            dbConnection
+			        ).toArray(Integer[]::new)
+			    );
+			}
+			
+			sanitizeRange(ranges.get("Ratings"), 1, 5);
+			sanitizeRange(ranges.get("Reviews"), 0, Integer.MAX_VALUE);
+			sanitizeRange(ranges.get("Bookmarks"), 0, Integer.MAX_VALUE);
+			sanitizeRange(ranges.get("Cooking Time"), 0, Integer.MAX_VALUE);
+			
 			searchRecipe(requestInfo, dbConnection, response, sessionUserId);
 		}
-		catch(Exception ex) {//error checking
+		catch(Exception ex) { //error checking
 			log("Recipe search failed: " + ex.getMessage());
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().write("{}");
 			return;
 		}
 	}
-	
+
 	private HashSet<Integer> recurseUniDir(Integer[] providedElementIds, String curLevelCol, String nextLevelCol, String tableName, Connection dbConnection) throws SQLException {
 		if(providedElementIds.length == 0) return new HashSet<Integer>(); 
 		
@@ -137,366 +146,263 @@ public class RecipeSearch extends HttpServlet {
 	    return recurseUp;
 	}
 	
-	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response, int sessionUserId) throws SQLException, IOException{
-		try (PreparedStatement statement = dbConnection.prepareStatement(buildRecipeQuery(requestInfo));){
-			int counter = 1;
-			String searchTerm = requestInfo.getSearchTerm();
-			Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
-			Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
-		    Map<String, Integer> tolerances = requestInfo.getTolerances();
+	private void sanitizeRange(Map<String, Integer> range, int absMin, int absMax) {
+	    Integer min = range.get("min");
+	    Integer max = range.get("max");
+	    
+	    min = (min == null || min < absMin || min > absMax) ? 0 : min;
+	    max = (max == null || max < absMin || max > absMax) ? absMax : max;
+	    
+	    if(min > max) {
+	    	int temp = min;
+	        min = max;
+	        max = temp;
+	    }
+	    
+	    range.put("min", min);
+	    range.put("max", max);
+	}
+	
+	private void searchRecipe(RecipeSearchRequest requestInfo, Connection dbConnection, HttpServletResponse response, int sessionUserId) throws SQLException, IOException {
+		ArrayList<Object> sqlParams = new ArrayList<>();
 
-			// ingredient filters
-			for(Integer id : filterIdMap.get("Ingredient")) {
-	    			statement.setInt(counter++, id);
-	    		}
-    		for(Integer id : filterIdMap.get("Dietary Restriction")) {
-    			statement.setInt(counter++, id);
-    		}
-    		if((filterIdMap.get("Ingredient").length>0) || (tolerances.get("Ingredient")>0)) {
-    	    	statement.setInt(counter++, tolerances.get("Ingredient"));
-    		}
+		try (PreparedStatement ps = dbConnection.prepareStatement(buildRecipeQuery(requestInfo, sessionUserId, sqlParams)); ) {
+			for (int i = 0; i < sqlParams.size(); i++) ps.setObject(i + 1, sqlParams.get(i));
     		
-    		//review count and average rating
-			statement.setInt(counter++, ranges.get("Reviews").get("min"));
-			statement.setInt(counter++, ranges.get("Reviews").get("max"));
-			statement.setInt(counter++, ranges.get("Ratings").get("min"));
-			statement.setInt(counter++, ranges.get("Ratings").get("max"));    		
-			
-			//bookmarks
-			statement.setInt(counter++, sessionUserId);
-			statement.setInt(counter++, ranges.get("Bookmarks").get("min"));
-			statement.setInt(counter++, ranges.get("Bookmarks").get("max"));
-			
-			// author
-    		for(Integer id : filterIdMap.get("Author")) {
-    			statement.setInt(counter++, id);
-    		}
-			
-    		//search term
-			if(!searchTerm.isEmpty()) {
-    			statement.setString(counter++, searchTerm + "%");
-        		statement.setString(counter++, "% "+ searchTerm + "%");
-    		}
-			
-			//appliance tolerance
-			if (filterIdMap.get("Appliance").length>0 || tolerances.get("Appliance")>0) {
-	    		for(Integer id : filterIdMap.get("Appliance")) {
-	    			statement.setInt(counter++, id);
-	    		}
-	    		statement.setInt(counter++, tolerances.get("Appliance"));
-			}
-    		
-			//cooking time
-			if(ranges.get("Cooking Time").get("min")!=0 || ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
-				statement.setInt(counter++, ranges.get("Cooking Time").get("min"));
-				statement.setInt(counter++, ranges.get("Cooking Time").get("max"));
-			}
-			
-			//dish type
-    		for(Integer id : filterIdMap.get("Dish Type")) {
-    			statement.setInt(counter++, id);
-    		}    	
-    		
-			//cuisine
-    		for(Integer id : filterIdMap.get("Cuisine")) {
-    			statement.setInt(counter++, id);
-    		}    
-    		
-    		for(Integer id : filterIdMap.get("Course")) {
-    		    statement.setInt(counter++, id);
-    		}
-    		
-	    	try(
-	    		ResultSet recipes = statement.executeQuery();
+	    	try (
+	    		ResultSet rs = ps.executeQuery();
 	    		PrintWriter pw = response.getWriter();
-	    		){
-	    		writeRecipeResults(recipes, pw);
-    		}
+	    	) { writeRecipeResults(rs, pw); }
 		}
 	}
-	private String buildRecipeQuery(RecipeSearchRequest requestInfo) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT rec.RECIPE_ID, rec.RECIPE_NAME, rec.RECIPE_IMAGE_PATH, rec.RECIPE_DESCRIPTION, ");
-		sb.append("rec.TOTAL_MINUTES, rec.RECIPE_ACTIVE_TIMESTAMP, recRevSubquery.reviewCount, ");
-		sb.append("recRevSubquery.averageRating, recBookSubquery.bookmarkCount, recBookSubquery.userbookmarked, ");
-		sb.append("recAuthSubquery.USER_ID, recAuthSubquery.USER_NAME, recAuthSubquery.USER_IMAGE_PATH FROM RECIPES rec ");
-		
-		String searchTerm = requestInfo.getSearchTerm();
+	
+	private String buildRecipeQuery(RecipeSearchRequest requestInfo, int sessionUserId, ArrayList<Object> sqlParams) {
 		Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 		Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
 	    Map<String, Integer> tolerances = requestInfo.getTolerances();
+	    
+	    StringBuilder sb = new StringBuilder();
+	    
+		sb.append("SELECT recipes.recipe_id, "
+				+ "recipes.recipe_name, "
+				+ "recipes.recipe_image_path, "
+				+ "recipes.recipe_description, "
+				+ "recipes.total_minutes, "
+				+ "recipes.recipe_active_timestamp, ");
+		sb.append("recipes_reviews.review_count, "
+				+ "recipes_reviews.average_rating,");
+		sb.append("recipes_users.bookmark_count, "
+				+ "recipes_users.user_bookmarked, ");
+		sb.append("users.user_id, "
+				+ "users.user_name, "
+				+ "users.user_image_path ");
 		
-		//ingredient filter
-		int ingredientsLength = filterIdMap.get("Ingredient").length;
-		int dietaryRestrictionsLength = filterIdMap.get("Dietary Restriction").length;
-		boolean ingredientToleranceAboveZero = tolerances.get("Ingredient")>0;
-		if((ingredientsLength>0)
-				|| (dietaryRestrictionsLength>0)
-				|| (ingredientToleranceAboveZero)
-				) {
-			sb.append("INNER JOIN (");
-				buildRecipeIngredientSubquery(sb, ingredientsLength, dietaryRestrictionsLength, ingredientToleranceAboveZero);
-			sb.append(") recIngSubquery ON rec.RECIPE_ID = recIngSubquery.RECIPE_ID ");
+		sb.append("FROM recipes NATURAL JOIN (");		
+			sb.append("SELECT recipes.recipe_id, COUNT(review_id) AS review_count, AVG(rating) AS average_rating ");
+			sb.append("FROM recipes LEFT JOIN reviews ON recipes.recipe_id = reviews.recipe_id AND review_status = 'Active' ");
+			sb.append("GROUP BY recipes.recipe_id ");
+			sb.append("HAVING COUNT(review_id) >= ? AND COUNT(review_id) <= ? ");
+				int minRating = ranges.get("Ratings").get("min");
+				int maxRating = ranges.get("Ratings").get("max");
+				sb.append("AND (");
+				if (minRating == 0) sb.append("AVG(rating) IS NULL OR "); // Unrated recipes are included only when there's no minimum
+				sb.append("(AVG(rating) >= ? AND AVG(rating) <= ?)");
+				sb.append(")");
+
+				sqlParams.add(ranges.get("Reviews").get("min"));
+				sqlParams.add(ranges.get("Reviews").get("max"));
+				sqlParams.add(minRating);
+				sqlParams.add(maxRating);
+		sb.append(") recipes_reviews ");
+		
+		sb.append("NATURAL JOIN (");
+			sb.append("SELECT recipes.recipe_id, "
+					+ "COUNT(bookmark_users.user_id) AS bookmark_count, "
+					+ "SUM(bookmark_users.user_id = ?) AS user_bookmarked ");
+				sqlParams.add(sessionUserId);
+			sb.append("FROM recipes LEFT JOIN (");
+				sb.append("SELECT bookmark.user_id, bookmark.recipe_id "
+						+ "FROM bookmark JOIN users ON users.user_id = bookmark.user_id AND user_status = 'Active'");
+			sb.append(") bookmark_users ON recipes.recipe_id = bookmark_users.recipe_id ");
+			sb.append("GROUP BY recipes.recipe_id ");
+			sb.append("HAVING COUNT(bookmark_users.user_id) >= ? AND COUNT(bookmark_users.user_id) <= ? ");
+				sqlParams.add(ranges.get("Bookmarks").get("min"));
+				sqlParams.add(ranges.get("Bookmarks").get("max"));
+			sb.append(") recipes_users ");
+			
+		int authorsLength = filterIdMap.get("Author").length;
+		if (authorsLength > 0) {
+			sb.append("JOIN users ON recipes.author_id = users.user_id AND users.user_id IN (");
+			for (int i = 0; i < authorsLength; i++) {
+				sb.append("?, ");
+				sqlParams.add(filterIdMap.get("Author")[i]);
+			}
+			sb.setLength(sb.length() - 2);
+			sb.append(")");
+		} 
+		else sb.append("LEFT JOIN users ON recipes.author_id = users.user_id ");
+		
+		sb.append("WHERE recipes.recipe_status = 'Active' ");
+		
+		// Ingredient filter: Recipe must contain at least (wanted - tolerance) of the wanted ingredients.
+		// A wanted ingredient counts as present if the recipe has it or any related one in the hierarchy.
+	    Map<Integer, Integer[]> ingredientMatches = requestInfo.getIngredientMatches();
+		int requiredIngredients = ingredientMatches.size() - tolerances.get("Ingredient");
+		if (requiredIngredients > 0) {
+		    sb.append("AND ("); 
+			 // The whole (EXISTS + EXISTS + ...) expression is evaluated once per recipe row.
+			 // So recipes.recipe_id is the same recipe in every EXISTS below.
+			 // Each EXISTS looks at that recipe's rows in rci to see if it has any ingredient that satisfies the wanted ingredient from the loop.
+		    for (Integer[] matchingIds : ingredientMatches.values()) {
+		        sb.append("EXISTS (");
+	        		sb.append("SELECT 1 "); 
+	        		sb.append("FROM recipes_cook_ingredients rci ");
+	        		sb.append("WHERE rci.recipe_id = recipes.recipe_id AND rci.ingredient_id IN (");
+	        			addPlaceholderArray(sb, sqlParams, matchingIds);
+				    sb.append(")");
+		        sb.append(") + ");
+		    }
+		    sb.setLength(sb.length() - 2); // remove the last plus and space
+		    sb.append(") >= ? ");
+		    sqlParams.add(requiredIngredients);
 		}
 		
-		// review count and average rating
-		sb.append("INNER JOIN (");
-			buildRecipeReviewSubquery(sb);
-		sb.append(") recRevSubquery ON rec.RECIPE_ID = recRevSubquery.RECIPE_ID ");
+		// Dietary restriction filter: the recipe must not contain any ingredient that violates a selected restriction.
+		// As mentioned before, recipes.recipe_id is the recipe currently being checked.
+		Integer[] dietaryRestrictionIds = filterIdMap.get("Dietary Restriction");
+		if (dietaryRestrictionIds.length > 0) {
+		    sb.append("AND NOT EXISTS (");
+		        sb.append("SELECT 1 ");
+		        sb.append("FROM recipes_cook_ingredients rci JOIN ingredients_violate_dietary_restrictions ivdr ON rci.ingredient_id = ivdr.ingredient_id ");
+		        sb.append("WHERE rci.recipe_id = recipes.recipe_id AND ivdr.dietary_restriction_id IN (");
+		        	addPlaceholderArray(sb, sqlParams, dietaryRestrictionIds);
+		        sb.append(")");
+		    sb.append(") ");
+		}
 		
-		// bookmarks
-		sb.append("INNER JOIN (");
-			buildRecipeBookmarkSubquery(sb);
-		sb.append(") recBookSubquery ON rec.RECIPE_ID = recBookSubquery.RECIPE_ID ");
-		
-		// authors
-		buildRecipeAuthorSubquery(sb, filterIdMap.get("Author").length, "recAuthSubquery");
-		
-		// moderation status
-		sb.append("WHERE rec.RECIPE_STATUS = 'Active' ");
-		
-		//search term
+		String searchTerm = requestInfo.getSearchTerm();
 		if(!searchTerm.isEmpty()) {
-			sb.append("AND (rec.RECIPE_NAME LIKE ? OR rec.RECIPE_NAME LIKE ?) ");
+			sb.append("AND (recipes.recipe_name LIKE ? OR recipes.recipe_name LIKE ?) ");
+				sqlParams.add(searchTerm + "%");
+				sqlParams.add("% "+ searchTerm + "%");
 		}
 		
-		// appliance tolerance
-		buildApplianceCondition(sb, filterIdMap.get("Appliance").length, tolerances.get("Appliance")>0);
-		
-		// cooking time. if the requested range encompasses the entire possible range, then any null cooking times are permissible 
-		if(ranges.get("Cooking Time").get("min")!=0 || ranges.get("Cooking Time").get("max")!=Integer.MAX_VALUE) {
-			buildCookingTimeCondition(sb);
+		int minMinutes = ranges.get("Cooking Time").get("min");
+		int maxMinutes = ranges.get("Cooking Time").get("max");
+		if (!(minMinutes == 0 || maxMinutes == Integer.MAX_VALUE)) {
+		    sb.append("AND recipes.total_minutes >= ? AND recipes.total_minutes <= ? ");
+		    sqlParams.add(minMinutes);
+		    sqlParams.add(maxMinutes);
 		}
 		
-		// dish type
-		buildDishTypeCondition(sb, filterIdMap.get("Dish Type").length);
+		// Appliance filter: The recipe may need at most (tolerance) appliances that are NOT in the user's list.
+		// As mentioned before, recipes.recipe_id is the recipe currently being checked.
+		Integer[] applianceIds = filterIdMap.get("Appliance");
+		int applianceTolerance = Math.max(0, tolerances.get("Appliance"));
+		if (applianceIds.length > 0) {
+		    sb.append("AND (");
+		    	sb.append("SELECT COUNT(*) ");
+		    	sb.append("FROM recipes_use_appliances rua");
+		    	sb.append("WHERE rua.recipe_id = recipes.recipe_id AND rua.appliance_id NOT IN (");
+		    		addPlaceholderArray(sb, sqlParams, applianceIds);
+				sb.append(")");
+		    sb.append(") <= ? ");
+		    sqlParams.add(applianceTolerance);
+		}
 		
-		// cuisine
-		buildCuisineCondition(sb, filterIdMap.get("Cuisine").length);
+		// Course filter: Recipe's course must be one of the selected courses
+		Integer[] courseIds = filterIdMap.get("Course");
+		if (courseIds.length > 0) {
+		    sb.append("AND recipes.course IN (");
+		    	addPlaceholderArray(sb, sqlParams, courseIds);
+		    sb.append(") ");
+		}
 		
-		// courses
-		buildCourseCondition(sb, filterIdMap.get("Course").length);
+		// Dish type filter: Recipe must have at least one of the selected dish types.
+		Integer[] dishTypeIds = filterIdMap.get("Dish Type");
+		if (dishTypeIds.length > 0) {
+		    sb.append("AND EXISTS (");
+		    	sb.append("SELECT 1");
+		    	sb.append("FROM recipes_has_dish_types rhdt ");
+		    	sb.append("WHERE rhdt.recipe_id = recipes.recipe_id AND rhdt.dish_type_id IN (");
+		    		addPlaceholderArray(sb, sqlParams, dishTypeIds);
+		    	sb.append(")");
+		    sb.append(") ");
+		}
 		
-		// options
-		buildCheckboxConditions(sb, requestInfo.getOptions());
+		// Dish type filter: Recipe must have at least one of the selected dish types.
+		Integer[] cuisineIds = filterIdMap.get("Cuisine");
+		if (dishTypeIds.length > 0) {
+		    sb.append("AND EXISTS (");
+		    	sb.append("SELECT 1");
+		    	sb.append("FROM recipes_feature_cuisines rfc ");
+		    	sb.append("WHERE rfc.recipe_id = recipes.recipe_id AND rfc.cuisine_id IN (");
+		    		addPlaceholderArray(sb, sqlParams, cuisineIds);
+		    	sb.append(")");
+		    sb.append(") ");
+		}
 		
-		// sort order
-		buildSortOrder(sb, requestInfo.getSortOptions());
+		Map<String, Boolean> options = requestInfo.getOptions();
+		if(!options.get("Ai Generated Description")) 	 sb.append("AND recipes.ai_gen_description = FALSE ");
+		if(!options.get("Ai Generated Appliances")) 	 sb.append("AND recipes.ai_gen_appliances = FALSE ");
+		if(!options.get("Ai Generated Cuisines")) 		 sb.append("AND recipes.ai_gen_cuisines = FALSE ");
+		if(!options.get("Ai Generated Dish Types")) 	 sb.append("AND recipes.ai_gen_dish_types = FALSE ");
+		if(!options.get("Ai Generated Cooking Minutes")) sb.append("AND recipes.ai_gen_total_minutes = FALSE ");
+		if(!options.get("Ai Generated Courses")) 		 sb.append("AND recipes.ai_gen_course = FALSE ");
 		
-		//limit
-		sb.append(" LIMIT 10");
+		
+		sb.append("ORDER BY ");
+		boolean hasSort = false; 
+	    for (Map.Entry<String, String> entry : requestInfo.getSortOptions().entrySet()) {
+	        String column;
+	        switch (entry.getKey()) {
+	            case "Publication Date": column = "recipes.recipe_active_timestamp"; break;
+	            case "Bookmarks":        column = "recipes_users.bookmark_count";    break;
+	            case "Reviews":          column = "recipes_reviews.review_count";    break;
+	            case "Ratings":          column = "recipes_reviews.average_rating";  break;
+	            default: continue; 
+	        }
+	        if (!hasSort) hasSort = true;
+	        else sb.append(", ");
+	        sb.append(column)
+	          .append("ascending".equals(entry.getValue()) ? " ASC" : " DESC");
+	    }
+	    if (!hasSort) sb.append("recipes.recipe_active_timestamp DESC");
+		
 		return sb.toString();
 	}
 	
-	private void buildRecipeIngredientSubquery(StringBuilder sb, int ingredientsLength, int dietaryRestrictionsLength, boolean ingredientToleranceAboveZero) {
-		sb.append("SELECT recIngSubquery.RECIPE_ID FROM RECIPES recIngSubquery ");
-		sb.append("LEFT JOIN (SELECT * FROM RECIPES_COOK_INGREDIENTS as rci ");
-		if(ingredientsLength>0) {
-				sb.append("WHERE rci.INGREDIENT_ID NOT IN (");
-				for (int i = 0; i<ingredientsLength; i++) {
-					sb.append("?, ");
-				}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(") ");
-		}
-		sb.append(") rci ON recIngSubquery.RECIPE_ID = rci.RECIPE_ID ");
-		if (dietaryRestrictionsLength>0) {
-			sb.append("LEFT JOIN (SELECT * FROM INGREDIENTS_VIOLATE_DIETARY_RESTRICTIONS as ivds ");
-					sb.append("WHERE ivds.DIETARY_RESTRICTION_ID IN (");
-					for (int i = 0; i<dietaryRestrictionsLength; i++) {
-						sb.append("?, ");
-					}
-				sb.setLength(sb.length()-2);//remove the last comma and space
-				sb.append(") ");
-			sb.append(") ivds ON rci.INGREDIENT_ID = ivds.INGREDIENT_ID ");
-		}
-		sb.append("GROUP BY recIngSubquery.RECIPE_ID HAVING "); //HAVING is safe because at least one of the following conditions will pass
-		if ((ingredientsLength>0) || (ingredientToleranceAboveZero)) {
-			sb.append("COUNT(DISTINCT rci.INGREDIENT_ID) <= ? AND ");
-		}
-		if (dietaryRestrictionsLength>0) {
-			sb.append("COUNT(ivds.DIETARY_RESTRICTION_ID) = 0 ");
-		}
-		else {
-			sb.setLength(sb.length()-4); // remove "AND " (guaranteed because at least one condition must be true, so by default, the first condition must have passed)
-		}
-	}
-	
-	private void buildRecipeReviewSubquery(StringBuilder sb) {
-		sb.append("SELECT recRevSubquery.RECIPE_ID, COUNT(rev.REVIEW_ID) AS reviewCount, AVG(rev.RATING*1.0) AS averageRating FROM RECIPES recRevSubquery ");
-		sb.append("LEFT JOIN REVIEWS rev ON recRevSubquery.RECIPE_ID = rev.RECIPE_ID AND rev.REVIEW_STATUS = 'ACTIVE' ");
-		sb.append("GROUP BY recRevSubquery.RECIPE_ID ");
-		sb.append("HAVING COUNT(rev.REVIEW_ID)>=? ");
-		sb.append("AND COUNT(rev.REVIEW_ID)<=? ");
-		sb.append("AND ((AVG(rev.RATING*1.0) IS NULL) ");//edge case: no reviews
-			sb.append("OR (AVG(rev.RATING*1.0)>=? ");
-				sb.append("AND AVG(rev.RATING*1.0)<=? ");
-		sb.append("))");
-	}
-	
-	private void buildRecipeBookmarkSubquery(StringBuilder sb) {
-		sb.append("SELECT recBookSubquery.RECIPE_ID, COUNT(b.USER_ID) AS bookmarkCount, ");
-		sb.append("SUM(b.USER_ID = ?) AS userbookmarked FROM RECIPES recBookSubquery ");
-		sb.append("LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b ");
-		sb.append("INNER JOIN USERS u ON u.USER_ID = b.USER_ID AND u.USER_STATUS = 'ACTIVE' ");
-		sb.append(") b ON recBookSubquery.RECIPE_ID = b.RECIPE_ID ");
-		sb.append("GROUP BY recBookSubquery.RECIPE_ID ");
-		sb.append("HAVING COUNT(b.USER_ID)>=? ");
-		sb.append("AND COUNT(b.USER_ID)<=? ");
-	}
-	
-	private void buildRecipeAuthorSubquery(StringBuilder sb, int authorsLength, String joinTableName) {
-		if(authorsLength>0) { // case 1: there is a list of provided authors
-			sb.append("INNER JOIN (");
-				buildRecipeAuthorSubqueryCaseWhereTheVariableAuthorsLengthIsAValidIntegerThatIsAboveZero(sb, authorsLength);
-			sb.append(") ");
-		}
-		else { // case 2: no authors provided, any author will do
-			sb.append("LEFT JOIN USERS ");
-		}
-		sb.append(joinTableName); 
-		sb.append(" ON rec.AUTHOR_ID = ");
-		
-		sb.append(joinTableName);
-		sb.append(".USER_ID ");
-	}
-	
-	private void buildRecipeAuthorSubqueryCaseWhereTheVariableAuthorsLengthIsAValidIntegerThatIsAboveZero(StringBuilder sb, int authorsLength) {
-		sb.append("SELECT recAuthSubquery.USER_ID, recAuthSubquery.USER_NAME, recAuthSubquery.USER_IMAGE_PATH FROM USERS recAuthSubquery ");
-			sb.append("WHERE recAuthSubquery.USER_ID IN (");
-			for (int i = 0; i<authorsLength; i++) {
-				sb.append("?, ");
-			}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(")");
-	}
-	
-	private void buildApplianceCondition(StringBuilder sb, int appliancesLength, boolean applianceToleranceBoolean) {
-		if (appliancesLength>0 || applianceToleranceBoolean) {
-			sb.append("AND (SELECT COUNT(rua.APPLIANCE_ID) FROM RECIPES_USE_APPLIANCES as rua ");
-				sb.append("WHERE rec.RECIPE_ID = rua.RECIPE_ID ");
-				if (appliancesLength>0) {
-					sb.append("AND rua.APPLIANCE_ID NOT IN (");
-					for (int i = 0; i<appliancesLength; i++) {
-						sb.append("?, ");
-					}
-					sb.setLength(sb.length()-2);//remove the last comma and space
-					sb.append(")");
-				}
-			sb.append(") <=? ");
-		}
-	}
-	
-	private void buildCookingTimeCondition(StringBuilder sb) {
-		sb.append("AND rec.TOTAL_MINUTES>=? ");
-		sb.append("AND rec.TOTAL_MINUTES<=? ");
-	}
-	
-	private void buildDishTypeCondition(StringBuilder sb, int dishTypesLength) {
-		if(dishTypesLength>0) {
-			sb.append("AND NOT EXISTS (SELECT 1 FROM RECIPES_HAS_DISH_TYPES as rhdt ");
-			sb.append("WHERE rec.RECIPE_ID = rhdt.RECIPE_ID ");
-			sb.append("AND rhdt.DISH_TYPE_ID NOT IN (");
-			for (int i = 0; i<dishTypesLength; i++) {
-				sb.append("?, ");
-			}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(")");
-			sb.append(") ");
-		}
-	}
-	
-	private void buildCuisineCondition(StringBuilder sb, int cuisinesLength) {
-		if(cuisinesLength>0) {
-			sb.append("AND NOT EXISTS (SELECT 1 FROM RECIPES_FEATURE_CUISINES as rfc ");
-			sb.append("WHERE rec.RECIPE_ID = rfc.RECIPE_ID ");
-			sb.append("AND rfc.CUISINE_ID NOT IN (");
-			for (int i = 0; i<cuisinesLength; i++) {
-				sb.append("?, ");
-			}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(")");
-			sb.append(") ");
-		}
-	}
-	
-	private void buildCourseCondition(StringBuilder sb, int coursesLength) {
-		if(coursesLength>0) {
-			sb.append("AND rec.COURSE IN (");
-			for (int i = 0; i<coursesLength; i++) {
-				sb.append("?, ");
-			}
-			sb.setLength(sb.length()-2);//remove the last comma and space
-			sb.append(") ");
-		}
-	}
-	
-	private void buildCheckboxConditions(StringBuilder sb, Map<String, Boolean> options) {
-		if(!options.get("Ai Generated Description")) {
-			sb.append("AND rec.AI_GEN_DESCRIPTION = FALSE ");
-		}
-		if(!options.get("Ai Generated Appliances")) {
-			sb.append("AND rec.AI_GEN_APPLIANCES = FALSE ");
-		}
-		if(!options.get("Ai Generated Cuisines")) {
-			sb.append("AND rec.AI_GEN_CUISINES = FALSE ");
-		}
-		if(!options.get("Ai Generated Dish Types")) {
-			sb.append("AND rec.AI_GEN_DISH_TYPES = FALSE ");
-		}
-		if(!options.get("Ai Generated Cooking Minutes")) {
-			sb.append("AND rec.AI_GEN_TOTAL_MINUTES = FALSE ");
-		}
-		if(!options.get("Ai Generated Courses")) {
-			sb.append("AND rec.AI_GEN_COURSE = FALSE ");
-		}
-	}
-	
-	private void buildSortOrder(StringBuilder sb, Map<String, String> sortOptions) {
-	    StringBuilder orderBy = new StringBuilder();
-	    for (Map.Entry<String, String> entry : sortOptions.entrySet()) {
-	        String column;
-	        switch (entry.getKey()) {
-	            case "Publication Date": column = "rec.RECIPE_ACTIVE_TIMESTAMP"; break;
-	            case "Bookmarks":        column = "recBookSubquery.bookmarkCount"; break;
-	            case "Reviews":          column = "recRevSubquery.reviewCount"; break;
-	            case "Ratings":          column = "recRevSubquery.averageRating"; break;
-	            default: continue; // ignore unknown keys
-	        }
-	        if (orderBy.length() > 0) orderBy.append(", ");
-	        orderBy.append(column).append("ascending".equals(entry.getValue()) ? " ASC" : " DESC");
+	private void addPlaceholderArray(StringBuilder sb, ArrayList<Object> sqlParams, Integer[] ids) {
+	    for (Integer id : ids) {
+	        sb.append("?, ");
+	        sqlParams.add(id);
 	    }
-	    if (orderBy.length() > 0) {
-	        sb.append(" ORDER BY ").append(orderBy);
-	    } else {
-	        sb.append(" ORDER BY rec.RECIPE_ACTIVE_TIMESTAMP DESC");
-	    }
+	    sb.setLength(sb.length() - 2); // remove the last comma and space
 	}
 	
 	private void writeRecipeResults(ResultSet recipes, PrintWriter pw) throws SQLException, IOException{
 		ObjectMapper mapper = new ObjectMapper();
-		ObjectNode outerNode = mapper.createObjectNode();
-		Integer counter = 0;
-		// formatting data into json
-		while(recipes.next()) {
-			ObjectNode innerNode = mapper.createObjectNode();
-			innerNode.put("recipeId", recipes.getInt("RECIPE_ID"));
-			innerNode.put("recipeName", recipes.getString("RECIPE_NAME"));
-			innerNode.put("recipeImagePath", recipes.getString("RECIPE_IMAGE_PATH"));
-			innerNode.put("recipeDescription", recipes.getString("RECIPE_DESCRIPTION"));
-			innerNode.put("recipeTotalMinutes", recipes.getObject("TOTAL_MINUTES") == null ? "N/A" : recipes.getInt("TOTAL_MINUTES") + "m");
-			innerNode.put("recipeActiveTimestamp", recipes.getTimestamp("RECIPE_ACTIVE_TIMESTAMP").toString());
-			innerNode.put("reviewCount", recipes.getInt("reviewCount"));
-			innerNode.put("averageRating", String.format("%.1f", recipes.getFloat("averageRating")));
-			innerNode.put("bookmarkCount", recipes.getInt("bookmarkCount"));
-			innerNode.put("userBookmarked", recipes.getInt("userbookmarked")>0);
-			innerNode.put("userId", recipes.getInt("USER_ID"));
-			innerNode.put("userName", recipes.getString("USER_NAME"));
-			innerNode.put("userImagePath", recipes.getString("USER_IMAGE_PATH"));
-			outerNode.put((counter++).toString(), mapper.writeValueAsString(innerNode));
-		}
+		ArrayList<Map<String, Object>> recipeList = new ArrayList<>();
+
+		while (recipes.next()) {
+	        Map<String, Object> recipeMap = new LinkedHashMap<>();
+	        recipeMap.put("recipeId", recipes.getInt("recipe_id"));
+	        recipeMap.put("recipeName", recipes.getString("recipe_name"));
+	        recipeMap.put("recipeImagePath", recipes.getString("recipe_image_path"));
+	        recipeMap.put("recipeDescription", recipes.getString("recipe_description"));
+	        recipeMap.put("recipeTotalMinutes", recipes.getObject("total_minutes") == null ? "N/A" : recipes.getInt("total_minutes") + "m");
+	        recipeMap.put("recipeActiveTimestamp", recipes.getTimestamp("recipe_active_timestamp").toString());
+	        recipeMap.put("reviewCount", recipes.getInt("review_count"));
+	        recipeMap.put("averageRating", String.format("%.1f", recipes.getFloat("average_rating")));
+	        recipeMap.put("bookmarkCount", recipes.getInt("bookmark_count"));
+	        recipeMap.put("userBookmarked", recipes.getInt("user_bookmarked") > 0);
+	        recipeMap.put("userId", recipes.getInt("user_id"));
+	        recipeMap.put("userName", recipes.getString("user_name"));
+	        recipeMap.put("userImagePath", recipes.getString("user_image_path"));
+	        
+	        recipeList.add(recipeMap);
+	    }
 		
-		//writing response
-		pw.write(mapper.writeValueAsString(outerNode));
+		pw.write(mapper.writeValueAsString(recipeList));
 	}
 }
