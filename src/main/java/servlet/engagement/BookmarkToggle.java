@@ -1,7 +1,5 @@
 package servlet.engagement;
 
-import database.DbAccess;
-
 import auth.ServletSecurity;
 
 import java.sql.Connection;
@@ -19,7 +17,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
