@@ -2,6 +2,8 @@ package servlet.engagement;
 
 import database.DbAccess;
 
+import auth.ServletSecurity;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,15 +26,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @WebServlet("/Bookmark/Toggle")
-public class BookmarkToggle extends HttpServlet {
-	private static final long serialVersionUID = 1L; // The compiler warned that I should do this but I don't know why.
-	
+public class BookmarkToggle extends HttpServlet {	
 
-	@Override //Mandatory post method for fetch requests
+	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		//verification checks
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader br = request.getReader()){
 			String line;
@@ -41,15 +41,11 @@ public class BookmarkToggle extends HttpServlet {
 			}
 		}
 		
-		HttpSession session = request.getSession(false);
-		Integer sessionUserId;
-		//assumes that if the userId exists, that it is a valid id
-		if(!request.isRequestedSessionIdValid() || session == null || (sessionUserId = (Integer) session.getAttribute("userId")) == null) {
-			log("Invalid session.");
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.getWriter().write("{}");
-			return;
-		}
+		Integer sessionUserId = ServletSecurity.getAuthenticatedUserId(request, response);
+		if (sessionUserId == null) return;
+		
+		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
+	    if (dbConnection == null) return;
 		
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String, Integer> bookmarkMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});
@@ -57,14 +53,6 @@ public class BookmarkToggle extends HttpServlet {
 		if((recipeId = bookmarkMap.get("recipeId"))==null) {
 			log("No recipe id provided.");
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().write("{}");
-			return;
-		}
-		
-		Connection dbConnection = DbAccess.getConnection();
-		if(dbConnection==null) {
-			log("No connection available.");
-			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 			response.getWriter().write("{}");
 			return;
 		}

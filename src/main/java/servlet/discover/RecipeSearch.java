@@ -32,9 +32,10 @@ public class RecipeSearch extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		
 		Integer sessionUserId = ServletSecurity.getAuthenticatedUserId(request, response);
+		if (sessionUserId == null) return;
 		
 		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
-		if(dbConnection == null) return;
+		if (dbConnection == null) return;
 		
 		String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
 	    Map<String, String> parameterMap = ServletSecurity.getValidatedParameters(request, response, parameters, true);
