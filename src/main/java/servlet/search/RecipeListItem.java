@@ -1,6 +1,6 @@
 package servlet.search;
 
-public class RecipeItem {
+public class RecipeListItem {
     private int id;
     private String name;
     private String imagePath;
@@ -16,7 +16,7 @@ public class RecipeItem {
     private String authorName;
     private String authorImagePath;
 
-    public RecipeItem(int id, String name, String imagePath, String description, 
+    public RecipeListItem(int id, String name, String imagePath, String description, 
                       String totalMinutes, String activeTimestamp, int reviewCount, 
                       String averageRating, int bookmarkCount, boolean userBookmarked, 
                       int authorId, String authorName, String authorImagePath) {

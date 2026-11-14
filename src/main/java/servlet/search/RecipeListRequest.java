@@ -10,7 +10,7 @@ import java.util.Map;
 
 import java.io.IOException;
 
-public class RecipeSearchRequest {
+public class RecipeListRequest {
     private String searchTerm;
     private Map<String, String> sortOptions;
     private Map<String, Integer[]> filterIdMap;
@@ -19,7 +19,7 @@ public class RecipeSearchRequest {
     private Map<String, Boolean> options;
     private Map<Integer, Integer[]> ingredientMatches = new LinkedHashMap<>(); // wanted id -> ids that satisfy it
 
-    public RecipeSearchRequest(Map<String, String> parameterMap) throws IOException {        
+    public RecipeListRequest(Map<String, String> parameterMap) throws IOException {        
         ObjectMapper mapper = new ObjectMapper();
                 
         this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));        

@@ -15,15 +15,15 @@ import servlet.security.ParamSecurity;
 import database.DbAccess;
 
 @WebServlet("/Recipes/Search")
-public class RecipeSearch extends HttpServlet {
-    private final RecipeSearchDAO recipeSearchDAO = new RecipeSearchDAO();
+public class RecipeListSearch extends HttpServlet {
+    private final RecipeListDAO recipeSearchDAO = new RecipeListDAO();
 	private static final ObjectMapper mapper = new ObjectMapper();
     
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {        
         String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
         Map<String, String> parameterMap = ParamSecurity.getParams(request, parameters);
-        RecipeSearchRequest requestInfo = new RecipeSearchRequest(parameterMap);
+        RecipeListRequest requestInfo = new RecipeListRequest(parameterMap);
         Connection dbConnection = DbAccess.getConnection();
         int sessionUserId = (Integer) request.getAttribute("userId");
         
