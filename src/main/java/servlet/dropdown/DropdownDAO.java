@@ -9,8 +9,7 @@ import util.SqlBuilder;
 
 public class DropdownDAO {
 
-    public ArrayList<DropdownItem> search(DropdownConfig config, DropdownRequest request, Connection dbConnection) {        
-    	
+    public ArrayList<DropdownItem> search(DropdownConfig config, DropdownRequest request, Connection dbConnection) {
     	String table = config.table();
         String idCol = config.idCol();
         String nameCol = config.nameCol();

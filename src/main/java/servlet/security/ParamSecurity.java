@@ -25,7 +25,39 @@ public class ParamSecurity {
         return parameterMap;
     }
     
+    public static <V> void validateParams(String name, Map<String, V> map, String[] requiredKeys) {
+        for (String key : requiredKeys) {
+            if (!map.containsKey(key) || map.get(key) == null) {
+                throw new ServletParamException(HttpServletResponse.SC_BAD_REQUEST, "Missing required key " + key + " from " + name);
+            }
+        }
+    }
+    
+    public static void validateParams(Map<String, String> parameterMap, String[] requiredParams) {
+        if (requiredParams == null) return;
+
+        for (String param : requiredParams) {
+            if (!parameterMap.containsKey(param) || parameterMap.get(param) == null) {
+                throw new ServletParamException(
+                    HttpServletResponse.SC_BAD_REQUEST, 
+                    "Missing required parameter: " + param
+                );
+            }
+        }
+    }
+
     public static String getCleanSearch(String rawString) {
     	return rawString.replace("\\", "").replaceAll("[%_]", "").trim();
+    }
+    
+    public static void sanitizeRange(Map<String, Integer> range, int defaultMin, int defaultMax) {
+        Integer min = range.get("min");
+        Integer max = range.get("max");
+        
+        min = (min == null) ? defaultMin : min;
+        max = (max == null) ? defaultMax : max;
+        
+        range.put("min", min);
+        range.put("max", max);
     }
 }

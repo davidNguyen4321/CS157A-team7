@@ -14,7 +14,6 @@ public class RecipeSearchDAO {
 
     public String search(RecipeSearchRequest requestInfo, Connection dbConnection, int sessionUserId) throws SQLException, JsonProcessingException {
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
-        Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
 
         filterIdMap.put("Dietary Restriction",
             recurseUniDir(
@@ -54,11 +53,6 @@ public class RecipeSearchDAO {
                 ).toArray(Integer[]::new)
             );
         }
-        
-        sanitizeRange(ranges.get("Ratings"), 1, 5);
-        sanitizeRange(ranges.get("Reviews"), 0, Integer.MAX_VALUE);
-        sanitizeRange(ranges.get("Bookmarks"), 0, Integer.MAX_VALUE);
-        sanitizeRange(ranges.get("Cooking Time"), 0, Integer.MAX_VALUE);
 
         try (PreparedStatement ps = buildRecipeQuery(requestInfo, sessionUserId).build(dbConnection);
              ResultSet rs = ps.executeQuery()) {
@@ -103,23 +97,6 @@ public class RecipeSearchDAO {
         HashSet<Integer> recurseDown = recurseUniDir(providedElementIds, baseColName, colName, tableName, dbConnection);
         recurseUp.addAll(recurseDown);
         return recurseUp;
-    }
-    
-    private void sanitizeRange(Map<String, Integer> range, int absMin, int absMax) {
-        Integer min = range.get("min");
-        Integer max = range.get("max");
-        
-        min = (min == null || min < absMin || min > absMax) ? 0 : min;
-        max = (max == null || max < absMin || max > absMax) ? absMax : max;
-        
-        if(min > max) {
-            int temp = min;
-            min = max;
-            max = temp;
-        }
-        
-        range.put("min", min);
-        range.put("max", max);
     }
     
     private SqlBuilder buildRecipeQuery(RecipeSearchRequest requestInfo, int sessionUserId) {
