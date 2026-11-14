@@ -18,7 +18,7 @@ public class RecipeListDAO {
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 
         filterIdMap.put("Dietary Restriction",
-    		recursionDAO.recurseUniDir(
+    		recursionDAO.recurseUniDir( // recurse up
                 filterIdMap.get("Dietary Restriction"),
                 "dietary_restriction_id",
                 "base_dietary_restriction_id",
@@ -27,19 +27,19 @@ public class RecipeListDAO {
             ).toArray(Integer[]::new)
         );
         filterIdMap.put("Cuisine",
-    		recursionDAO.recurseUniDir(
+    		recursionDAO.recurseUniDir( // recurse down
                 filterIdMap.get("Cuisine"),
-                "cuisine_id",
                 "base_cuisine_id",
+                "cuisine_id",
                 "cuisines",
                 dbConnection
             ).toArray(Integer[]::new)
         );
         filterIdMap.put("Dish Type",
-    		recursionDAO.recurseUniDir(
+    		recursionDAO.recurseUniDir( // recurse down
                 filterIdMap.get("Dish Type"),
-                "dish_type_id",
                 "base_dish_type_id",
+                "dish_type_id",
                 "dish_types",
                 dbConnection
             ).toArray(Integer[]::new)
@@ -249,8 +249,8 @@ public class RecipeListDAO {
 			        rs.getString("recipe_name"),
 			        rs.getString("recipe_image_path"),
 			        rs.getString("recipe_description"),
-			        rs.getObject("total_minutes") == null ? "N/A" : rs.getInt("total_minutes") + "m",
-			        rs.getTimestamp("recipe_active_timestamp").toString(),
+			        rs.getObject("total_minutes", Integer.class),
+			        rs.getDate("recipe_active_timestamp").toString(),
 					rs.getInt("review_count"),
 					String.format("%.1f", rs.getFloat("average_rating")),
 					rs.getInt("bookmark_count"),

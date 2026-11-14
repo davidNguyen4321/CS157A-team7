@@ -97,20 +97,23 @@
 			
 			let reviewMeta = document.createElement("div");
 			reviewMeta.classList.add("review-meta");
-			let ratings = document.createElement("span");
-			ratings.classList.add("card-rating");
-			ratings.textContent="Reviews: "+averageRating+"/5";
-			stars = document.createElement("span");
-			stars.classList.add("stars");
-			stars.setAttribute("style", "--rating: " + averageRating);
-			stars.setAttribute("aria-label", averageRating + " out of 5 stars");
-			let reviews = document.createElement("span");
-			reviews.classList.add("card-rating");
-			reviews.textContent=" (" + reviewCount +")";
-			ratings.append(stars);
-			ratings.append(reviews);
-			reviewMeta.append(ratings);
+			if (reviewCount > 0) {
+				let ratings = document.createElement("span");
+				ratings.classList.add("card-rating");
+				ratings.textContent="Reviews: "+averageRating+"/5";
+				stars = document.createElement("span");
+				stars.classList.add("stars");
+				stars.setAttribute("style", "--rating: " + averageRating);
+				stars.setAttribute("aria-label", averageRating + " out of 5 stars");
+				let reviews = document.createElement("span");
+				reviews.classList.add("card-rating");
+				reviews.textContent=" (" + reviewCount +")";
+				ratings.append(stars);
+				ratings.append(reviews);
+				reviewMeta.append(ratings);
+			}
 			cardFooter.append(reviewMeta);
+			
 			
 			let cardStats = document.createElement("div");
 			cardStats.classList.add("card-stats");

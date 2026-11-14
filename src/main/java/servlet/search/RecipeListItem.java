@@ -5,7 +5,7 @@ public class RecipeListItem {
     private String name;
     private String imagePath;
     private String description;
-    private String totalMinutes;
+    private Integer totalMinutes;
     private String activeTimestamp;
     private int reviewCount;
     private String averageRating;
@@ -17,7 +17,7 @@ public class RecipeListItem {
     private String authorImagePath;
 
     public RecipeListItem(int id, String name, String imagePath, String description, 
-                      String totalMinutes, String activeTimestamp, int reviewCount, 
+                      Integer totalMinutes, String activeTimestamp, int reviewCount, 
                       String averageRating, int bookmarkCount, boolean userBookmarked, 
                       int authorId, String authorName, String authorImagePath) {
         this.id = id;
@@ -39,7 +39,7 @@ public class RecipeListItem {
     public String getRecipeName() { return name; }
     public String getRecipeImagePath() { return imagePath; }
     public String getRecipeDescription() { return description; }
-    public String getRecipeTotalMinutes() { return totalMinutes; }
+    public Integer getRecipeTotalMinutes() { return totalMinutes; }
     public String getRecipeActiveTimestamp() { return activeTimestamp; }
     public int getReviewCount() { return reviewCount; }
     public String getAverageRating() { return averageRating; }

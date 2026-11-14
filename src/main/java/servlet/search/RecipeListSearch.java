@@ -16,7 +16,7 @@ import database.DbAccess;
 
 @WebServlet("/Recipes/Search")
 public class RecipeListSearch extends HttpServlet {
-    private final RecipeListDAO recipeSearchDAO = new RecipeListDAO();
+    private final RecipeListDAO recipeListDAO = new RecipeListDAO();
 	private static final ObjectMapper mapper = new ObjectMapper();
     
     @Override
@@ -28,7 +28,7 @@ public class RecipeListSearch extends HttpServlet {
         int sessionUserId = (Integer) request.getAttribute("userId");
         
         try (PrintWriter pw = response.getWriter()) {
-            pw.write(mapper.writeValueAsString(recipeSearchDAO.search(requestInfo, dbConnection, sessionUserId)));
+            pw.write(mapper.writeValueAsString(recipeListDAO.search(requestInfo, dbConnection, sessionUserId)));
         }
     }
 }
