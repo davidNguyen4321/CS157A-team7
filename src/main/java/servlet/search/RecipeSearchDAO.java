@@ -101,7 +101,7 @@ public class RecipeSearchDAO {
     
     private SqlBuilder buildRecipeQuery(RecipeSearchRequest requestInfo, int sessionUserId) {
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
-        Map<String, Map<String, Integer>> ranges = requestInfo.getRanges();
+        Map<String, Map<String, Double>> ranges = requestInfo.getRanges();
         Map<String, Integer> tolerances = requestInfo.getTolerances();
         
         SqlBuilder sb = new SqlBuilder();
@@ -125,15 +125,15 @@ public class RecipeSearchDAO {
             sb.addString("FROM recipes LEFT JOIN reviews ON recipes.recipe_id = reviews.recipe_id AND review_status = 'Active' ");
             sb.addString("GROUP BY recipes.recipe_id ");
             sb.addString("HAVING COUNT(review_id) >= ? AND COUNT(review_id) <= ? ");
-                int minRating = ranges.get("Ratings").get("min");
-                int maxRating = ranges.get("Ratings").get("max");
+            	double minRating = ranges.get("Ratings").get("min");
+            	double maxRating = ranges.get("Ratings").get("max");
                 sb.addString("AND (");
-                if (minRating == 0) sb.addString("AVG(rating) IS NULL OR ");
+                if (minRating == Integer.MIN_VALUE && maxRating == Integer.MAX_VALUE) sb.addString("AVG(rating) IS NULL OR ");
                 sb.addString("(AVG(rating) >= ? AND AVG(rating) <= ?)");
                 sb.addString(")");
 
-                sb.addParam(ranges.get("Reviews").get("min"));
-                sb.addParam(ranges.get("Reviews").get("max"));
+                sb.addParam(ranges.get("Reviews").get("min").intValue());
+                sb.addParam(ranges.get("Reviews").get("max").intValue());
                 sb.addParam(minRating);
                 sb.addParam(maxRating);
         sb.addString(") recipes_reviews ");
@@ -149,8 +149,8 @@ public class RecipeSearchDAO {
             sb.addString(") bookmark_users ON recipes.recipe_id = bookmark_users.recipe_id ");
             sb.addString("GROUP BY recipes.recipe_id ");
             sb.addString("HAVING COUNT(bookmark_users.user_id) >= ? AND COUNT(bookmark_users.user_id) <= ? ");
-                sb.addParam(ranges.get("Bookmarks").get("min"));
-                sb.addParam(ranges.get("Bookmarks").get("max"));
+                sb.addParam(ranges.get("Bookmarks").get("min").intValue());
+                sb.addParam(ranges.get("Bookmarks").get("max").intValue());
         sb.addString(") recipes_users ");
             
         Integer[] authors = filterIdMap.get("Author");
@@ -199,8 +199,8 @@ public class RecipeSearchDAO {
                 sb.addParam("% "+ searchTerm + "%");
         }
         
-        int minMinutes = ranges.get("Cooking Time").get("min");
-        int maxMinutes = ranges.get("Cooking Time").get("max");
+        int minMinutes = ranges.get("Cooking Time").get("min").intValue();
+        int maxMinutes = ranges.get("Cooking Time").get("max").intValue();
         if (!(minMinutes == 0 && maxMinutes == Integer.MAX_VALUE)) {
             sb.addString("AND recipes.total_minutes >= ? AND recipes.total_minutes <= ? ");
             sb.addParam(minMinutes);

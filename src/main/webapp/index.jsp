@@ -305,13 +305,13 @@
 											Average Ratings
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
-				                    		<input type="number" id="RatingsMinRange" name="RatingsMinRange" class="filter-range" min="0" max="5" step="1"/>
+				                    		<input type="number" id="RatingsMinRange" name="RatingsMinRange" class="filter-range" min="1" max="5" step="0.1"/>
 			                    			<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												min to
 				                    			</h2>
 				                    		</div>
-				                    		<input type="number" id="RatingsMaxRange" name="RatingsMaxRange" class="filter-range" min="0" max="5" step="1"/>
+				                    		<input type="number" id="RatingsMaxRange" name="RatingsMaxRange" class="filter-range" min="1" max="5" step="0.1"/>
 				                    		<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												max
@@ -457,7 +457,7 @@
 						
 						addMinMaxListener("BookmarksMinRange", "BookmarksMaxRange", true, 0, null, "Bookmarks");
 						addMinMaxListener("CookingTimeMinRange", "CookingTimeMaxRange", true, 0, null, "Cooking Time");
-						addMinMaxListener("RatingsMinRange", "RatingsMaxRange", true, 0, 5, "Ratings");
+						addMinMaxListener("RatingsMinRange", "RatingsMaxRange", true, 1, 5, "Ratings");
 						addMinMaxListener("ReviewsMinRange", "ReviewsMaxRange", true, 0, null, "Reviews");
 	
 						const options = new Map();
@@ -734,6 +734,13 @@
 							other.addEventListener('input', function (e) {//tracking input
 							    enforceMinMax(other, self, !isMin, minMin, maxMax, key);
 							});
+							
+							for (let el of [self, other]) {
+							    el.addEventListener('wheel', function (e) {
+							        if (document.activeElement === el) e.preventDefault();
+							    }, { passive: false });
+							}
+							
 							enforceMinMax(self, other, isMin, minMin, maxMax, key); // to finish initialization
 						}
 						

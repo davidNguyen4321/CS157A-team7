@@ -50,12 +50,12 @@ public class ParamSecurity {
     	return rawString.replace("\\", "").replaceAll("[%_]", "").trim();
     }
     
-    public static void sanitizeRange(Map<String, Integer> range, int defaultMin, int defaultMax) {
-        Integer min = range.get("min");
-        Integer max = range.get("max");
-        
-        min = (min == null) ? defaultMin : min;
-        max = (max == null) ? defaultMax : max;
+    public static void sanitizeRange(Map<String, Double> range) {
+    	Double min = range.get("min");
+    	Double max = range.get("max");
+    	        
+        min = (min == null || !Double.isFinite(min)) ? Integer.MIN_VALUE : min;
+        max = (max == null || !Double.isFinite(min)) ? Integer.MAX_VALUE : max;
         
         range.put("min", min);
         range.put("max", max);
