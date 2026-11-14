@@ -16,7 +16,7 @@ public class ParamSecurity {
             if (value == null) {
             	throw new ServletParamException(HttpServletResponse.SC_BAD_REQUEST, "Missing " + parameter);
             }
-            if (value.length() > 1000 || (parameter == "searchTerm" && value.length() > 100)) {
+            if (value.length() > 1000 || (parameter.equals("searchTerm") && value.length() > 100)) {
             	throw new ServletParamException(HttpServletResponse.SC_BAD_REQUEST, parameter + " exceed reasonable length");
             }
             parameterMap.put(parameter, value);

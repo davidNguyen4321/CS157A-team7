@@ -121,16 +121,16 @@
 		                    	</h1>
 		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
 		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date');">
-								    <p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Publication Date
+								    <p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
 								</button>
 		                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks');">
-									<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Bookmarks
+									<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
 								</button>
 		                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews');">
-		                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Reviews
+		                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
 		                    	</button>
 		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'RatingsSortText', 'Ratings');">
-		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;">Ratings
+		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
 		                    	</button>
 	                    	</div>
 	                    	<div class="filter-panel-container-no-grid">
@@ -184,7 +184,7 @@
 			                    	<input type="checkbox" name="AiGeneratedDishTypes" id="AiGeneratedDishTypes" checked/><br>
 			                    	<label for="AiGeneratedCookingMinutes" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Cooking Minutes</label>
 			                    	<input type="checkbox" name="AiGeneratedCookingMinutes" id="AiGeneratedCookingMinutes" checked/><br>
-			                    	<label for="AiGeneratedCourses" class="mini-text" style="color:#826300; font-size: 0.8rem;">Ai Generated Courses</label>
+			                    	<label for="AiGeneratedCourses" class="mini-text" style="color:#826300; font-size: 0.8rem;">AI Gen Courses</label>
 			                    	<input type="checkbox" name="AiGeneratedCourses" id="AiGeneratedCourses" checked/>
 	                    		</div>
 	                    	</div>
@@ -424,6 +424,8 @@
 							sortOptions.set(key	, object);
 						}
 						
+						updateSortTextElements();
+						
 						const filterIds = new Map();
 						for (let key of ["Ingredient", "Appliance", "Author", "Cuisine", "Dish Type", "Dietary Restriction", "Course"]){
 							filterIds.set(key, []);
@@ -461,6 +463,10 @@
 							minEl.addEventListener('input', () => range.min = minEl.value === "" ? null : Number(minEl.value));
 							maxEl.addEventListener('input', () => range.max = maxEl.value === "" ? null : Number(maxEl.value));
 						}
+						
+						document.querySelectorAll('.filter-range').forEach(el => {
+						  el.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+						});
 
 						addRangeListener("BookmarksMinRange", "BookmarksMaxRange", "Bookmarks");
 						addRangeListener("CookingTimeMinRange", "CookingTimeMaxRange", "Cooking Time");

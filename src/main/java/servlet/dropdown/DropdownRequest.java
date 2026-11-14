@@ -15,7 +15,7 @@ public class DropdownRequest {
         ObjectMapper mapper = new ObjectMapper();
         
         this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));
-        this.excludeList = mapper.readValue(parameterMap.get("excludeList"), Integer[].class);
+        this.excludeList = mapper.readValue(parameterMap.get("excludeArray"), Integer[].class);
     }
 
     public String getSearchTerm() { return searchTerm; }

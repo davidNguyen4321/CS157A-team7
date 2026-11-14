@@ -480,6 +480,10 @@ nav.main-nav {
 
 .filter-range {
   height: 40px;
+  flex: 1 1 0;       
+  min-width: 0;      
+  max-width: 120px;  
+  box-sizing: border-box;
 }
 
 .priority-badge {
