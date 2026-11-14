@@ -53,8 +53,8 @@ public class DropdownDAO {
             }
             return resultsList;
         } 
-        catch (SQLException ex) {
-            throw new RuntimeException(table + " search failed: " + ex.getMessage(), ex);
+        catch (SQLException e) {
+            throw new RuntimeException(table + " search failed: " + e.getMessage(), e);
         }
     }
 }

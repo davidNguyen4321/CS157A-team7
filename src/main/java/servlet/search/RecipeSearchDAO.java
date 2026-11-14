@@ -5,40 +5,43 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashSet;
+import java.util.Arrays;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class RecipeSearchDAO {
-    private static final ObjectMapper mapper = new ObjectMapper();
 
-    public String search(RecipeSearchRequest requestInfo, Connection dbConnection, int sessionUserId) throws SQLException, JsonProcessingException {
+    public ArrayList<RecipeItem> search(RecipeSearchRequest requestInfo, Connection dbConnection, int sessionUserId) throws JsonProcessingException {
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 
         filterIdMap.put("Dietary Restriction",
             recurseUniDir(
                 filterIdMap.get("Dietary Restriction"),
-                "DIETARY_RESTRICTION_ID",
-                "BASE_DIETARY_RESTRICTION_ID",
-                "DIETARY_RESTRICTIONS",
+                "dietary_restriction_id",
+                "base_dietary_restriction_id",
+                "dietary_restrictions",
                 dbConnection
             ).toArray(Integer[]::new)
         );
         filterIdMap.put("Cuisine",
             recurseUniDir(
                 filterIdMap.get("Cuisine"),
-                "CUISINE_ID",
-                "BASE_CUISINE_ID",
-                "CUISINES",
+                "cuisine_id",
+                "base_cuisine_id",
+                "cuisines",
                 dbConnection
             ).toArray(Integer[]::new)
         );
         filterIdMap.put("Dish Type",
             recurseUniDir(
                 filterIdMap.get("Dish Type"),
-                "DISH_TYPE_ID",
-                "BASE_DISH_TYPE_ID",
-                "DISH_TYPES",
+                "dish_type_id",
+                "base_dish_type_id",
+                "dish_types",
                 dbConnection
             ).toArray(Integer[]::new)
         );
@@ -46,21 +49,18 @@ public class RecipeSearchDAO {
         for (Integer wantedId : filterIdMap.get("Ingredient")) {
             requestInfo.getIngredientMatches().put(wantedId,
                 recurseBiDir(new Integer[] { wantedId },
-                    "INGREDIENT_ID",
-                    "BASE_INGREDIENT_ID",
-                    "INGREDIENTS",
+                    "ingredient_id",
+                    "base_ingredient_id",
+                    "ingredients",
                     dbConnection
                 ).toArray(Integer[]::new)
             );
         }
 
-        try (PreparedStatement ps = buildRecipeQuery(requestInfo, sessionUserId).build(dbConnection);
-             ResultSet rs = ps.executeQuery()) {
-            return writeRecipeResults(rs);
-        }
+        return executeRecipeQuery(buildRecipeQuery(requestInfo, sessionUserId), dbConnection);
     }
 
-    private HashSet<Integer> recurseUniDir(Integer[] providedElementIds, String curLevelCol, String nextLevelCol, String tableName, Connection dbConnection) throws SQLException {
+    private HashSet<Integer> recurseUniDir(Integer[] providedElementIds, String curLevelCol, String nextLevelCol, String tableName, Connection dbConnection) {
         if(providedElementIds.length == 0) return new HashSet<Integer>(); 
         
         HashSet<Integer> closureSet = new HashSet<Integer>(Arrays.asList(providedElementIds));
@@ -74,25 +74,25 @@ public class RecipeSearchDAO {
             sb.addManyInts(newIdsToRecurse);
             sb.addString(")");
             
-            try (PreparedStatement statement = dbConnection.prepareStatement(sb.toString())) {
-                int counter = 1;
-                for(Integer id : newIdsToRecurse) statement.setInt(counter++, id); 
-                
-                try (ResultSet nextLevelIds = statement.executeQuery()) {
-                    newIdsToRecurse = new ArrayList<Integer>();
-                    while(nextLevelIds.next()) {
-                        Integer nextLevelId = nextLevelIds.getInt(nextLevelCol);
-                        if (!nextLevelIds.wasNull() && closureSet.add(nextLevelId)) {
-                            newIdsToRecurse.add(nextLevelId);
-                        }
+            try (PreparedStatement ps = sb.build(dbConnection);
+            	 ResultSet nextLevelIds = ps.executeQuery()) {
+                newIdsToRecurse = new ArrayList<Integer>();
+                Integer nextLevelId = nextLevelIds.getObject(nextLevelCol, Integer.class);
+                while(nextLevelIds.next()) {
+                    if (nextLevelId != null && closureSet.add(nextLevelId)) {
+                        newIdsToRecurse.add(nextLevelId);
                     }
                 }
             }
+            catch (SQLException e) {
+            	throw new RuntimeException(tableName + " recursive search failed: " + e.getMessage(), e);
+            }
         }
+        
         return closureSet;
     }
     
-    private HashSet<Integer> recurseBiDir(Integer[] providedElementIds, String colName, String baseColName, String tableName, Connection dbConnection) throws SQLException {
+    private HashSet<Integer> recurseBiDir(Integer[] providedElementIds, String colName, String baseColName, String tableName, Connection dbConnection) {
         HashSet<Integer> recurseUp = recurseUniDir(providedElementIds, colName, baseColName, tableName, dbConnection);
         HashSet<Integer> recurseDown = recurseUniDir(providedElementIds, baseColName, colName, tableName, dbConnection);
         recurseUp.addAll(recurseDown);
@@ -278,28 +278,33 @@ public class RecipeSearchDAO {
         return sb;
     }
     
-    private String writeRecipeResults(ResultSet recipes) throws SQLException, JsonProcessingException {
-    	ArrayList<Map<String, Object>> recipeList = new ArrayList<>();
-
-        while (recipes.next()) {
-            Map<String, Object> recipeMap = new LinkedHashMap<>();
-            recipeMap.put("recipeId", recipes.getInt("recipe_id"));
-            recipeMap.put("recipeName", recipes.getString("recipe_name"));
-            recipeMap.put("recipeImagePath", recipes.getString("recipe_image_path"));
-            recipeMap.put("recipeDescription", recipes.getString("recipe_description"));
-            recipeMap.put("recipeTotalMinutes", recipes.getObject("total_minutes") == null ? "N/A" : recipes.getInt("total_minutes") + "m");
-            recipeMap.put("recipeActiveTimestamp", recipes.getTimestamp("recipe_active_timestamp").toString());
-            recipeMap.put("reviewCount", recipes.getInt("review_count"));
-            recipeMap.put("averageRating", String.format("%.1f", recipes.getFloat("average_rating")));
-            recipeMap.put("bookmarkCount", recipes.getInt("bookmark_count"));
-            recipeMap.put("userBookmarked", recipes.getInt("user_bookmarked") > 0);
-            recipeMap.put("userId", recipes.getInt("user_id"));
-            recipeMap.put("userName", recipes.getString("user_name"));
-            recipeMap.put("userImagePath", recipes.getString("user_image_path"));
-            
-            recipeList.add(recipeMap);
-        }
-        
-        return mapper.writeValueAsString(recipeList);
+    private ArrayList<RecipeItem> executeRecipeQuery(SqlBuilder sb, Connection dbConnection) {
+    	try (PreparedStatement ps = sb.build(dbConnection);
+           	 ResultSet rs = ps.executeQuery()) {
+           	
+		   	ArrayList<RecipeItem> resultsList = new ArrayList<>();
+			while (rs.next()) {
+				resultsList.add(new RecipeItem(
+			        rs.getInt("recipe_id"),
+			        rs.getString("recipe_name"),
+			        rs.getString("recipe_image_path"),
+			        rs.getString("recipe_description"),
+			        rs.getObject("total_minutes") == null ? "N/A" : rs.getInt("total_minutes") + "m",
+			        rs.getTimestamp("recipe_active_timestamp").toString(),
+					rs.getInt("review_count"),
+					String.format("%.1f", rs.getFloat("average_rating")),
+					rs.getInt("bookmark_count"),
+					rs.getInt("user_bookmarked") > 0,	
+			        rs.getInt("user_id"),
+			        rs.getString("user_name"),
+			        rs.getString("user_image_path")
+			    ));
+			}
+		    
+			return resultsList;
+		} 
+	    catch (SQLException e) {
+	        throw new RuntimeException("Recipe search failed: " + e.getMessage(), e);
+	    }
     }
 }
