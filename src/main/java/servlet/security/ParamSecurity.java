@@ -55,7 +55,7 @@ public class ParamSecurity {
     	Double max = range.get("max");
     	        
         min = (min == null || !Double.isFinite(min)) ? Integer.MIN_VALUE : min;
-        max = (max == null || !Double.isFinite(min)) ? Integer.MAX_VALUE : max;
+        max = (max == null || !Double.isFinite(max)) ? Integer.MAX_VALUE : max;
         
         range.put("min", min);
         range.put("max", max);

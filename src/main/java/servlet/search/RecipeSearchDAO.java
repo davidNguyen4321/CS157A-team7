@@ -201,7 +201,7 @@ public class RecipeSearchDAO {
         
         int minMinutes = ranges.get("Cooking Time").get("min").intValue();
         int maxMinutes = ranges.get("Cooking Time").get("max").intValue();
-        if (!(minMinutes == 0 && maxMinutes == Integer.MAX_VALUE)) {
+        if (!(minMinutes == Integer.MIN_VALUE && maxMinutes == Integer.MAX_VALUE)) {
             sb.addString("AND recipes.total_minutes >= ? AND recipes.total_minutes <= ? ");
             sb.addParam(minMinutes);
             sb.addParam(maxMinutes);

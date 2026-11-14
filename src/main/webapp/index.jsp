@@ -267,13 +267,13 @@
 											Reviews
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
-				                    		<input type="number" id="ReviewsMinRange" name="ReviewsMinRange" class="filter-range" min="0" step="1"/>
+				                    		<input type="number" id="ReviewsMinRange" name="ReviewsMinRange" class="filter-range" step="1"/>
 			                    			<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												min to
 				                    			</h2>
 				                    		</div>
-				                    		<input type="number" id="ReviewsMaxRange" name="ReviewsMaxRange" class="filter-range" min="0" step="1"/>
+				                    		<input type="number" id="ReviewsMaxRange" name="ReviewsMaxRange" class="filter-range" step="1"/>
 				                    		<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												max
@@ -286,13 +286,13 @@
 											Bookmarks
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
-				                    		<input type="number" id="BookmarksMinRange" name="BookmarksMinRange" class="filter-range" min="0" step="1"/>
+				                    		<input type="number" id="BookmarksMinRange" name="BookmarksMinRange" class="filter-range" step="1"/>
 			                    			<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												min to
 				                    			</h2>
 				                    		</div>
-				                    		<input type="number" id="BookmarksMaxRange" name="BookmarksMaxRange" class="filter-range" min="0" step="1"/>
+				                    		<input type="number" id="BookmarksMaxRange" name="BookmarksMaxRange" class="filter-range" step="1"/>
 				                    		<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												max
@@ -305,13 +305,13 @@
 											Average Ratings
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
-				                    		<input type="number" id="RatingsMinRange" name="RatingsMinRange" class="filter-range" min="1" max="5" step="0.1"/>
+				                    		<input type="number" id="RatingsMinRange" name="RatingsMinRange" class="filter-range" step="0.1"/>
 			                    			<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												min to
 				                    			</h2>
 				                    		</div>
-				                    		<input type="number" id="RatingsMaxRange" name="RatingsMaxRange" class="filter-range" min="1" max="5" step="0.1"/>
+				                    		<input type="number" id="RatingsMaxRange" name="RatingsMaxRange" class="filter-range" step="0.1"/>
 				                    		<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												max
@@ -324,13 +324,13 @@
 											Cooking Time (Minutes)
 		                    			</h2>
 				                    	<div class="filter-panel-mini-flex">
-				                    		<input type="number" id="CookingTimeMinRange" name="CookingTimeMinRange" class="filter-range" min="0" step="1"/>
+				                    		<input type="number" id="CookingTimeMinRange" name="CookingTimeMinRange" class="filter-range" step="1"/>
 			                    			<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												min to
 				                    			</h2>
 				                    		</div>
-				                    		<input type="number" id="CookingTimeMaxRange" name="CookingTimeMaxRange" class="filter-range" min="0" step="1"/>
+				                    		<input type="number" id="CookingTimeMaxRange" name="CookingTimeMaxRange" class="filter-range" step="1"/>
 				                    		<div class="filter-panel-mini-flex">
 			                    				<h2 class="mini-text" style="color:#826300; font-size: 0.8rem;">
 												max
@@ -445,25 +445,27 @@
 
 						addSliderListener("AppliancesSlider", "AppliancesToleranceDisplay", "Appliance",
 						    n => "Recipe may need up to " + n + (n == 1 ? " appliance" : " appliances") + " I don't have");
-						
-						const ranges = new Map();
-						for (let key of ["Bookmarks", "Cooking Time", "Ratings", "Reviews"]){
-							let object = {
-									min: "",
-									max: ""
-							}
-							ranges.set(key, object);
-						}
-						
-						addMinMaxListener("BookmarksMinRange", "BookmarksMaxRange", true, 0, null, "Bookmarks");
-						addMinMaxListener("CookingTimeMinRange", "CookingTimeMaxRange", true, 0, null, "Cooking Time");
-						addMinMaxListener("RatingsMinRange", "RatingsMaxRange", true, 1, 5, "Ratings");
-						addMinMaxListener("ReviewsMinRange", "ReviewsMaxRange", true, 0, null, "Reviews");
 	
 						const options = new Map();
 						for (let key of ["Ai Generated Description", "Ai Generated Appliances", "Ai Generated Cuisines", "Ai Generated Dish Types", "Ai Generated Cooking Minutes", "Ai Generated Courses"]){
 							options.set(key, true);
 						}
+						
+						const ranges = new Map();
+
+						function addRangeListener(minId, maxId, key){
+							const minEl = document.getElementById(minId);
+							const maxEl = document.getElementById(maxId);
+							const range = { min: null, max: null };
+							ranges.set(key, range);
+							minEl.addEventListener('input', () => range.min = minEl.value === "" ? null : Number(minEl.value));
+							maxEl.addEventListener('input', () => range.max = maxEl.value === "" ? null : Number(maxEl.value));
+						}
+
+						addRangeListener("BookmarksMinRange", "BookmarksMaxRange", "Bookmarks");
+						addRangeListener("CookingTimeMinRange", "CookingTimeMaxRange", "Cooking Time");
+						addRangeListener("RatingsMinRange", "RatingsMaxRange", "Ratings");
+						addRangeListener("ReviewsMinRange", "ReviewsMaxRange", "Reviews");
 						
 						addCheckListener("AiGeneratedDescription", "Ai Generated Description");
 						addCheckListener("AiGeneratedAppliances", "Ai Generated Appliances");
@@ -704,94 +706,7 @@
 						        tolerances.set(name, this.value);
 						    }
 						}
-						
-						function addMinMaxListener(selfId, otherId, isMin, minMin, maxMax, key){//expects that self and other both share the same range
-							let self = document.getElementById(selfId);
-							let other = document.getElementById(otherId);
-							if(maxMax===null){
-								maxMax = Math.pow(2, 31)-1; //2147483647, max int for java
-								if(self.max!=='' && self.max!==undefined && self.hasAttribute('max')){
-									maxMax = Math.min(maxMax, self.max);
-								}
-								else{
-									self.max=maxMax;
-									other.max=maxMax;
-								}
-							}
-							if(minMin===null){
-								minMin = -Math.pow(2, 31); //-2147483648, min int for java
-								if(self.min!=='' && self.min!==undefined && self.hasAttribute('min')){
-									minMin = Math.max(minMin, self.min);
-								}
-								else{
-									self.min=minMin;
-									other.min=minMin;
-								}
-							}
-							self.addEventListener('input', function (e) {//tracking input
-							    enforceMinMax(self, other, isMin, minMin, maxMax, key);
-							});
-							other.addEventListener('input', function (e) {//tracking input
-							    enforceMinMax(other, self, !isMin, minMin, maxMax, key);
-							});
-							
-							for (let el of [self, other]) {
-							    el.addEventListener('wheel', function (e) {
-							        if (document.activeElement === el) e.preventDefault();
-							    }, { passive: false });
-							}
-							
-							enforceMinMax(self, other, isMin, minMin, maxMax, key); // to finish initialization
-						}
-						
-						function enforceMinMax(self, other, isMin, minMin, maxMax, key){
-							let minElement = self;
-							let maxElement = other;
-							if (!isMin){
-								minElement = other;
-								maxElement = self;
-							}
-							let min = minElement.value;
-							let max = maxElement.value;
-							min = safeMinMax(minElement, min, minMin, maxMax);
-							max = safeMinMax(maxElement, max, minMin, maxMax);
-							if(!(min==="")&&!(max==="")){
-								minElement.value = Math.min(min, max);
-								maxElement.value = Math.max(min, max);
-							}
-							
-							if(minElement.value===""){ //to make parsing in java easier
-								ranges.get(key).min = minElement.min;
-							}
-							else{
-								ranges.get(key).min = minElement.value;
-							}
-							if(maxElement.value===""){ //to make parsing in java easier
-								ranges.get(key).max = maxElement.max;
-							}
-							else{
-								ranges.get(key).max = maxElement.value;
-							}
-						}
-						
-						function safeMinMax(element, num, minMin, maxMax){
-							if(num===""){ // if num is empty or has non numeric characters
-								num=""; //set it empty
-							}
-							else{
-								num = Math.min(maxMax, Math.max(minMin, num)); //bound num
-							}
-							element.value = num;
-							return num;
-						}
-						
-						function addCheckListener(selfId, key){
-							let self = document.getElementById(selfId);
-							self.addEventListener('input', function (e) {//tracking input
-								options.set(key, self.checked);
-							});
-						}
-						
+				
 					    recipeSearchTimeout = null;
 					    
 						async function searchRecipes(searchBarId){
