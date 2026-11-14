@@ -15,11 +15,12 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import servlet.error.ServletSecurity;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import database.DbAccess;
 
 @WebServlet("/Follow/Toggle")
 public class FollowToggle extends HttpServlet {	
@@ -34,8 +35,8 @@ public class FollowToggle extends HttpServlet {
 			}
 		}
 				
-		Connection dbConnection = ServletSecurity.getDbConnection();
-		Integer sessionUserId = Integer.parseInt((String)request.getAttribute("userId"));
+		Connection dbConnection = DbAccess.getConnection();
+		Integer sessionUserId = (Integer) request.getAttribute("userId");
 		
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String, Integer> followMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});

@@ -11,6 +11,10 @@ public class DbAccess {
 	}
 	
 	public static Connection getConnection() {
+		if (dbConnection == null) {
+			throw new IllegalStateException("Database connection is not available");
+        }
+		
 		return dbConnection;
 	}
 }

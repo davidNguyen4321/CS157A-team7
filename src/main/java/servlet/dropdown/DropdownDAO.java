@@ -1,6 +1,5 @@
 package servlet.dropdown;
 
-import servlet.error.ServletSecurity;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,16 +7,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import util.SqlBuilder;
 
+
 public class DropdownDAO {
 
-    public ArrayList<DropdownItemDTO> search(AbstractDropdown dropdown, DropdownRequest request) {        
-    	Connection dbConnection = ServletSecurity.getDbConnection();
+    public ArrayList<DropdownItemDTO> search(DropdownConfig config, DropdownRequest request, Connection dbConnection) {        
     	
-    	String table = dropdown.getTable();
-        String idCol = dropdown.getIdCol();
-        String nameCol = dropdown.getNameCol();
-        String imageCol = dropdown.getImageCol();
-        String activeCol = dropdown.getActiveCol();
+    	String table = config.table();
+        String idCol = config.idCol();
+        String nameCol = config.nameCol();
+        String imageCol = config.imageCol();
+        String activeCol = config.activeCol();
         
         String searchTerm = request.getSearchTerm();
         Integer[] excludeList = request.getExcludeList();

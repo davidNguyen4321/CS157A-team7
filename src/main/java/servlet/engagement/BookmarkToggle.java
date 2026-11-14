@@ -1,6 +1,7 @@
 package servlet.engagement;
 
 import java.sql.Connection;
+import database.DbAccess;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +16,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import servlet.error.ServletSecurity;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,8 +34,8 @@ public class BookmarkToggle extends HttpServlet {
 			}
 		}
 				
-		Connection dbConnection = ServletSecurity.getDbConnection();
-		int sessionUserId = Integer.parseInt((String)request.getAttribute("userId"));
+		Connection dbConnection = DbAccess.getConnection();
+		int sessionUserId = (Integer) request.getAttribute("userId");
 		
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String, Integer> bookmarkMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});

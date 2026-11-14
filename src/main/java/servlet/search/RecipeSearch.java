@@ -24,16 +24,18 @@ import servlet.error.ServletSecurity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import database.DbAccess;
+
 @WebServlet("/Recipes/Search")
 public class RecipeSearch extends HttpServlet {
 	
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 				
-		Connection dbConnection = ServletSecurity.getDbConnection();
+		Connection dbConnection = DbAccess.getConnection();
 		
-		Integer sessionUserId = Integer.parseInt((String)request.getAttribute("userId"));
-		String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options", "userId"};
+		int sessionUserId = (Integer) request.getAttribute("userId");
+		String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
 	    Map<String, String> parameterMap = ServletSecurity.getValidatedParameters(request, parameters, true);
 		
 		RecipeSearchRequest requestInfo = new RecipeSearchRequest(parameterMap);

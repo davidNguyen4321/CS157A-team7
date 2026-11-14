@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-@WebFilter(urlPatterns = {"/Bookmark/*", "/Follow/*", "/Recipes/*", "/DishTypes/*", "/Cuisines/*", "/Ingredients/*", "/Appliances/*", "/Users/*"})
+@WebFilter(urlPatterns = {"/Bookmark/*", "/Follow/*", "/Recipes/*", "/Dropdown/*"})
 public class ErrorHandlingFilter implements Filter {
 
     @Override

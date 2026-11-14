@@ -429,11 +429,11 @@
 							filterIds.set(key, []);
 						}
 						
-						addDropdownListener('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '${pageContext.request.contextPath}/DishTypes/Search?');
-						addDropdownListener('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '${pageContext.request.contextPath}/Cuisines/Search?');
-						addDropdownListener('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '${pageContext.request.contextPath}/Ingredients/Search?');
-						addDropdownListener('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '${pageContext.request.contextPath}/Appliances/Search?');
-						addDropdownListener('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '${pageContext.request.contextPath}/Users/Search?');
+						addDropdownListener('DishTypesSearch', 'Dish Type', 'DishTypesSearchContainer', 'DishTypesContainer', '${pageContext.request.contextPath}/Dropdown/DishTypes?');
+						addDropdownListener('CuisinesSearch', 'Cuisine', 'CuisinesSearchContainer', 'CuisinesContainer', '${pageContext.request.contextPath}/Dropdown/Cuisines?');
+						addDropdownListener('IngredientsSearch', 'Ingredient', 'IngredientsSearchContainer', 'IngredientsContainer', '${pageContext.request.contextPath}/Dropdown/Ingredients?');
+						addDropdownListener('AppliancesSearch', 'Appliance', 'AppliancesSearchContainer', 'AppliancesContainer', '${pageContext.request.contextPath}/Dropdown/Appliances?');
+						addDropdownListener('AuthorsSearch', 'Author', 'AuthorsSearchContainer', 'AuthorsContainer', '${pageContext.request.contextPath}/Dropdown/Users?');
 						
 						const tolerances = new Map();
 						for (let key of ["Ingredient", "Appliance"]){
