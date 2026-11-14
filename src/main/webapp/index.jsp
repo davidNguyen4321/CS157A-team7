@@ -21,35 +21,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Genie</title>
-    <!-- Stylesheet lives in the webapp/css folder -->
     <link rel="stylesheet" type="text/css" href="css/index.css">
 </head>
 <body>
 
     <%
-        // Tracks which tab is currently selected
-        String currentTab = request.getParameter("tab");
+        String currentTab = request.getParameter("tab"); 
         if (currentTab == null || currentTab.trim().isEmpty()) {
             currentTab = "discover";
         }
-    %>
-    <%-- reuses connection that DbInit opened at startup --%>
-    <%
-    	Connection dbConnection = DbAccess.getConnection();
+        
+        Connection dbConnection = DbAccess.getConnection();
         int sessionUserId = (Integer) session.getAttribute("userId");
     %>
-
-    <!--
-      =========================================================================
-      NAVIGATION HEADER
-      =========================================================================
-    -->
+    
     <%@ include file="/WEB-INF/fragments/header.jspf" %>
-    <!--
-      =========================================================================
-      DISCOVER TAB MAIN SECTION
-      =========================================================================
-    -->
     <main>
     	<%
     	if ("discover".equals(currentTab)) {
@@ -62,18 +48,10 @@
 	           </div>
 	           <div class="hero-content-wrapper">
 	               <!-- Use inline-block style so this wrapper matches the exact width of the title text -->
-	               <div style="display: inline-block; max-width: 100%;">
-	                   <div class="hero-badge">
-	                       <span class="hero-badge-dot"></span>
-	                       Cook smarter, not harder
-	                   </div>
+	               <div>
 	                   <h1 class="hero-title">
 	                       What can you cook <span style="white-space: nowrap;"><em>right now?</em></span>
 	                   </h1>
-	                   <div class="hero-desc">
-	                       <p style="margin: 0 0 0.5rem 0;">Search by ingredients and appliances you already have.</p>
-	                       <p style="margin: 0;">Discover recipes that fit your kitchen, not the other way around.</p>
-	                   </div>
 	
 	                   <!-- Smart search form -->
 	                   <form action="index.jsp" method="GET" class="search-form" style="width: 100%;">
@@ -132,7 +110,38 @@
 		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'RatingsSortText', 'Ratings');">
 		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
 		                    	</button>
-	                    	</div>
+		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
+									<h1 class="filter-panel-name">Courses</h1>
+			                    	<div class="filter-panel-container-no-grid" style="padding:0; align-items:center;">
+			                    		<%
+			                    		if (dbConnection != null) {
+			                    			String sql = "SELECT DISTINCT COURSE, COURSE + 0 AS COURSE_ID " +
+			                    			     		 "FROM RECIPES " +
+			                    			     		 "WHERE COURSE IS NOT NULL " +
+			                    			     		 "ORDER BY COURSE + 0 ASC";
+			                    			try (
+			                    				PreparedStatement courseStatement = dbConnection.prepareStatement(sql);
+			                    				ResultSet courseResults = courseStatement.executeQuery()
+			                    			) {
+			                    				while(courseResults.next()){
+			                    		            int courseId = courseResults.getInt("COURSE_ID");
+			                    		            String courseName = courseResults.getString("COURSE");
+						                    		%>
+													    <button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
+													        <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+													            <%=courseName%>
+													        </h2>
+													    </button>
+													<%
+		                    					}
+		                    				}
+				     					   	catch (Exception error) {
+				   					    		out.println("<p>Database error: " +error.getMessage() + "</p>");
+				   					    	}
+		                    			}
+			                    		%>
+									</div>
+	                    		</div>
 	                    	<div class="filter-panel-container-no-grid">
 	                    		<div class="filter-panel-mini" style="width:1rem;">
 				                    <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
@@ -221,40 +230,6 @@
 			                    					   					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
 			                    					   					    	}
 			                    			                    			}
-			                    		%>
-									</div>
-	                    		</div>
-	                    		<div class="filter-panel-mini"  style="min-width: 200px;">
-	                    			<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
-										Courses
-			                    	</h2>
-			                    	<div class="filter-panel-container">
-			                    		<%
-			                    		if (dbConnection != null) {
-			                    			String sql = "SELECT DISTINCT COURSE, COURSE + 0 AS COURSE_ID " +
-			                    			     		 "FROM RECIPES " +
-			                    			     		 "WHERE COURSE IS NOT NULL " +
-			                    			     		 "ORDER BY COURSE + 0 ASC";
-			                    			try (
-			                    				PreparedStatement courseStatement = dbConnection.prepareStatement(sql);
-			                    				ResultSet courseResults = courseStatement.executeQuery()
-			                    			) {
-			                    				while(courseResults.next()){
-			                    		            int courseId = courseResults.getInt("COURSE_ID");
-			                    		            String courseName = courseResults.getString("COURSE");
-						                    		%>
-													    <button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
-													        <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
-													            <%=courseName%>
-													        </h2>
-													    </button>
-													<%
-		                    					}
-		                    				}
-				     					   	catch (Exception error) {
-				   					    		out.println("<p>Database error: " +error.getMessage() + "</p>");
-				   					    	}
-		                    			}
 			                    		%>
 									</div>
 	                    		</div>
@@ -467,6 +442,11 @@
 						document.querySelectorAll('.filter-range').forEach(el => {
 						  el.addEventListener('wheel', e => e.preventDefault(), { passive: false });
 						});
+						
+						function addCheckListener(checkboxId, key){
+						    const box = document.getElementById(checkboxId);
+						    box.addEventListener('change', () => options.set(key, box.checked));
+						}
 
 						addRangeListener("BookmarksMinRange", "BookmarksMaxRange", "Bookmarks");
 						addRangeListener("CookingTimeMinRange", "CookingTimeMaxRange", "Cooking Time");
@@ -1228,9 +1208,8 @@
                     </div>
                 </div>
             </div>
-            <p style="margin: 0;">© 2026 Recipe Genie</p>
-            <div class="footer-links">
-                <a href="#">Terms of Service</a>
+            <div>
+                <p style="margin: 0;">© 2026 Recipe Genie</p>
             </div>
         </div>
     </footer>

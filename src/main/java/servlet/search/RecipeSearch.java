@@ -22,9 +22,9 @@ public class RecipeSearch extends HttpServlet {
         Connection dbConnection = DbAccess.getConnection();
         
         int sessionUserId = (Integer) request.getAttribute("userId");
+        
         String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
         Map<String, String> parameterMap = ParamSecurity.getParams(request, parameters);
-        
         RecipeSearchRequest requestInfo = new RecipeSearchRequest(parameterMap);
         
         try {

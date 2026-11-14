@@ -229,7 +229,7 @@ nav.main-nav {
 
 .hero-section {
   position: relative;
-  overflow: hidden;
+  overflow: visible;         
   background-color: var(--primary);
   color: #ffffff;
   min-width: 25rem;
@@ -240,6 +240,7 @@ nav.main-nav {
   inset: 0;
   opacity: 0.1;
   pointer-events: none;
+  overflow: hidden;          
 }
 
 .blob-1 {
@@ -314,12 +315,13 @@ nav.main-nav {
 }
 
 .search-form {
+  position: relative;          
   margin-top: 2rem;
   background-color: #ffffff;
   border-radius: 0.75rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
   width: 100%;
-  overflow: hidden;
+  overflow: visible;          
 }
 
 .search-top-bar {
@@ -440,13 +442,29 @@ nav.main-nav {
 }
 
 .filter-panel {
+  position: absolute;        
+  top: 100%;             
+  left: 0;              
+  right: 0;               
+  z-index: 30;           
+  border-radius: 0 0 0.75rem 0.75rem; 
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); 
   align-items: center;
   background-color: #FFF7D9;
-  display: none;
-  width: 100%;
+  display: none;            
   padding: 10px;
   contain: inline-size;
   overflow-x: auto;
+}
+
+.search-top-bar {
+  border-radius: 0.75rem 0.75rem 0 0;
+  overflow: hidden;
+}
+
+.search-form:not(:has(.filter-panel.active)) .search-bottom-row {
+  border-radius: 0 0 0.75rem 0.75rem;
+  overflow: hidden;
 }
 
 .filter-panel.active {
@@ -1045,22 +1063,6 @@ footer {
   gap: 0.5rem;
 }
 
-.footer-links {
-  display: flex;
-  gap: 1rem;
-}
-
-.footer-links a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.footer-links a:hover {
-  color: var(--foreground);
-}
-
-/* Media Queries */
 @media (max-width: 639px) {
   .header-inner {
     padding-left: 1rem;
