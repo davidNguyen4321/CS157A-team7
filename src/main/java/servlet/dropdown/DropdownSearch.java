@@ -8,9 +8,9 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import servlet.error.ServletSecurity;
+import servlet.security.ParamSecurity;
+import servlet.security.ServletParamException;
 import jakarta.servlet.annotation.WebServlet;
-import servlet.error.ServletRequestException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,9 +34,9 @@ public class DropdownSearch extends HttpServlet {
 		String pathInfo = request.getPathInfo();
 		DropdownConfig config = (pathInfo == null) ? null : CONFIGS.get(pathInfo);
 
-		if (config == null) throw new ServletRequestException(HttpServletResponse.SC_NOT_FOUND, "No dropdown configured for " + pathInfo);
+		if (config == null) throw new ServletParamException(HttpServletResponse.SC_NOT_FOUND, "No dropdown configured for " + pathInfo);
 		
-		DropdownRequest dropdownRequest = new DropdownRequest(ServletSecurity.getValidatedParameters(request, new String[] {"searchTerm", "excludeArray"}, false));
+		DropdownRequest dropdownRequest = new DropdownRequest(ParamSecurity.getParams(request, new String[] {"searchTerm", "excludeArray"}));
 		Connection dbConnection = DbAccess.getConnection();
             
         try (PrintWriter pw = response.getWriter()) {

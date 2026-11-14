@@ -1,4 +1,4 @@
-package servlet.error;
+package servlet.security;
 
 import util.Loggers;
 
@@ -30,17 +30,16 @@ public class ErrorHandlingFilter implements Filter {
     	try {
     		HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("userId") == null) {
-                throw new ServletRequestException(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access attempt");
+                throw new ServletParamException(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized access attempt");
             }
             
             int userId = (Integer) session.getAttribute("userId");
     		request.setAttribute("userId", userId);
     		chain.doFilter(request, response); 
     	}
-    	catch (ServletRequestException e) { 
+    	catch (ServletParamException e) { 
             String message = describe(request) + " => " + e.getMessage();
-            if (e.getStatus() >= 500) Loggers.OPERATION.severe(message);
-            else Loggers.SECURITY.warning(message);
+            Loggers.SECURITY.warning(message);
             sendJsonError(response, e.getStatus());
         }
     	catch (JsonProcessingException e) { // Malformed JSON which browser should never send
@@ -49,7 +48,7 @@ public class ErrorHandlingFilter implements Filter {
             sendJsonError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
     	catch (Exception e) { // SQL failures, bugs, etc
-            String message = describe(request) + " => " + "Unexpected error: " + e;
+            String message = describe(request) + " => " + "Unexpected error: " + e.getMessage();
     		Loggers.OPERATION.severe(message);
             sendJsonError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }

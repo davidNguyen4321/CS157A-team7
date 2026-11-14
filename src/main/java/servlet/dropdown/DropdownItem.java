@@ -1,11 +1,11 @@
 package servlet.dropdown;
 
-public class DropdownItemDTO {
+public class DropdownItem {
     private int id;
     private String name;
     private String image; // Nullable
 
-    public DropdownItemDTO(int id, String name, String image) {
+    public DropdownItem(int id, String name, String image) {
         this.id = id;
         this.name = name;
         this.image = image;

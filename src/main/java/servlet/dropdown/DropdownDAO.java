@@ -7,10 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import util.SqlBuilder;
 
-
 public class DropdownDAO {
 
-    public ArrayList<DropdownItemDTO> search(DropdownConfig config, DropdownRequest request, Connection dbConnection) {        
+    public ArrayList<DropdownItem> search(DropdownConfig config, DropdownRequest request, Connection dbConnection) {        
     	
     	String table = config.table();
         String idCol = config.idCol();
@@ -45,12 +44,12 @@ public class DropdownDAO {
         try (PreparedStatement ps = sb.build(dbConnection);
         	 ResultSet rs = ps.executeQuery()) {
         	
-        	ArrayList<DropdownItemDTO> resultsList = new ArrayList<>();
+        	ArrayList<DropdownItem> resultsList = new ArrayList<>();
             while (rs.next()) {
-            	resultsList.add(new DropdownItemDTO(
-            			rs.getInt(idCol), 
-            			rs.getString(nameCol), 
-            			imageCol != null ? rs.getString(imageCol) : null
+            	resultsList.add(new DropdownItem(
+        			rs.getInt(idCol), 
+        			rs.getString(nameCol), 
+        			imageCol != null ? rs.getString(imageCol) : null
             	));
             }
             return resultsList;
