@@ -1,9 +1,9 @@
-package servlet.discover;
+package servlet.dropdown;
 
 import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet("/DishTypes/Search")
-public class DishTypeDropdown extends DropdownSearch {
+public class DishTypeDropdown extends AbstractDropdown {
     @Override protected String getTable() { return "DISH_TYPES"; }
     @Override protected String getIdCol() { return "DISH_TYPE_ID"; }
     @Override protected String getNameCol() { return "DISH_TYPE_NAME"; }

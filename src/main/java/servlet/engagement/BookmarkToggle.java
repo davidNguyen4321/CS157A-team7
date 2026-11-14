@@ -1,7 +1,5 @@
 package servlet.engagement;
 
-import auth.ServletSecurity;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,6 +15,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import servlet.error.ServletSecurity;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,10 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class BookmarkToggle extends HttpServlet {	
 
 	@Override
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-		
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {		
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader br = request.getReader()){
 			String line;
@@ -37,12 +33,9 @@ public class BookmarkToggle extends HttpServlet {
 				sb.append(line);
 			}
 		}
-		
-		Integer sessionUserId = ServletSecurity.getAuthenticatedUserId(request, response);
-		if (sessionUserId == null) return;
-		
-		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
-	    if (dbConnection == null) return;
+				
+		Connection dbConnection = ServletSecurity.getDbConnection();
+		int sessionUserId = Integer.parseInt((String)request.getAttribute("userId"));
 		
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String, Integer> bookmarkMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});

@@ -1,6 +1,8 @@
 package util;
 
 public class WebUtils {
+    private WebUtils() {}
+	
 	// Converts user input into harmless text rather than executable code
 	public static String esc(String s) {
 		if (s == null) return "";

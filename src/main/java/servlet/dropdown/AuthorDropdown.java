@@ -1,9 +1,9 @@
-package servlet.discover;
+package servlet.dropdown;
 
 import jakarta.servlet.annotation.WebServlet;
 
 @WebServlet("/Users/Search")
-public class AuthorDropdown extends DropdownSearch {
+public class AuthorDropdown extends AbstractDropdown {
     @Override protected String getTable() { return "USERS"; }
     @Override protected String getIdCol() { return "USER_ID"; }
     @Override protected String getNameCol() { return "USER_NAME"; }

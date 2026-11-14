@@ -1,4 +1,4 @@
-package servlet.discover; 
+package servlet.search; 
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +20,7 @@ public class RecipeSearchRequest {
 
     public RecipeSearchRequest(Map<String, String> parameterMap) throws IOException {        
         ObjectMapper mapper = new ObjectMapper();
+                
         this.searchTerm = parameterMap.get("searchTerm").replaceAll("[%_]", "").trim(); // These characters are banned in recipe creation
         
         this.sortOptions = mapper.readValue(

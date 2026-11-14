@@ -15,20 +15,17 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import servlet.error.ServletSecurity;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import auth.ServletSecurity;
 
 @WebServlet("/Follow/Toggle")
 public class FollowToggle extends HttpServlet {	
 
 	@Override 
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
 		StringBuilder sb = new StringBuilder();
 		try(BufferedReader br = request.getReader()){
 			String line;
@@ -36,12 +33,9 @@ public class FollowToggle extends HttpServlet {
 				sb.append(line);
 			}
 		}
-		
-		Integer sessionUserId = ServletSecurity.getAuthenticatedUserId(request, response);
-		if (sessionUserId == null) return;
-		
-		Connection dbConnection = ServletSecurity.getValidatedDbConnection(request, response);
-	    if (dbConnection == null) return;
+				
+		Connection dbConnection = ServletSecurity.getDbConnection();
+		Integer sessionUserId = Integer.parseInt((String)request.getAttribute("userId"));
 		
 		ObjectMapper mapper = new ObjectMapper();
 		HashMap<String, Integer> followMap = mapper.readValue(sb.toString(), new TypeReference<HashMap<String, Integer>>() {});
