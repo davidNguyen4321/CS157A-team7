@@ -3,7 +3,6 @@ package servlet.engagement;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.util.Map;
 
 import database.DbAccess;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,7 +15,7 @@ import servlet.security.ServletParamException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebServlet("/Toggle/*")
+@WebServlet("/Toggle/Bookmark")
 public class BookmarkToggle extends HttpServlet {
 	private static final ToggleConfig CONFIG = new ToggleConfig("bookmark", "user_id", "recipe_id");
 

@@ -13,9 +13,14 @@ public class ToggleDAO {
     	try {
 	    	boolean exists = checkExists(config, requestInfo, dbConnection);
 	    	
-	    	boolean isActive = exists 
-	            ? deleteRecord(config, requestInfo, dbConnection) 
-	            : insertRecord(config, requestInfo, dbConnection);
+	    	boolean isActive;
+	    	try {
+	    	    isActive = exists 
+	    	        ? deleteRecord(config, requestInfo, dbConnection) 
+	    	        : insertRecord(config, requestInfo, dbConnection);
+	    	} catch (java.sql.SQLIntegrityConstraintViolationException e) {
+	    	    isActive = true; // Handled concurrently by another tab
+	    	}
 	    	
 	    	int count = getCount(config, requestInfo, dbConnection);
     	
@@ -72,8 +77,9 @@ public class ToggleDAO {
     
     private int getCount(ToggleConfig config, ToggleRequest request, Connection dbConnection) throws SQLException {
         SqlBuilder sb = new SqlBuilder();
-        sb.addString("SELECT COUNT(*) AS count FROM ").addString(config.table()) 
-          .addString(" WHERE ").addString(config.targetCol()).addString(" = ?");
+        sb.addString("SELECT COUNT(*) AS count FROM ").addString(config.table()).addString(" t ")
+          .addString("JOIN users ON t.").addString(config.userCol()).addString(" = u.user_id ")
+          .addString("WHERE t.").addString(config.targetCol()).addString(" = ? AND u.user_status = 'Active'");
         sb.addParam(request.getTargetId());
 
         int count = 0;

@@ -37,7 +37,7 @@ public class FollowToggle extends HttpServlet {
         }
 
         try (PrintWriter pw = response.getWriter()) {
-            pw.write(mapper.writeValueAsString(toggleDAO.toggle(CONFIG, toggleRequest, DbAccess.getConnection())));
+            pw.write(mapper.writeValueAsString(toggleDAO.toggle(CONFIG, toggleRequest, dbConnection)));
         }
     }
 }

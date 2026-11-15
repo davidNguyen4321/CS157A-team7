@@ -917,6 +917,12 @@ nav.main-nav {
 	background: #FFF6ED;
 }
 
+.card-bookmark-count {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
 .card-bookmark.active,
 .card-rating.active,
 .card-follow.active {

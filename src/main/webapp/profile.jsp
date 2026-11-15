@@ -151,7 +151,6 @@ int profileId;
             <%= sessionUserId %>,
             { showUser: false },
             false,
-            5
         ).then(recipes => {
             if (recipes.length === 0) {
                 document.getElementById("recipeGrid").innerHTML = "<p>No recipes yet.</p>";
@@ -182,7 +181,7 @@ int profileId;
                			String reviewImage =
                					rs.getString("RECIPE_IMAGE_PATH");
                			if (reviewImage == null || reviewImage.isEmpty()) {
-               				reviewImage = "/images/recipe-placeholder.jpg";
+               				reviewImage = "/images/recipes/recipe-placeholder.jpg";
                			}
                			int rating = rs.getInt("RATING");
         %>

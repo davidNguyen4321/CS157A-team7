@@ -117,9 +117,15 @@
 			
 			let cardStats = document.createElement("div");
 			cardStats.classList.add("card-stats");
-			let cardBookmark = document.createElement("button");
-			createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
-			cardStats.append(cardBookmark);
+			let isOwnRecipe = userId && Number(userId) === Number(sessionUserId);
+			if (isOwnRecipe) {
+				cardStats.append(createBookmarkCountLabel(bookmarkCount));
+			}
+			else {
+				let cardBookmark = document.createElement("button");
+				createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
+				cardStats.append(cardBookmark);
+			}
 			cardFooter.append(cardStats);
 			
 			cardBody.append(cardFooter);
@@ -179,6 +185,21 @@
 			{ "Ai Generated Description": true, "Ai Generated Appliances": true, "Ai Generated Cuisines": true, 
 			  "Ai Generated Dish Types": true, "Ai Generated Cooking Minutes": true, "Ai Generated Courses": true, "Bookmarked Only": bookmarkedOnly });
 		renderRecipeCards(containerId, recipes, sessionUserId, cardOptions);
+	}
+	
+	function createBookmarkCountLabel(bookmarkCount){
+		let label = document.createElement("span");
+		label.classList.add("card-bookmark-count");
+		label.textContent = bookmarkCount;
+		label.setAttribute("title", "Bookmarks");
+		let bookmarkImage = document.createElement("img");
+		bookmarkImage.classList.add("bookmark-icon");
+		bookmarkImage.setAttribute('alt', "Bookmarks");
+		bookmarkImage.setAttribute('width', "16");
+		bookmarkImage.setAttribute('height', "16");
+		bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
+		label.append(bookmarkImage);
+		return label;
 	}
 	
 	function createNewBookmark(self, recId, bookmarkCount, userBookmarked){

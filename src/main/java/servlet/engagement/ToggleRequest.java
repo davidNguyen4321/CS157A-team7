@@ -3,9 +3,7 @@ package servlet.engagement;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.servlet.http.HttpServletResponse;
 import servlet.security.ParamSecurity;
-import servlet.security.ServletParamException;
 
 import java.io.IOException;
 import java.util.Map;

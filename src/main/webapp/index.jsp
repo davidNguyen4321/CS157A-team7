@@ -54,8 +54,7 @@
 	                   <form action="index.jsp" method="GET" class="search-form" style="width: 100%;">
 	                       <div class="search-top-bar">
 	                           <span class="search-icon-fixed">🔍</span>
-	                           <input id="RecipesSearch" type="text" name="search" placeholder="Search recipe..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
-	
+							   <input id="RecipesSearch" type="text" name="search" placeholder="Search recipe..." value="<%=request.getParameter("search") != null ? WebUtils.esc(request.getParameter("search")) : ""%>">	
 	                           <!-- Filters button next to the search bar -->
 	                           <button type="button" class="filter-btn" onclick="handleFilterTypeClick('GeneralPanel', this);">
 	                               ⚙️ Filters
@@ -147,7 +146,7 @@
 			                    	<div class="filter-search-wrap">
 									    <div style="color: #F5F5DC" class="search-top-bar">
 									        <span class="search-icon-fixed">🔍</span>
-									        <input id="DishTypesSearch" type="text" name="search" placeholder="Search dish types..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+									        <input id="DishTypesSearch" type="text" name="search" placeholder="Search dish types..." value="<%=request.getParameter("search") != null ? WebUtils.esc(request.getParameter("search")) : ""%>">
 									    </div>
 									    <div id="DishTypesSearchContainer" class="filter-panel-search-container"></div>
 									</div>
@@ -166,7 +165,7 @@
 			                    	<div class="filter-search-wrap">
 									    <div style="color: #F5F5DC" class="search-top-bar">
 									        <span class="search-icon-fixed">🔍</span>
-									        <input id="CuisinesSearch" type="text" name="search" placeholder="Search cuisines..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+									        <input id="CuisinesSearch" type="text" name="search" placeholder="Search cuisines..." value="<%=request.getParameter("search") != null ? WebUtils.esc(request.getParameter("search")) : ""%>">
 									    </div>
 									    <div id="CuisinesSearchContainer" class="filter-panel-search-container"></div>
 									</div>
@@ -323,7 +322,7 @@
 	                      	<div class="filter-search-wrap">
 							    <div style="color: #F5F5DC" class="search-top-bar">
 							        <span class="search-icon-fixed">🔍</span>
-							        <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+							        <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%=request.getParameter("search") != null ? WebUtils.esc(request.getParameter("search")) : ""%>">
 							    </div>
 							    <div id="IngredientsSearchContainer" class="filter-panel-search-container"></div>
 							</div>
@@ -350,7 +349,7 @@
 	                       	<div class="filter-search-wrap">
 							    <div style="color: #F5F5DC" class="search-top-bar">
 							        <span class="search-icon-fixed">🔍</span>
-							        <input id="AppliancesSearch" type="text" name="search" placeholder="Search appliances..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+							        <input id="AppliancesSearch" type="text" name="search" placeholder="Search appliances..." value="<%=request.getParameter("search") != null ? WebUtils.esc(request.getParameter("search")) : ""%>">
 							    </div>
 							    <div id="AppliancesSearchContainer" class="filter-panel-search-container"></div>
 							</div>
@@ -377,7 +376,7 @@
 	                       	<div class="filter-search-wrap">
 							    <div style="color: #F5F5DC" class="search-top-bar">
 							        <span class="search-icon-fixed">🔍</span>
-							        <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+							        <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%=request.getParameter("search") != null ? WebUtils.esc(request.getParameter("search")) : ""%>">
 							    </div>
 							    <div id="AuthorsSearchContainer" class="filter-panel-search-container"></div>
 							</div>
@@ -811,7 +810,7 @@
 	                   	                       			String reviewImage =
 	                   	                       					reviews.getString("RECIPE_IMAGE_PATH");
 	                   	                       			if (reviewImage == null || reviewImage.isEmpty()) {
-	                   	                       				reviewImage = "/images/recipe-placeholder.jpg";
+	                   	                       				reviewImage = "/images/recipes/recipe-placeholder.jpg";
 	                   	                       			}
 	                   	                       			String reviewerAvatar = reviews.getString("USER_IMAGE_PATH");
 	                   	                       			if (reviewerAvatar == null || reviewerAvatar.isEmpty()){
@@ -826,10 +825,10 @@
 	                       </div>
 	                       <div class="review-body">
 	                           <p class="review-title">
-	                               <%=WebUtils.esc(reviews.getString("RECIPE_NAME"))%>
+	                               <%=WebUtils.esc(reviews.getString("recipe_name"))%>
 	                           </p>
 	                           <p class="review-text">
-	                               <%=reviews.getString("REVIEW_DESCRIPTION")%>
+	                               <%= WebUtils.esc(reviews.getString("review_description")) %>
 	                           </p>
 	                           <div class="review-footer">
 	                               <div class="card-author">
