@@ -78,7 +78,7 @@ public class ToggleDAO {
     private int getCount(ToggleConfig config, ToggleRequest request, Connection dbConnection) throws SQLException {
         SqlBuilder sb = new SqlBuilder();
         sb.addString("SELECT COUNT(*) AS count FROM ").addString(config.table()).addString(" t ")
-          .addString("JOIN users ON t.").addString(config.userCol()).addString(" = u.user_id ")
+          .addString("JOIN users u ON t.").addString(config.userCol()).addString(" = u.user_id ")
           .addString("WHERE t.").addString(config.targetCol()).addString(" = ? AND u.user_status = 'Active'");
         sb.addParam(request.getTargetId());
 
