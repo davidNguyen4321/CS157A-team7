@@ -695,30 +695,13 @@
 				
 					    recipeSearchTimeout = null;
 					    
-						async function searchRecipes(searchBarId){
+					    async function searchRecipes(searchBarId){
 						    clearTimeout(recipeSearchTimeout);
 						    recipeSearchTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
-								searchBar = document.getElementById(searchBarId);
-					    		searchTerm = searchBar.value.trim();
-						        let parameters = new URLSearchParams();
-						        parameters.append('searchTerm', searchTerm);
-						        parameters.append('sortOptions', JSON.stringify(activeSortOptions()));
-						        parameters.append('filterIds', JSON.stringify(Object.fromEntries(filterIds)));
-						        parameters.append('tolerances', JSON.stringify(Object.fromEntries(tolerances)));
-						        parameters.append('ranges', JSON.stringify(Object.fromEntries(ranges)));
-						        parameters.append('options', JSON.stringify(Object.fromEntries(options)));
-								let response = await fetch("${pageContext.request.contextPath}/Recipes/Search?" + parameters.toString(), {
-						        	method:'GET',
-						        	headers:{
-						                "Content-Type": "application/json",
-						                "Accept": "application/json"
-						        	},
-						        });
-								if (!response.ok) {
-						        	throw new Error('Network response was not ok');
-						        }
-					        	let objects = await response.json(); // Creates a JSON object
-					        	addResults(objects);
+						        let searchTerm = document.getElementById(searchBarId).value.trim();
+						        addResults(await fetchRecipes(searchTerm, activeSortOptions(),
+						            Object.fromEntries(filterIds), Object.fromEntries(tolerances),
+						            Object.fromEntries(ranges), Object.fromEntries(options)));
 						    }, 10);
 						}
 											
@@ -728,18 +711,8 @@
 				        	resultContainer.classList.add("active");
 							let previousRecipes = document.querySelectorAll(".search-recipe-card");
 	
-							//removing past recipes
-					    	for (let previousRecipe of previousRecipes) {
-					    		previousRecipe.remove();
-					    	}
-							for (let recipe of objects){
-							    addRecipeCard("recipeResultsScrollRow", recipe["recipeId"], recipe["recipeName"], 
-							            recipe["recipeImagePath"], recipe["recipeDescription"],
-							            recipe["recipeTotalMinutes"], recipe["recipeActiveTimestamp"], 
-							            recipe["reviewCount"], recipe["averageRating"], recipe["bookmarkCount"],
-							            recipe["userBookmarked"], recipe["userId"],
-							            recipe["userName"], recipe["userImagePath"], <%=sessionUserId%>, true);
-							}
+					    	for (let previousRecipe of previousRecipes) previousRecipe.remove();
+					    	renderRecipeCards("recipeResultsScrollRow", objects, <%=sessionUserId%>, { showUser: true });
 						}
 						</script>
 	                   </form>
@@ -766,103 +739,34 @@
 	                   <p class="section-subtitle">Latest recipes from your favorite creators</p>
 	               </div>
 	               <div id="followedScrollRow" class="horizontal-scroll-row"></div>
-					 <%
-					 if (dbConnection != null) {
-					 		    	String sql =
-					 		    		    "SELECT r.RECIPE_NAME, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_ID, " +
-					 		    		    "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
-					 		    		    "u.USER_NAME, COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " + // really cheeky
-					 						"recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
-					 		    		    "FROM RECIPES r INNER JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
-					 				    	"INNER JOIN FOLLOW f ON r.AUTHOR_ID = f.FOLLOWING_ID " +
-					 						"AND f.FOLLOWER_ID = ? " +
-					 				    	"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
-					 	                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
-					 	                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
-					 	                		"FROM RECIPES recRevSubquery " +
-					 		           			"LEFT JOIN REVIEWS rev ON " +
-					 		           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
-					 		            		"AND rev.REVIEW_STATUS = 'Active' " +
-					 	                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
-					 		           		") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
-					 		             			"LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
-					 		  							"INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
-					 		  		  					"AND u.USER_STATUS = 'Active' " +
-					             			  		") b ON r.RECIPE_ID = b.RECIPE_ID " +
-					 		  		  		"WHERE r.RECIPE_STATUS = 'Active' GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
-					 		    		    "r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, r.RECIPE_IMAGE_PATH, " +
-					 		    		    "r.RECIPE_DESCRIPTION, r.AUTHOR_ID, u.USER_IMAGE_PATH, " +
-					 				    	"recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING, " +
-					 		    		    "u.USER_NAME ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC ";
-					 			    try (
-					 			    	PreparedStatement statement = dbConnection.prepareStatement(sql);
-					 		    		){
-					 			    	statement.setInt(1, sessionUserId);
-					 			    	statement.setInt(2, sessionUserId);
-					 	    			try(
-					 	    				ResultSet recipes = statement.executeQuery();		
-					 					)	{
-               	                            ArrayList<Map<String, Object>> followedRecipesList = new ArrayList<>();
-	                   	                         while (recipes.next()) {
-	                   	                        	 Map<String, Object> recipe = new HashMap<>();
-	                   	                        	 recipe.put("id", recipes.getInt("RECIPE_ID"));
-	                   	                        	 recipe.put("name", recipes.getString("RECIPE_NAME"));
-	                   	                        	 recipe.put("image", recipes.getString("RECIPE_IMAGE_PATH"));
-	                   	                        	 recipe.put("description", recipes.getString("RECIPE_DESCRIPTION"));
-	                   	                        	 recipe.put("minutes", recipes.getObject("TOTAL_MINUTES"));
-	                   	                        	 recipe.put("timestamp", recipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
-	                   	                        	 recipe.put("reviews", recipes.getInt("REVIEW_COUNT"));
-	                   	                        	 recipe.put("rating", String.format("%.1f", recipes.getFloat("AVERAGE_RATING")));
-	                   	                        	 recipe.put("bookmarks", recipes.getInt("BOOKMARK_COUNT"));
-	                   	                        	 recipe.put("hasBookmarked", recipes.getInt("HAS_BOOKMARKED")>0);
-	                   	                        	 recipe.put("authorId", recipes.getInt("AUTHOR_ID"));
-	                   	                        	 recipe.put("authorName", recipes.getString("USER_NAME"));
-	                   	                        	 recipe.put("authorImage", recipes.getString("USER_IMAGE_PATH"));
-                  	                             
-	                   	                        	followedRecipesList.add(recipe);
-                  	                         }
-                  	                         
-                  	                         ObjectMapper mapper = new ObjectMapper();
-                  	                         String followedRecipesJson = mapper.writeValueAsString(followedRecipesList);	
-					    		%>
-					    	<script>
-							{
-							    const followedRecipesData = <%= followedRecipesJson %>;
-							    const sessionUserId = <%= sessionUserId %>;
-							
-							    followedRecipesData.forEach((recipe, index) => {
-							        let recipeCard = addRecipeCard(
-							            "followedScrollRow", 
-							            recipe.id, 
-							            recipe.name, 
-							            recipe.image, 
-							            recipe.description,
-							            recipe.minutes, 
-							            recipe.timestamp,
-							            recipe.reviews, 
-							            parseFloat(recipe.rating),
-							            recipe.bookmarks, 
-							            recipe.hasBookmarked, 
-							            recipe.authorId,
-							            recipe.authorName, 
-							            recipe.authorImage,
-							            sessionUserId,
-							            true
-							        );
-							
-							        let recipeImage = recipeCard.querySelector(".recipe-card-img");
-							        let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
-							        let rankBadge = document.createElement("div");
-							        rankBadge.classList.add("rank-badge");
-							        rankBadge.textContent = "#" + (index + 1);
-							        recipeImage.insertBefore(rankBadge, recipeCardBadges);
-							    });
-							}
+					<%
+						if (dbConnection != null) {
+						    ArrayList<Integer> followedIds = new ArrayList<>();
+						    String sql = "SELECT following_id FROM follow WHERE follower_id = ?";
+						    try (PreparedStatement ps = dbConnection.prepareStatement(sql)) {
+						        ps.setInt(1, sessionUserId);
+						        try (ResultSet rs = ps.executeQuery()) {
+						            while (rs.next()) followedIds.add(rs.getInt("following_id"));
+						        }
+						    } 
+						    catch (Exception error) {
+						        out.println("<p>Database error: " + error.getMessage() + "</p>");
+						    }
+						    if (!followedIds.isEmpty()) {
+					%>
+							<script>
+							    loadRecipeStrip(
+						    		"followedScrollRow", 
+						    		<%= followedIds %>, 
+						    		{ "Publication Date": "descending" },
+						            <%= sessionUserId %>, 
+						            { showUser: true, rank: false }
+							    );
 							</script>
-							<% 
-							}}catch (Exception error){
-					    				out.println("<p>Database error: " +error.getMessage() + "</p>");
-					    	}}%>
+					<%
+					    	}
+						}
+					%>
 	           </section>
 	
 	           <!-- Reviews for You -->
@@ -934,7 +838,7 @@
 	                               </div>
 	                               <div class="review-meta">
 	                                   <span class="review-date">
-	                                       <%=reviews.getTimestamp("REVIEW_ACTIVE_TIMESTAMP")%>
+	                                       <%=reviews.getDate("review_active_timestamp")%>
 	                                   </span>
 	                                   <span class="card-rating">
 	                                       <span class="stars"
@@ -958,112 +862,22 @@
 	               </div>
 	           </section>
 	
-	           <!-- Your Most Popular -->
-	           <section>
-	               <div>
-	                   <h2 class="section-title">Your Most Popular</h2>
-	                   <p class="section-subtitle">Which of your recipes are the most popular</p>
-	               </div>
-	               <div id="popularScrollRow" class="horizontal-scroll-row"></div>
-	                   <%
-	                   if (dbConnection != null) {
-	                   	                       String popularSql =
-	                   	                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
-	                   	                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
-	                   	                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
-	                   	                           "recRevSubquery.AVERAGE_RATING, " +
-	                   	                           "recRevSubquery.REVIEW_COUNT, "+
-	                   	                           "r.RECIPE_ID, r.RECIPE_ACTIVE_TIMESTAMP FROM RECIPES r " +
-	                   	             			   "LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
-	                   		  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
-	                   		  		  				   "AND u.USER_STATUS = 'Active' " +
-	                               			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
-	                   	                   		"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
-	                   	                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
-	                   	                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
-	                   	                		"FROM RECIPES recRevSubquery " +
-	                   		           			"LEFT JOIN REVIEWS rev ON " +
-	                   		           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
-	                   		            		"AND rev.REVIEW_STATUS = 'Active' " +
-	                   	                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
-	                   	                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
-	                   	                           "WHERE r.RECIPE_STATUS = 'Active' " +
-	                   	                           "AND r.AUTHOR_ID = ? " +
-	                   	                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, r.RECIPE_ACTIVE_TIMESTAMP, " +
-	                   	                           "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
-	                   	                           "r.TOTAL_MINUTES, recRevSubquery.AVERAGE_RATING, " +
-	                   	                           "recRevSubquery.REVIEW_COUNT " +
-	                   	                           "ORDER BY BOOKMARK_COUNT DESC";
-	                   	
-	                   	                       try (
-	                   	                           PreparedStatement popularStatement =
-	                   	                               dbConnection.prepareStatement(popularSql);
-	                   	                       ) {
-	                   	                    	   popularStatement.setInt(1, sessionUserId);
-	                   	                    	   popularStatement.setInt(2, sessionUserId);
-	                   	                       	try(                           
-	                   	                       		ResultSet popularRecipes =
-	                   	                       				popularStatement.executeQuery()){
-	                   	                            ArrayList<Map<String, Object>> popularRecipesList = new ArrayList<>();
-	                   	                         while (popularRecipes.next()) {
-	                   	                             Map<String, Object> recipe = new HashMap<>();
-	                   	                             recipe.put("id", popularRecipes.getInt("RECIPE_ID"));
-	                   	                             recipe.put("name", popularRecipes.getString("RECIPE_NAME"));
-	                   	                             recipe.put("image", popularRecipes.getString("RECIPE_IMAGE_PATH"));
-	                   	                             recipe.put("description", popularRecipes.getString("RECIPE_DESCRIPTION"));
-	                   	                             recipe.put("minutes", popularRecipes.getObject("TOTAL_MINUTES"));
-	                   	                             recipe.put("timestamp", popularRecipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
-	                   	                             recipe.put("reviews", popularRecipes.getInt("REVIEW_COUNT"));
-	                   	                          	 recipe.put("hasBookmarked", popularRecipes.getInt("HAS_BOOKMARKED")>0);
-	                   	                             recipe.put("rating", String.format("%.1f", popularRecipes.getFloat("AVERAGE_RATING")));
-	                   	                             recipe.put("bookmarks", popularRecipes.getInt("BOOKMARK_COUNT"));
-	                   	                             popularRecipesList.add(recipe);
-	                   	                         }
-	                   	                         
-	                   	                         ObjectMapper mapper = new ObjectMapper();
-	                   	                         String popularRecipesJson = mapper.writeValueAsString(popularRecipesList);	                   	                            	   
-	                   %>
-						<script>
-						    const popularRecipesData = <%= popularRecipesJson %>;
-						    const sessionUserId = <%= sessionUserId %>;
-						    
-						    popularRecipesData.forEach((recipe, index) => {
-						        let recipeCard = addRecipeCard(
-						            "popularScrollRow", 
-						            recipe.id, 
-						            recipe.name, 
-						            recipe.image, 
-						            recipe.description,
-						            recipe.minutes, 
-						            recipe.timestamp,
-						            recipe.reviews, 
-						            parseFloat(recipe.rating),
-						            recipe.bookmarks, 
-						            recipe.hasBookmarked, 
-						            sessionUserId,
-						            null, // null because never have to be read
-						            null,
-						            sessionUserId,
-						            false
-						        );
-						
-						        let recipeImage = recipeCard.querySelector(".recipe-card-img");
-						        let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
-						        let rankBadge = document.createElement("div");
-						        rankBadge.classList.add("rank-badge");
-						        rankBadge.textContent = "#" + (index + 1);
-						        recipeImage.insertBefore(rankBadge, recipeCardBadges);
-						    });
-						</script>
-	                   <%
-	                   	                        }
-	                   	                       }
-	                   	                       catch (Exception error){
-	                   			    	out.println("<p>Database error: " +error.getMessage() + "</p>");
-	                   			    }
-	                   	                   }
-	                   %>
-	           </section>
+	           	<!-- Your Most Popular -->
+	           	<section>
+	               	<div>
+	               	    <h2 class="section-title">Your Most Popular</h2>
+	               	    <p class="section-subtitle">Which of your recipes are the most popular</p>
+	               	</div>
+	               	<div id="popularScrollRow" class="horizontal-scroll-row"></div>
+	               	<script>
+	               	loadRecipeStrip(
+	                	"popularScrollRow", 
+	                	[<%= sessionUserId %>],
+	                    { "Bookmarks": "descending", "Publication Date": "descending" },
+	                    <%= sessionUserId %>, 
+	                    { showUser: false, rank: true });
+	               	</script>
+	           	</section>
 	       </div>
 	       <script>
 	       		document.getElementById("personalizedStrips").classList.add("active");
@@ -1131,7 +945,7 @@
 		      	                   	                        	 recipe.put("image", bookmarkedRecipes.getString("RECIPE_IMAGE_PATH"));
 		      	                   	                        	 recipe.put("description", bookmarkedRecipes.getString("RECIPE_DESCRIPTION"));
 		      	                   	                        	 recipe.put("minutes", bookmarkedRecipes.getObject("TOTAL_MINUTES"));
-		      	                   	                        	 recipe.put("timestamp", bookmarkedRecipes.getString("RECIPE_ACTIVE_TIMESTAMP"));
+		      	                   	                        	 recipe.put("timestamp", bookmarkedRecipes.getDate("RECIPE_ACTIVE_TIMESTAMP").toString());
 		      	                   	                        	 recipe.put("reviews", bookmarkedRecipes.getInt("REVIEW_COUNT"));
 		      	                   	                        	 recipe.put("rating", String.format("%.1f", bookmarkedRecipes.getFloat("AVERAGE_RATING")));
 		      	                   	                        	 recipe.put("bookmarks", bookmarkedRecipes.getInt("BOOKMARK_COUNT"));
@@ -1169,13 +983,6 @@
 							            sessionUserId,
 							            true
 							        );
-							
-							        let recipeImage = recipeCard.querySelector(".recipe-card-img");
-							        let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
-							        let rankBadge = document.createElement("div");
-							        rankBadge.classList.add("rank-badge");
-							        rankBadge.textContent = "#" + (index + 1);
-							        recipeImage.insertBefore(rankBadge, recipeCardBadges);
 							    });
 							}
 							</script>

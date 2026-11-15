@@ -245,7 +245,7 @@ int profileId;
                        	 recipe.put("image", rs.getString("RECIPE_IMAGE_PATH"));
                        	 recipe.put("description", rs.getString("RECIPE_DESCRIPTION"));
                        	 recipe.put("minutes", rs.getObject("TOTAL_MINUTES"));
-                       	 recipe.put("timestamp", rs.getString("RECIPE_ACTIVE_TIMESTAMP"));
+                       	 recipe.put("timestamp", rs.getDate("RECIPE_ACTIVE_TIMESTAMP").toString());
                        	 recipe.put("reviews", rs.getInt("REVIEW_COUNT"));
                        	 recipe.put("rating", String.format("%.1f", rs.getFloat("AVERAGE_RATING")));
                        	 recipe.put("bookmarks", rs.getInt("BOOKMARK_COUNT"));
@@ -323,7 +323,7 @@ int profileId;
                         <small>on <%= WebUtils.esc(rs.getString("RECIPE_NAME")) %></small></p>
                     <p class="review-text"><%= WebUtils.esc(rs.getString("REVIEW_DESCRIPTION")) %></p>
                     <div class="review-footer">
-                        <span class="review-date"><%= rs.getTimestamp("REVIEW_ACTIVE_TIMESTAMP") %></span>
+                        <span class="review-date"><%= rs.getDate("REVIEW_ACTIVE_TIMESTAMP") %></span>
 						<span class="card-rating">
                              <span class="stars"
                                  style="--rating: <%= rating %>;"

@@ -128,6 +128,61 @@
 			
 			return recipeCard
 	}
+	
+	async function fetchRecipes(searchTerm, sortOptions, filterIds, tolerances, ranges, options) {
+		let parameters = new URLSearchParams();
+		parameters.append('searchTerm', searchTerm);
+		parameters.append('sortOptions', JSON.stringify(sortOptions));
+		parameters.append('filterIds', JSON.stringify(filterIds));
+		parameters.append('tolerances', JSON.stringify(tolerances));
+		parameters.append('ranges', JSON.stringify(ranges));
+		parameters.append('options', JSON.stringify(options));
+		let response = await fetch("${pageContext.request.contextPath}/Recipes/Search?" + parameters.toString(), {
+			method: 'GET',
+			headers: { "Content-Type": "application/json", "Accept": "application/json" },
+		});
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		return await response.json();
+	}
+
+	function renderRecipeCards(containerId, recipes, sessionUserId, options = {}) {
+		const { showUser = true, rank = false } = options;
+		recipes.forEach((recipe, index) => {
+			let recipeCard = addRecipeCard(
+				containerId,
+				recipe.recipeId, recipe.recipeName,
+				recipe.recipeImagePath, recipe.recipeDescription,
+				recipe.recipeTotalMinutes, recipe.recipeActiveTimestamp,
+				recipe.reviewCount, parseFloat(recipe.averageRating),
+				recipe.bookmarkCount, recipe.userBookmarked,
+				recipe.userId, recipe.userName, recipe.userImagePath,
+				sessionUserId, showUser
+			);
+			if (rank) {
+				let recipeImage = recipeCard.querySelector(".recipe-card-img");
+				let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
+				let rankBadge = document.createElement("div");
+				rankBadge.classList.add("rank-badge");
+				rankBadge.textContent = "#" + (index + 1);
+				recipeImage.insertBefore(rankBadge, recipeCardBadges);
+			}
+		});
+	}
+
+	async function loadRecipeStrip(containerId, authorIds, sortOptions, sessionUserId, cardOptions) {
+		let recipes = await fetchRecipes("", sortOptions,
+			{ "Ingredient": [], "Appliance": [], "Author": authorIds, "Cuisine": [],
+			  "Dish Type": [], "Dietary Restriction": [], "Course": [] },
+			{ "Ingredient": 0, "Appliance": 0 },
+			{ "Bookmarks": {}, "Cooking Time": {}, "Ratings": {}, "Reviews": {} },
+			{ "Ai Generated Description": true, "Ai Generated Appliances": true,
+			  "Ai Generated Cuisines": true, "Ai Generated Dish Types": true,
+			  "Ai Generated Cooking Minutes": true, "Ai Generated Courses": true });
+		renderRecipeCards(containerId, recipes, sessionUserId, cardOptions);
+	}
+	
 	function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
 		self.classList.add("card-bookmark");
 		self.onclick = function(event) {
