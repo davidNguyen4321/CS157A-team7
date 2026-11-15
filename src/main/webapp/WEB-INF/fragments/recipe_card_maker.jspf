@@ -171,15 +171,13 @@
 		});
 	}
 
-	async function loadRecipeStrip(containerId, authorIds, sortOptions, sessionUserId, cardOptions) {
+	async function loadRecipeStrip(containerId, authorIds, sortOptions, sessionUserId, cardOptions, bookmarkedOnly = false) {
 		let recipes = await fetchRecipes("", sortOptions,
-			{ "Ingredient": [], "Appliance": [], "Author": authorIds, "Cuisine": [],
-			  "Dish Type": [], "Dietary Restriction": [], "Course": [] },
+			{ "Ingredient": [], "Appliance": [], "Author": authorIds, "Cuisine": [], "Dish Type": [], "Dietary Restriction": [], "Course": [] },
 			{ "Ingredient": 0, "Appliance": 0 },
 			{ "Bookmarks": {}, "Cooking Time": {}, "Ratings": {}, "Reviews": {} },
-			{ "Ai Generated Description": true, "Ai Generated Appliances": true,
-			  "Ai Generated Cuisines": true, "Ai Generated Dish Types": true,
-			  "Ai Generated Cooking Minutes": true, "Ai Generated Courses": true });
+			{ "Ai Generated Description": true, "Ai Generated Appliances": true, "Ai Generated Cuisines": true, 
+			  "Ai Generated Dish Types": true, "Ai Generated Cooking Minutes": true, "Ai Generated Courses": true, "Bookmarked Only": bookmarkedOnly });
 		renderRecipeCards(containerId, recipes, sessionUserId, cardOptions);
 	}
 	

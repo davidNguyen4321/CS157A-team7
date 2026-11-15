@@ -216,6 +216,7 @@ public class RecipeListDAO {
         if(!options.get("Ai Generated Dish Types"))      sb.addString("AND recipes.ai_gen_dish_types = FALSE ");
         if(!options.get("Ai Generated Cooking Minutes")) sb.addString("AND recipes.ai_gen_total_minutes = FALSE ");
         if(!options.get("Ai Generated Courses"))         sb.addString("AND recipes.ai_gen_course = FALSE ");
+        if(Boolean.TRUE.equals(options.get("Bookmarked Only"))) sb.addString("AND recipes_users.user_bookmarked > 0 ");
         
         sb.addString("ORDER BY ");
         boolean hasSort = false; 

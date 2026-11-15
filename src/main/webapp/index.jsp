@@ -7,10 +7,7 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 <%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
@@ -891,109 +888,19 @@
             %> <!-- Fallback: library (also the final option) -->
            	<div id="library" class="sections-container">
 	        	<section>
-		               <div>
-		                   <h2 class="section-title">Your Library</h2>
-		                   <p class="section-subtitle">Recipes Too Good to Forget</p>
-		               </div>
-		               <div id="libraryScrollRow" class="horizontal-scroll-row"></div>
-		               	<%
-		                   if (dbConnection != null) {
-		                   		                       String bookmarkSql =
-		                   		                           "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
-		                   		                           "r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, r.RECIPE_ACTIVE_TIMESTAMP, " +
-		                   		                           "COUNT(DISTINCT b.USER_ID) AS BOOKMARK_COUNT, " +
-				                   		                   "recRevSubquery.REVIEW_COUNT, " +
-				                   				           "recRevSubquery.AVERAGE_RATING, " +
-		                   		                           "r.RECIPE_ID, r.AUTHOR_ID, u.USER_NAME, " +
-		                   		                           "u.USER_IMAGE_PATH FROM RECIPES r " +
-		                   		             			   "LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
-			                   	  						   "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
-			                   	  		  				   "AND u.USER_STATUS = 'Active' " +
-		                   	            			  	   ") b ON r.RECIPE_ID = b.RECIPE_ID " +
-			                   		                   		"LEFT JOIN USERS u ON r.AUTHOR_ID = u.USER_ID " +
-			                   		                   		"INNER JOIN ( SELECT recRevSubquery.RECIPE_ID, " +
-				                   		                		"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
-				                   		                		"AVG(rev.RATING*1.0) AS AVERAGE_RATING " + 
-				                   		                		"FROM RECIPES recRevSubquery " +
-				                   			           			"LEFT JOIN REVIEWS rev ON " +
-				                   			           			"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
-				                   			            		"AND rev.REVIEW_STATUS = 'Active' " +
-				                   		                   		"GROUP BY recRevSubquery.RECIPE_ID " + 
-		                   		                           ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
-		                   		                   			"WHERE r.RECIPE_STATUS = 'Active' " +
-		                   		                           "GROUP BY r.RECIPE_ID, r.RECIPE_NAME, " +
-		                   		                           "r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " +
-		                   		                           "r.TOTAL_MINUTES, u.USER_ID, u.USER_NAME, " + 
-		                   		                           "u.USER_IMAGE_PATH, recRevSubquery.REVIEW_COUNT, " +
-		                   		                           "recRevSubquery.AVERAGE_RATING " + 
-		                   		                           "HAVING SUM(b.USER_ID = ?)>0 " +
-		                   		                           "ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC";
-		                   		
-		                   		                       try (
-		                   		                           PreparedStatement bookmarkedStatement =
-		                   		                               dbConnection.prepareStatement(bookmarkSql);
-		                   		                       ) {
-		                   		                    	   bookmarkedStatement.setInt(1, sessionUserId);
-		                   		                       	try(                           
-		                   		                       		ResultSet bookmarkedRecipes =
-		                   		                       				bookmarkedStatement.executeQuery()){
-			                   	                            ArrayList<Map<String, Object>> bookmarkedRecipesList = new ArrayList<>();
-		      	                   	                         while (bookmarkedRecipes.next()) {
-		      	                   	                        	 Map<String, Object> recipe = new HashMap<>();
-		      	                   	                        	 recipe.put("id", bookmarkedRecipes.getInt("RECIPE_ID"));
-		      	                   	                        	 recipe.put("name", bookmarkedRecipes.getString("RECIPE_NAME"));
-		      	                   	                        	 recipe.put("image", bookmarkedRecipes.getString("RECIPE_IMAGE_PATH"));
-		      	                   	                        	 recipe.put("description", bookmarkedRecipes.getString("RECIPE_DESCRIPTION"));
-		      	                   	                        	 recipe.put("minutes", bookmarkedRecipes.getObject("TOTAL_MINUTES"));
-		      	                   	                        	 recipe.put("timestamp", bookmarkedRecipes.getDate("RECIPE_ACTIVE_TIMESTAMP").toString());
-		      	                   	                        	 recipe.put("reviews", bookmarkedRecipes.getInt("REVIEW_COUNT"));
-		      	                   	                        	 recipe.put("rating", String.format("%.1f", bookmarkedRecipes.getFloat("AVERAGE_RATING")));
-		      	                   	                        	 recipe.put("bookmarks", bookmarkedRecipes.getInt("BOOKMARK_COUNT"));
-		      	                   	                        	 recipe.put("authorId", bookmarkedRecipes.getInt("AUTHOR_ID"));
-		      	                   	                        	 recipe.put("authorName", bookmarkedRecipes.getString("USER_NAME"));
-		      	                   	                        	 recipe.put("authorImage", bookmarkedRecipes.getString("USER_IMAGE_PATH"));
-		    	                   	                             
-		      	                   	                        	 bookmarkedRecipesList.add(recipe);
-		    	                   	                         }
-		    	                   	                         
-		    	                   	                         ObjectMapper mapper = new ObjectMapper();
-		    	                   	                         String bookmarkedRecipesJson = mapper.writeValueAsString(bookmarkedRecipesList);	 
-		                   %>
-							<script>
-							{
-							    const bookmarkedRecipesData = <%= bookmarkedRecipesJson %>;
-							    const sessionUserId = <%= sessionUserId %>;
-							    
-							    bookmarkedRecipesData.forEach((recipe, index) => {
-							        let recipeCard = addRecipeCard(
-							            "libraryScrollRow", 
-							            recipe.id, 
-							            recipe.name, 
-							            recipe.image, 
-							            recipe.description,
-							            recipe.minutes, 
-							            recipe.timestamp,
-							            recipe.reviews, 
-							            parseFloat(recipe.rating),
-							            recipe.bookmarks, 
-							            true, 
-							            recipe.authorId,
-							            recipe.authorName, 
-							            recipe.authorImage,
-							            sessionUserId,
-							            true
-							        );
-							    });
-							}
-							</script>
-		                   <%
-		                        }
-		                       }
-		                       catch (Exception error){
-						    	out.println("<p>Database error: " +error.getMessage() + "</p>");
-						    }
-		                   }
-		                   %>
+		               	<div>
+		               	    <h2 class="section-title">Your Library</h2>
+		               	    <p class="section-subtitle">Recipes Too Good to Forget</p>
+		               	</div>
+		               	<div id="libraryScrollRow" class="horizontal-scroll-row"></div>
+		               	<script>
+							loadRecipeStrip(
+						    	"libraryScrollRow", [], 
+						    	{ "Publication Date": "descending" },
+						        <%= sessionUserId %>, 
+						        { showUser: true }, true
+						    );
+						</script>
 		           </section>
 		      </div>
 		   <script>
