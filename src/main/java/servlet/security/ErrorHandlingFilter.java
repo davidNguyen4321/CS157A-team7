@@ -55,7 +55,9 @@ public class ErrorHandlingFilter implements Filter {
     }
     
     private String describe(HttpServletRequest request) {
-        return request.getMethod() + " " + request.getRequestURI() + " from " + request.getRemoteAddr();
+        return request.getMethod() + " " + request.getRequestURI() 
+    		+ " from " + request.getRemoteAddr()
+        	+ " (user " + request.getAttribute("userId") + ")";
     }
     
     private void sendJsonError(HttpServletResponse response, int status) throws IOException {

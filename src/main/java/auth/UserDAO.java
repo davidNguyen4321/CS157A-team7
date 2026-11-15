@@ -5,7 +5,7 @@ import database.DbAccess;
 import java.util.regex.Pattern;
 
 import java.time.ZoneId;
-
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -80,6 +80,20 @@ public class UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? map(rs) : null;
             }
+        }
+    }
+    
+    public static boolean userExists(int userId, Connection connection) {
+        String sql = "SELECT 1 FROM users WHERE user_id = ? AND user_status = 'Active'";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+        catch (SQLException e) {
+            throw new RuntimeException("Find user failed: " + e.getMessage(), e);
         }
     }
 }

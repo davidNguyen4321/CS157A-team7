@@ -84,13 +84,13 @@ int profileId;
 		
 	    followTimeout = null;
 		function toggleFollow(self, followingID){
-			let url = "${pageContext.request.contextPath}/Follow/Toggle";
+			let url = "${pageContext.request.contextPath}/Toggle/Follow";
 		    clearTimeout(followTimeout);
 		    followTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
 				let response = await fetch(url, {
 		        	method:'POST',
 		        	body: JSON.stringify({
-		        		followingId: followingID
+		        		targetId: followingID
 		        	}),
 		        	headers:{
 		                "Content-Type": "application/json; charset=UTF-8",
@@ -101,7 +101,7 @@ int profileId;
 		        	throw new Error('Network response was not ok');
 		        }
 	        	let objects = await response.json(); // Creates a JSON object
-	        	toggleFollowElement(self, objects["follow"]);
+	        	toggleFollowElement(self, objects["status"]);
 		    }, 10);
 		}
 		

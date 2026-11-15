@@ -177,4 +177,19 @@ public class RecipeDAO {
 
         return reviews;
     }
+    
+    public static Integer findAuthorId(int recipeId, Connection connection) {
+        String sql = "SELECT author_id FROM recipes WHERE recipe_id = ? AND recipe_status = 'Active'";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, recipeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+                return rs.getInt("author_id");
+            }
+        }
+        catch (SQLException e) {
+	        throw new RuntimeException("Find recipe author failed: " + e.getMessage(), e);
+        }
+    }
 }

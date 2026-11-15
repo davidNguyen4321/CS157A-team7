@@ -23,10 +23,6 @@ public class ToggleRequest {
         
         this.targetId = parameterMap.get("targetId");
         this.sessionUserId = sessionUserId;
-        
-        if (this.targetId.equals(this.sessionUserId)) {
-        	throw new ServletParamException(HttpServletResponse.SC_BAD_REQUEST, "Attempt to interact with self detected");
-        }
     }
 
     public int getTargetId() {return targetId; }
