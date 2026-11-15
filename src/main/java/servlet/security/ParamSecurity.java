@@ -1,5 +1,8 @@
 package servlet.security;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +11,26 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class ParamSecurity {
 	
-    public static Map<String, String> getParams(HttpServletRequest request, String[] parameters) {
+    public static String readRequestBody(HttpServletRequest request, int maxChar) throws IOException {
+    	char[] buffer = new char[maxChar];
+    	StringBuilder sb = new StringBuilder();
+    	int totalCharsRead = 0;
+    	int charsRead;
+    	
+    	try (BufferedReader br = request.getReader()) {
+            while ((charsRead = br.read(buffer)) != -1) {
+                totalCharsRead += charsRead;
+                if (totalCharsRead > maxChar) {
+                    throw new ServletParamException(HttpServletResponse.SC_BAD_REQUEST, "Request body exceeds maximum allowed size " + maxChar);
+                }
+                sb.append(buffer, 0, charsRead);
+            }
+        }
+    	
+        return sb.toString();
+    }
+	
+	public static Map<String, String> getParams(HttpServletRequest request, String[] parameters) {
         Map<String, String> parameterMap = new HashMap<>();
         
         for (String parameter : parameters) {

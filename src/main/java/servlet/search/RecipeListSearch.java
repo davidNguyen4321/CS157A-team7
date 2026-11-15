@@ -23,12 +23,13 @@ public class RecipeListSearch extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {        
         String[] parameters = {"searchTerm", "sortOptions", "filterIds", "tolerances", "ranges", "options"};
         Map<String, String> parameterMap = ParamSecurity.getParams(request, parameters);
-        RecipeListRequest requestInfo = new RecipeListRequest(parameterMap);
+        
+        Integer sessionUserId = (Integer) request.getAttribute("userId");
+        RecipeListRequest requestInfo = new RecipeListRequest(parameterMap, sessionUserId);
         Connection dbConnection = DbAccess.getConnection();
-        int sessionUserId = (Integer) request.getAttribute("userId");
         
         try (PrintWriter pw = response.getWriter()) {
-            pw.write(mapper.writeValueAsString(recipeListDAO.search(requestInfo, dbConnection, sessionUserId)));
+            pw.write(mapper.writeValueAsString(recipeListDAO.search(requestInfo, dbConnection)));
         }
     }
 }

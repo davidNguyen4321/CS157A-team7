@@ -11,7 +11,8 @@ import java.util.Map;
 import java.io.IOException;
 
 public class RecipeListRequest {
-    private String searchTerm;
+    private Integer sessionUserId;
+	private String searchTerm;
     private Map<String, String> sortOptions;
     private Map<String, Integer[]> filterIdMap;
     private Map<String, Integer> tolerances;
@@ -19,10 +20,11 @@ public class RecipeListRequest {
     private Map<String, Boolean> options;
     private Map<Integer, Integer[]> ingredientMatches = new LinkedHashMap<>(); // wanted id -> ids that satisfy it
 
-    public RecipeListRequest(Map<String, String> parameterMap) throws IOException {        
+    public RecipeListRequest(Map<String, String> parameterMap, Integer sessionUserId) throws IOException {        
         ObjectMapper mapper = new ObjectMapper();
                 
-        this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));        
+        this.sessionUserId = sessionUserId;
+        this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));
         this.sortOptions = mapper.readValue(parameterMap.get("sortOptions"), new TypeReference<Map<String, String>>() {});
         this.filterIdMap = mapper.readValue(parameterMap.get("filterIds"), new TypeReference<Map<String, Integer[]>>() {});
         this.tolerances = mapper.readValue(parameterMap.get("tolerances"), new TypeReference<Map<String, Integer>>() {});
@@ -51,6 +53,7 @@ public class RecipeListRequest {
         ParamSecurity.sanitizeRange(this.ranges.get("Cooking Time"));
     }
 
+    protected Integer getUserId() { return sessionUserId; }
     protected String getSearchTerm() { return searchTerm; }
     protected Map<String, String> getSortOptions() { return sortOptions; }
     protected Map<String, Integer[]> getFilterIdMap() { return filterIdMap; }

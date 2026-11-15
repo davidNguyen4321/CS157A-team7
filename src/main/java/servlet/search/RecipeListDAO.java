@@ -9,12 +9,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 public class RecipeListDAO {
 	private final RecursionDAO recursionDAO = new RecursionDAO();
 
-    public ArrayList<RecipeListItem> search(RecipeListRequest requestInfo, Connection dbConnection, int sessionUserId) throws JsonProcessingException {
+    public ArrayList<RecipeListItem> search(RecipeListRequest requestInfo, Connection dbConnection) {
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 
         filterIdMap.put("Dietary Restriction",
@@ -56,10 +54,10 @@ public class RecipeListDAO {
             );
         }
 
-        return executeRecipeQuery(buildRecipeQuery(requestInfo, sessionUserId), dbConnection);
+        return executeRecipeQuery(buildRecipeQuery(requestInfo), dbConnection);
     }
     
-    private SqlBuilder buildRecipeQuery(RecipeListRequest requestInfo, int sessionUserId) {
+    private SqlBuilder buildRecipeQuery(RecipeListRequest requestInfo) {
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
         Map<String, Map<String, Double>> ranges = requestInfo.getRanges();
         Map<String, Integer> tolerances = requestInfo.getTolerances();
@@ -102,7 +100,7 @@ public class RecipeListDAO {
             sb.addString("SELECT recipes.recipe_id, "
                     + "COUNT(bookmark_users.user_id) AS bookmark_count, "
                     + "SUM(bookmark_users.user_id = ?) AS user_bookmarked ");
-                sb.addParam(sessionUserId);
+                sb.addParam(requestInfo.getUserId());
             sb.addString("FROM recipes LEFT JOIN (");
                 sb.addString("SELECT bookmark.user_id, bookmark.recipe_id "
                         + "FROM bookmark JOIN users ON users.user_id = bookmark.user_id AND user_status = 'Active'");

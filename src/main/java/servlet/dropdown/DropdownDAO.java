@@ -9,15 +9,15 @@ import util.SqlBuilder;
 
 public class DropdownDAO {
 
-    public ArrayList<DropdownItem> search(DropdownConfig config, DropdownRequest request, Connection dbConnection) {
+    public ArrayList<DropdownItem> search(DropdownConfig config, DropdownRequest requestInfo, Connection dbConnection) {
     	String table = config.table();
         String idCol = config.idCol();
         String nameCol = config.nameCol();
         String imageCol = config.imageCol();
         String activeCol = config.activeCol();
         
-        String searchTerm = request.getSearchTerm();
-        Integer[] excludeList = request.getExcludeList();
+        String searchTerm = requestInfo.getSearchTerm();
+        Integer[] excludeList = requestInfo.getExcludeList();
 
         SqlBuilder sb = new SqlBuilder();
         sb.addString("SELECT * ")

@@ -19,11 +19,11 @@ import java.sql.Connection;
 @WebServlet("/Dropdown/*")
 public class DropdownSearch extends HttpServlet {
     private static final Map<String, DropdownConfig> CONFIGS = Map.of(
-	    "/Appliances",  new DropdownConfig("APPLIANCES", "APPLIANCE_ID", "APPLIANCE_NAME", "APPLIANCE_IMAGE_PATH", null),
-	    "/Cuisines",    new DropdownConfig("CUISINES", "CUISINE_ID", "CUISINE_NAME", null, null),
-	    "/Ingredients", new DropdownConfig("INGREDIENTS", "INGREDIENT_ID", "INGREDIENT_NAME", "INGREDIENT_IMAGE_PATH", null),
-	    "/DishTypes",   new DropdownConfig("DISH_TYPES", "DISH_TYPE_ID", "DISH_TYPE_NAME", null, null),
-	    "/Users",       new DropdownConfig("USERS", "USER_ID", "USER_NAME", "USER_IMAGE_PATH", "USER_STATUS")
+	    "/Appliances",  new DropdownConfig("appliances", "appliance_id", "appliance_name", "appliance_image_path", null),
+	    "/Cuisines",    new DropdownConfig("cuisines", "cuisine_id", "cuisine_name", null, null),
+	    "/Ingredients", new DropdownConfig("ingredients", "ingredient_id", "ingredient_name", "ingredient_image_path", null),
+	    "/DishTypes",   new DropdownConfig("dish_types", "dish_type_id", "dish_type_name", null, null),
+	    "/Users",       new DropdownConfig("users", "user_id", "user_name", "user_image_path", "user_status")
 	);
 		    
 	private final DropdownDAO dropdownDAO = new DropdownDAO();
