@@ -9,11 +9,7 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 <%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
@@ -129,69 +125,7 @@ int profileId;
 			}
 			self.append(followImage);
 		}
-
-		function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
-			self.classList.add("card-bookmark");
-			self.setAttribute("onclick", "toggleBookmark(this, " + recId + ");");
-			self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
-			self.textContent=bookmarkCount;
-			let bookmarkImage = document.createElement("img");
-			bookmarkImage.classList.add("bookmark-icon");
-			bookmarkImage.setAttribute('alt', "Bookmark icon");
-			bookmarkImage.setAttribute('width', "16");
-			bookmarkImage.setAttribute('height', "16");
-			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
-			if(userBookmarked){
-				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
-				self.classList.add("active");
-			}
-			else{
-				bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
-			}
-			self.append(bookmarkImage);
-		}
 		
-	    bookmarkTimeout = null;
-		function toggleBookmark(self, recId){
-			let url = "${pageContext.request.contextPath}/Bookmark/Toggle";
-		    clearTimeout(bookmarkTimeout);
-		    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
-				let response = await fetch(url, {
-		        	method:'POST',
-		        	body: JSON.stringify({
-						recipeId: recId
-		        	}),
-		        	headers:{
-		                "Content-Type": "application/json; charset=UTF-8",
-		                "Accept": "application/json; charset=UTF-8"
-		        	}
-		        });
-				if (!response.ok) {
-		        	throw new Error('Network response was not ok');
-		        }
-	        	let objects = await response.json(); // Creates a JSON object
-	        	toggleBookmarkElement(self, objects["bookmark"], objects["bookmarkCount"]);
-		    }, 10);
-		}
-		
-		function toggleBookmarkElement(self, toggleOnBoolean, newCount){
-			let bookmarkImage = document.createElement("img");
-			bookmarkImage.classList.add("bookmark-icon");
-			bookmarkImage.setAttribute('alt', "Bookmark icon");
-			bookmarkImage.setAttribute('width', "16");
-			bookmarkImage.setAttribute('height', "16");
-			bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
-			if(toggleOnBoolean){
-				self.classList.add("active");
-				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
-			}
-			else{
-				self.classList.remove("active");
-				bookmarkImage.setAttribute("src", "${pageContext.request.contextPath}/images/bookmark_icon.svg")
-			}
-			self.textContent=newCount;
-			self.append(bookmarkImage);
-		}
 	</script>
 	<% if(profileId!=sessionUserId){
 		String fsql = "SELECT 1 FROM FOLLOW " + 
@@ -209,83 +143,22 @@ int profileId;
       		createNewFollow(button, <%=profileId%>, <%=isFollowing%>);
       		container.append(button);
 		</script>
-        <%}}}
-            String rsql = "SELECT r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, r.TOTAL_MINUTES, " +
-            			  "r.RECIPE_ID, COUNT(b.USER_ID) AS BOOKMARK_COUNT, SUM(b.USER_ID = ?) AS HAS_BOOKMARKED, " +
-  						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING, r.RECIPE_ACTIVE_TIMESTAMP " +
-            			  "FROM RECIPES r LEFT JOIN (SELECT b.USER_ID, b.RECIPE_ID FROM BOOKMARK b " +
-	  						  "INNER JOIN USERS u ON u.USER_ID = b.USER_ID " +
-	  		  				  "AND u.USER_STATUS = 'Active' " +
-            			  ") b ON r.RECIPE_ID = b.RECIPE_ID " +
-            			  "INNER JOIN (SELECT recRevSubquery.RECIPE_ID, " +
-                          	"COUNT(rev.REVIEW_ID) AS REVIEW_COUNT, " +
-            			  	"AVG(rev.RATING*1.0) AS AVERAGE_RATING " +
-                          	"FROM RECIPES recRevSubquery " +
-            			  	"LEFT JOIN REVIEWS rev ON " +
-                          	"recRevSubquery.RECIPE_ID = rev.RECIPE_ID " + 
-            			  	"AND rev.REVIEW_STATUS = 'Active' " +
-            			  	"GROUP BY recRevSubquery.RECIPE_ID " +
-                       	  ") recRevSubquery ON r.RECIPE_ID = recRevSubquery.RECIPE_ID " + 
-                          "WHERE r.AUTHOR_ID = ? AND r.RECIPE_STATUS = 'Active' " +
-                          "GROUP BY r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, r.RECIPE_DESCRIPTION, " + 
-                          "r.TOTAL_MINUTES, r.RECIPE_ID, r.RECIPE_ACTIVE_TIMESTAMP, " + 
-  						  "recRevSubquery.REVIEW_COUNT, recRevSubquery.AVERAGE_RATING " +
-                          "ORDER BY r.RECIPE_ACTIVE_TIMESTAMP DESC LIMIT 5";
-            boolean anyRecipe = false;
-            try (PreparedStatement ps = con.prepareStatement(rsql)) {
-                ps.setInt(1, sessionUserId);
-                ps.setInt(2, profileId);
-                try (ResultSet rs = ps.executeQuery()) {
-                       ArrayList<Map<String, Object>> recipesList = new ArrayList<>();
-                       while (rs.next()) {
-                    	 anyRecipe=true;
-                       	 Map<String, Object> recipe = new HashMap<>();
-                       	 recipe.put("id", rs.getInt("RECIPE_ID"));
-                       	 recipe.put("name", rs.getString("RECIPE_NAME"));
-                       	 recipe.put("image", rs.getString("RECIPE_IMAGE_PATH"));
-                       	 recipe.put("description", rs.getString("RECIPE_DESCRIPTION"));
-                       	 recipe.put("minutes", rs.getObject("TOTAL_MINUTES"));
-                       	 recipe.put("timestamp", rs.getDate("RECIPE_ACTIVE_TIMESTAMP").toString());
-                       	 recipe.put("reviews", rs.getInt("REVIEW_COUNT"));
-                       	 recipe.put("rating", String.format("%.1f", rs.getFloat("AVERAGE_RATING")));
-                       	 recipe.put("bookmarks", rs.getInt("BOOKMARK_COUNT"));
-                         recipe.put("hasBookmarked", rs.getInt("HAS_BOOKMARKED")>0);
-                            
-                       	recipesList.add(recipe);
-                        }
-                        
-                        ObjectMapper mapper = new ObjectMapper();
-                        String recipesJson = mapper.writeValueAsString(recipesList);
-
-        %>
-		<script>
-		{
-		    const recipesData = <%= recipesJson %>;
-		    const sessionUserId = <%= sessionUserId %>;
-		    
-		    recipesData.forEach((recipe) => {
-		        let recipeCard = addRecipeCard(
-		            "recipeGrid", 
-		            recipe.id, 
-		            recipe.name, 
-		            recipe.image, 
-		            recipe.description,
-		            recipe.minutes, 
-		            recipe.timestamp,
-		            recipe.reviews, 
-		            parseFloat(recipe.rating),
-		            recipe.bookmarks, 
-		            recipe.hasBookmarked, 
-		            null,
-		            null, 
-		            null,
-		            sessionUserId,
-		            false
-		        );
-		    });
-		}
-		</script><%
-            if (!anyRecipe) { %><p>No recipes yet.</p><% }}} %>
+		<%}}}%>
+        <script>
+        loadRecipeStrip(
+            "recipeGrid",
+            [<%= profileId %>],
+            { "Publication Date": "descending" },
+            <%= sessionUserId %>,
+            { showUser: false },
+            false,
+            5
+        ).then(recipes => {
+            if (recipes.length === 0) {
+                document.getElementById("recipeGrid").innerHTML = "<p>No recipes yet.</p>";
+            }
+        });
+        </script>
         </div>
     </section>
 
