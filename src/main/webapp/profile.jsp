@@ -9,7 +9,6 @@
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
-<%@ page import="java.util.List" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 <%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>

@@ -2,7 +2,6 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="database.DbAccess" %>
 <%@ page import="recipe.Recipe" %>
 <%@ page import="recipe.Review" %>
 <%@ page import="recipe.RecipeDAO" %>
