@@ -107,9 +107,9 @@
 		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'RatingsSortText', 'Ratings');">
 		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
 		                    	</button>
-		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
-									<h1 class="filter-panel-name">Courses</h1>
-			                    	<div class="filter-panel-container-no-grid" style="padding:0; align-items:center;">
+								    <h1 class="filter-panel-name" style="margin-left: auto;">Courses</h1>
+								    <div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
+		                    	
 			                    		<%
 			                    		if (dbConnection != null) {
 			                    			String sql = "SELECT DISTINCT COURSE, COURSE + 0 AS COURSE_ID " +
@@ -124,7 +124,7 @@
 			                    		            int courseId = courseResults.getInt("COURSE_ID");
 			                    		            String courseName = courseResults.getString("COURSE");
 						                    		%>
-													    <button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
+													    <button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center; padding: 0.5rem 1.5rem;" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
 													        <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 													            <%=courseName%>
 													        </h2>
@@ -137,7 +137,6 @@
 				   					    	}
 		                    			}
 			                    		%>
-									</div>
 	                    		</div>
 	                    	<div class="filter-panel-container-no-grid">
 	                    		<div class="filter-panel-mini" style="width:1rem;">
@@ -145,11 +144,12 @@
 										Dish Types
 			                    	</h2>
 			                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-			                    	<div style="color: #F5F5DC" class="search-top-bar">
-			                           <span class="search-icon-fixed">🔍</span>
-			                           <input id="DishTypesSearch" type="text" name="search" placeholder="Search dish types..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
-			                       	</div>
-			                       	<div id="DishTypesSearchContainer" class="filter-panel-search-container">
+			                    	<div class="filter-search-wrap">
+									    <div style="color: #F5F5DC" class="search-top-bar">
+									        <span class="search-icon-fixed">🔍</span>
+									        <input id="DishTypesSearch" type="text" name="search" placeholder="Search dish types..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+									    </div>
+									    <div id="DishTypesSearchContainer" class="filter-panel-search-container"></div>
 									</div>
 				                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 				                    	<h2 class="mini-text" style="color:#1F1800; font-size: 0.75rem;">
@@ -163,11 +163,12 @@
 										Cuisines
 			                    	</h2>
 			                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-			                    	<div style="color: #F5F5DC" class="search-top-bar">
-			                           <span class="search-icon-fixed">🔍</span>
-			                           <input id="CuisinesSearch" type="text" name="search" placeholder="Search cuisines..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
-			                       	</div>
-			                       	<div id="CuisinesSearchContainer" class="filter-panel-search-container">
+			                    	<div class="filter-search-wrap">
+									    <div style="color: #F5F5DC" class="search-top-bar">
+									        <span class="search-icon-fixed">🔍</span>
+									        <input id="CuisinesSearch" type="text" name="search" placeholder="Search cuisines..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+									    </div>
+									    <div id="CuisinesSearchContainer" class="filter-panel-search-container"></div>
 									</div>
 				                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 				                    	<h2 class="mini-text" style="color:#1F1800; font-size: 0.75rem;">
@@ -319,12 +320,13 @@
 							Ingredients
 	                    	</h1>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-	                      	<div style="color: #F5F5DC" class="search-top-bar">
-	                          <span class="search-icon-fixed">🔍</span>
-	                          <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
-	                      	</div>
-	                      <div id="IngredientsSearchContainer" class="filter-panel-search-container">
-						</div>
+	                      	<div class="filter-search-wrap">
+							    <div style="color: #F5F5DC" class="search-top-bar">
+							        <span class="search-icon-fixed">🔍</span>
+							        <input id="IngredientsSearch" type="text" name="search" placeholder="Search ingredients..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+							    </div>
+							    <div id="IngredientsSearchContainer" class="filter-panel-search-container"></div>
+							</div>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected ingredients
@@ -345,12 +347,13 @@
 							Appliances
 	                    	</h1>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-	                       	<div style="color: #F5F5DC" class="search-top-bar">
-	                           <span class="search-icon-fixed">🔍</span>
-	                           <input id="AppliancesSearch" type="text" name="search" placeholder="Search appliances..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
-	                       	</div>
-	                       <div id="AppliancesSearchContainer" class="filter-panel-search-container">
-						</div>
+	                       	<div class="filter-search-wrap">
+							    <div style="color: #F5F5DC" class="search-top-bar">
+							        <span class="search-icon-fixed">🔍</span>
+							        <input id="AppliancesSearch" type="text" name="search" placeholder="Search appliances..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+							    </div>
+							    <div id="AppliancesSearchContainer" class="filter-panel-search-container"></div>
+							</div>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected appliances
@@ -371,12 +374,13 @@
 							Authors
 	                    	</h1>
 	                    	<hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
-	                       	<div style="color: #F5F5DC" class="search-top-bar">
-	                           <span class="search-icon-fixed">🔍</span>
-	                           <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
-	                       	</div>
-	                       <div id="AuthorsSearchContainer" class="filter-panel-search-container">
-						</div>
+	                       	<div class="filter-search-wrap">
+							    <div style="color: #F5F5DC" class="search-top-bar">
+							        <span class="search-icon-fixed">🔍</span>
+							        <input id="AuthorsSearch" type="text" name="search" placeholder="Search authors..." value="<%=request.getParameter("search") != null ? request.getParameter("search") : ""%>">
+							    </div>
+							    <div id="AuthorsSearchContainer" class="filter-panel-search-container"></div>
+							</div>
 	        	            <hr class="hrounded-divider" style="border-color:#1F1800; opacity:0.6;"> 
 	                    	<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
 							Selected authors
@@ -601,10 +605,20 @@
 						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId){
 						    let panel = document.getElementById(panelSearchContainerId);
 						    
+						    if (objects.length === 0) {
+						        let none = document.createElement("div");   // a div with no onclick, so it can't be selected
+						        none.classList.add("filter-panel-search-autocomplete", "no-results");
+						        none.setAttribute("aria-disabled", "true");
+						        let noneText = document.createElement("p");
+						        noneText.classList.add("mini-text");
+						        noneText.textContent = "No elements found.";
+						        none.append(noneText);
+						        panel.append(none);
+						        return;
+						    }
+						    
 						    // Define default placeholders dynamically based on the dropdown type
-						    const placeholderMap = {
-						        'Author': '/images/users/user-placeholder.png',
-						    };
+						    const placeholderMap = { 'Author': '/images/users/user-placeholder.png' };
 
 						    for (let object of objects){
 						        let id = object["id"];

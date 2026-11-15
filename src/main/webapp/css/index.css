@@ -574,37 +574,62 @@ nav.main-nav {
   line-height: 1;
 }
 
-.filter-panel-search-container {
-  max-width: 100%;
-  background-color: #FFF7D9;
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  gap: 5px;
+.filter-search-wrap {
+  position: relative;
 }
 
-.filter-panel-search-container:not(:has(*))::before {
-  content: "No elements found.";
-  font-style: italic;
-  color: #403200;
-  font-size: 0.85rem;
+.filter-panel-search-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: max-content;      
+  max-width: 66.67%;       
+  min-width: 14rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: row;   
+  flex-wrap: wrap;       
+  gap: 6px;
+  padding: 8px;
+  background-color: #FFF7D9;
+  border: 1px solid var(--border);
+  border-radius: 0 0 0.75rem 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.filter-panel-search-container:not(:has(*)) {
+  display: none;               
 }
 
 .filter-panel-search-autocomplete {
   background-color: #FFF7D9;
   display: flex;
   flex-direction: row;
-  max-width: 100%;
-  min-width: 100%;
+  flex: 0 0 auto;     
   align-items: center;
-  padding: 5px;
+  padding: 4px 12px;
   gap: 0.75rem;
   cursor: pointer;
   border-radius: 25px;
 }
 
+.filter-panel-search-autocomplete .mini-text {
+  margin: 0;           
+}
+
 .filter-panel-search-autocomplete:hover {
   background-color: #FFE18C;
+}
+
+.filter-panel-search-autocomplete.no-results {
+  cursor: default;
+  font-style: italic;
+  color: #403200;
+  opacity: 0.7;
+}
+
+.filter-panel-search-autocomplete.no-results:hover {
+  background-color: #FFF7D9;
 }
 
 .filter-panel-container-no-grid {
