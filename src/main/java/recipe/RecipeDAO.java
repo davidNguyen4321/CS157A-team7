@@ -41,7 +41,7 @@ public class RecipeDAO {
             return recipe;
         }
         catch (SQLException e) {
-        	return null;
+	        throw new RuntimeException("Recipe data load failed: " + e.getMessage(), e);
         }
     }
 
