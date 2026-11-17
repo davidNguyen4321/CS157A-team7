@@ -1,12 +1,13 @@
 package servlet.engagement;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+
+import java.io.IOException;
 
 import servlet.security.ParamSecurity;
 
-import java.io.IOException;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 public class ToggleRequest {
     private final Integer targetId;

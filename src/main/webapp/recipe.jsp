@@ -1,12 +1,15 @@
-<%@ page language="java"
-    contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
-<%@ page import="recipe.Recipe" %>
-<%@ page import="recipe.Review" %>
+<%@ page import="database.DbAccess" %>
+<%@ page import="java.sql.Connection" %>
+<%@ page import="recipe.ReviewListDAO" %>
+<%@ page import="recipe.ReviewItem" %>
 <%@ page import="recipe.RecipeDAO" %>
+<%@ page import="recipe.Recipe" %>
 <%@ page import="util.WebUtils" %>
 <%@ page import="java.util.List" %>
+<%@ page import="util.Loggers" %>
+<%@ page import="java.util.logging.Level" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 
@@ -16,24 +19,28 @@
     try {
         recipeId = Integer.parseInt(request.getParameter("recipeId"));
     } catch (Exception e) {
+        Loggers.SECURITY.warning(Loggers.describe(request) + " => Invalid recipe ID");
         response.sendError(400, "Invalid recipe ID.");
         return;
     }
 
     Recipe recipe;
-    List<Review> reviews;
+    List<ReviewItem> reviews;
 
     try {
-        recipe = RecipeDAO.findById(recipeId);
+        Connection dbConnection = DbAccess.getConnection();
+
+        recipe = RecipeDAO.findById(recipeId, dbConnection);
 
         if (recipe == null) {
+            Loggers.SECURITY.warning(Loggers.describe(request) + " => Recipe " + recipeId + " not found");
             response.sendError(404, "Recipe not found.");
             return;
         }
 
-        reviews = RecipeDAO.getReviews(recipeId);
+        reviews = ReviewListDAO.findByRecipeId(recipeId, dbConnection);
     } catch (Exception e) {
-        e.printStackTrace();
+        Loggers.OPERATION.log(Level.SEVERE, Loggers.describe(request) + " => Unable to load recipe " + recipeId, e);
         response.sendError(500, "Unable to load recipe.");
         return;
     }
@@ -51,7 +58,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title><%= WebUtils.esc(recipe.name) %> | Recipe Genie</title>
+    <title><%=WebUtils.esc(recipe.name)%> | Recipe Genie</title>
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/index.css">
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/recipe.css">
@@ -65,49 +72,57 @@
 
     <section class="recipe-hero">
         <img class="recipe-hero-image"
-             src="${pageContext.request.contextPath}<%= imagePath %>"
+             src="${pageContext.request.contextPath}<%= WebUtils.esc(imagePath) %>"
              alt="<%= WebUtils.esc(recipe.name) %>">
 
         <div>
-            <h1><%= WebUtils.esc(recipe.name) %></h1>
+            <h1><%=WebUtils.esc(recipe.name)%></h1>
 
             <p class="recipe-description">
-                <%= recipe.description == null
+                <%=recipe.description == null
                         ? ""
-                        : WebUtils.esc(recipe.description) %>
+                        : WebUtils.esc(recipe.description)%>
             </p>
 
             <div class="recipe-author">
-                <% if (recipe.authorName != null) { %>
+                <%
+                if (recipe.authorName != null) {
+                %>
                     <%
-                        String authorImage = recipe.authorImagePath;
+                    String authorImage = recipe.authorImagePath;
 
-                        if (authorImage == null || authorImage.isEmpty()) {
-                            authorImage = "/images/users/user-placeholder.png";
-                        }
+                                            if (authorImage == null || authorImage.isEmpty()) {
+                                                authorImage = "/images/users/user-placeholder.png";
+                                            }
                     %>
 
-                    <img src="${pageContext.request.contextPath}<%= authorImage %>"
+                    <img src="${pageContext.request.contextPath}<%= WebUtils.esc(authorImage) %>"
                          alt="Author">
 
-                    <a href="profile.jsp?id=<%= recipe.authorId %>">
-                        <%= WebUtils.esc(recipe.authorName) %>
+                    <a href="profile.jsp?id=<%=recipe.authorId%>">
+                        <%=WebUtils.esc(recipe.authorName)%>
                     </a>
-                <% } %>
+                <%
+                }
+                %>
             </div>
 
             <p>
                 <strong>Cooking time:</strong>
-                <%= recipe.totalMinutes == null
+                <%=recipe.totalMinutes == null
                         ? "Not specified"
-                        : recipe.totalMinutes + " minutes" %>
+                        : recipe.totalMinutes + " minutes"%>
             </p>
 
-            <% if (recipe.course != null) { %>
+            <%
+            if (recipe.course != null) {
+            %>
                 <p><strong>Course:</strong>
-                    <%= WebUtils.esc(recipe.course) %>
+                    <%=WebUtils.esc(recipe.course)%>
                 </p>
-            <% } %>
+            <%
+            }
+            %>
 
             <button class="recipe-button"
                     type="button"
@@ -121,9 +136,13 @@
         <h2>Ingredients</h2>
 
         <ul class="recipe-list">
-            <% for (String ingredient : recipe.ingredients) { %>
-                <li><%= WebUtils.esc(ingredient) %></li>
-            <% } %>
+            <%
+            for (String ingredient : recipe.ingredients) {
+            %>
+                <li><%=WebUtils.esc(ingredient)%></li>
+            <%
+            }
+            %>
         </ul>
     </section>
 
@@ -132,26 +151,38 @@
             <h2>Appliances</h2>
 
             <ul class="recipe-list">
-                <% for (String appliance : recipe.appliances) { %>
-                    <li><%= WebUtils.esc(appliance) %></li>
-                <% } %>
+                <%
+                for (String appliance : recipe.appliances) {
+                %>
+                    <li><%=WebUtils.esc(appliance)%></li>
+                <%
+                }
+                %>
             </ul>
         </div>
 
         <div>
             <h2>Tags</h2>
 
-            <% for (String cuisine : recipe.cuisines) { %>
+            <%
+            for (String cuisine : recipe.cuisines) {
+            %>
                 <span class="badge-pill">
-                    <%= WebUtils.esc(cuisine) %>
+                    <%=WebUtils.esc(cuisine)%>
                 </span>
-            <% } %>
+            <%
+            }
+            %>
 
-            <% for (String dishType : recipe.dishTypes) { %>
+            <%
+            for (String dishType : recipe.dishTypes) {
+            %>
                 <span class="badge-pill">
-                    <%= WebUtils.esc(dishType) %>
+                    <%=WebUtils.esc(dishType)%>
                 </span>
-            <% } %>
+            <%
+            }
+            %>
         </div>
     </section>
 
@@ -159,20 +190,26 @@
         <h2>Instructions</h2>
 
         <p class="instructions">
-            <%= recipe.instructions == null
+            <%=recipe.instructions == null
                     ? ""
-                    : WebUtils.esc(recipe.instructions) %>
+                    : WebUtils.esc(recipe.instructions)%>
         </p>
     </section>
 
     <section class="recipe-section">
         <h2>Reviews</h2>
 
-        <% if (reviews.isEmpty()) { %>
+        <%
+        if (reviews.isEmpty()) {
+        %>
             <p>No reviews yet.</p>
-        <% } %>
+        <%
+        }
+        %>
 
-        <% for (Review review : reviews) { %>
+        <%
+        for (ReviewItem review : reviews) {
+        %>
             <div class="review-card">
 
                 <div>
@@ -185,7 +222,7 @@
                     %>
 
                     <img class="reviewer-image"
-                         src="${pageContext.request.contextPath}<%= reviewerImage %>"
+                         src="${pageContext.request.contextPath}<%= WebUtils.esc(reviewerImage) %>"
                          alt="Reviewer">
 
                     <strong>

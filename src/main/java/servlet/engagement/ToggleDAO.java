@@ -28,17 +28,15 @@ public class ToggleDAO {
     	}
     	catch (SQLException e) {
     		throw new RuntimeException("Toggle flip failed: " + e.getMessage(), e);
-    	}
-
-        
+    	}   
     }
     
     private boolean checkExists(ToggleConfig config, ToggleRequest request, Connection dbConnection) throws SQLException {
         SqlBuilder sb = new SqlBuilder();
         
-        sb.addString("SELECT 1 FROM ").addString(config.table())
-          .addString(" WHERE ").addString(config.userCol()).addString(" = ? AND ").addString(config.targetCol()).addString(" = ?");
-        sb.addParam(request.getUserId()).addParam(request.getTargetId());
+        sb.addString("SELECT 1 FROM " + config.table())
+          .addString(" WHERE " + config.userCol() + " = ? AND " + config.targetCol() + " = ?")
+          .addParam(request.getUserId()).addParam(request.getTargetId());
           
         try (PreparedStatement ps = sb.build(dbConnection);
              ResultSet rs = ps.executeQuery()) {
@@ -49,9 +47,9 @@ public class ToggleDAO {
     private boolean deleteRecord(ToggleConfig config, ToggleRequest request, Connection dbConnection) throws SQLException {
         SqlBuilder sb = new SqlBuilder();
         
-        sb.addString("DELETE FROM ").addString(config.table())
-          .addString(" WHERE ").addString(config.userCol()).addString(" = ? AND ").addString(config.targetCol()).addString(" = ?");
-        sb.addParam(request.getUserId()).addParam(request.getTargetId());
+        sb.addString("DELETE FROM " + config.table())
+          .addString(" WHERE " + config.userCol() + " = ? AND " + config.targetCol() + " = ?")
+          .addParam(request.getUserId()).addParam(request.getTargetId());
 
         try (PreparedStatement ps = sb.build(dbConnection)) {
             ps.execute();
@@ -63,10 +61,9 @@ public class ToggleDAO {
     private boolean insertRecord(ToggleConfig config, ToggleRequest request, Connection dbConnection) throws SQLException {
         SqlBuilder sb = new SqlBuilder();
         
-        sb.addString("INSERT INTO ").addString(config.table())
-          .addString("(" + config.userCol() + ", " + config.targetCol() + ") ")
-          .addString("VALUES (?, ?)");
-        sb.addParam(request.getUserId()).addParam(request.getTargetId());
+        sb.addString("INSERT INTO " + config.table() + "(" + config.userCol() + ", " + config.targetCol() + ")" + " VALUES")
+          .addString(" (?, ?)")
+          .addParam(request.getUserId()).addParam(request.getTargetId());
 
         try (PreparedStatement ps = sb.build(dbConnection)) {
             ps.execute();
@@ -77,10 +74,11 @@ public class ToggleDAO {
     
     private int getCount(ToggleConfig config, ToggleRequest request, Connection dbConnection) throws SQLException {
         SqlBuilder sb = new SqlBuilder();
-        sb.addString("SELECT COUNT(*) AS count FROM ").addString(config.table()).addString(" t ")
-          .addString("JOIN users u ON t.").addString(config.userCol()).addString(" = u.user_id ")
-          .addString("WHERE t.").addString(config.targetCol()).addString(" = ? AND u.user_status = 'Active'");
-        sb.addParam(request.getTargetId());
+        
+        sb.addString("SELECT COUNT(*) AS count")
+          .addString(" FROM " + config.table() + " t JOIN users u ON t." + config.userCol() + " = u.user_id")
+          .addString(" WHERE t." + config.targetCol() + " = ? AND u.user_status = 'Active'")
+          .addParam(request.getTargetId());
 
         int count = 0;
         try (PreparedStatement ps = sb.build(dbConnection);

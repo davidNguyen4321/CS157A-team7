@@ -1,20 +1,23 @@
 package servlet.dropdown;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import database.DbAccess;
 import java.util.Map;
 
+import database.DbAccess;
+
+import java.sql.Connection;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import servlet.security.ParamSecurity;
 import servlet.security.ServletParamException;
-import jakarta.servlet.annotation.WebServlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.sql.Connection;
 
 @WebServlet("/Dropdown/*")
 public class DropdownSearch extends HttpServlet {

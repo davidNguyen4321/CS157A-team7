@@ -1,7 +1,8 @@
 package seed;
-import java.sql.SQLException;
 
 import auth.PasswordHasher;
+
+import java.sql.SQLException;
 
 public class StarterPopulator {
 	Starter starter;

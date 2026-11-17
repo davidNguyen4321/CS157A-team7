@@ -1,15 +1,19 @@
 package servlet.engagement;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
+import recipe.RecipeDAO;
 
 import database.DbAccess;
+
+import java.sql.Connection;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import recipe.RecipeDAO;
+
 import servlet.security.ParamSecurity;
 import servlet.security.ServletParamException;
 
@@ -33,7 +37,7 @@ public class BookmarkToggle extends HttpServlet {
         if (authorId == null) {
             throw new ServletParamException(HttpServletResponse.SC_NOT_FOUND, "Recipe " + toggleRequest.getTargetId() + " does not exist");
         }
-        if (authorId == toggleRequest.getUserId()) {
+        if (authorId.equals(toggleRequest.getUserId())) {
             throw new ServletParamException(HttpServletResponse.SC_FORBIDDEN, "Attempt to bookmark own recipe");
         }
 

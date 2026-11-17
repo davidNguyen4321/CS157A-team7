@@ -1,11 +1,12 @@
 package servlet.dropdown;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+
+import java.io.IOException;
 
 import servlet.security.ParamSecurity;
 
-import java.io.IOException;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DropdownRequest {
     private String searchTerm;

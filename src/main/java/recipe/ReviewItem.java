@@ -1,11 +1,9 @@
 package recipe;
 
-import java.sql.Timestamp;
-
-public class Review {
+public class ReviewItem {
     public String description;
     public int rating;
-    public Timestamp timestamp;
+    public String timestamp;
     public String reviewerName;
     public String reviewerImagePath;
 }

@@ -38,26 +38,20 @@ public class ErrorHandlingFilter implements Filter {
     		chain.doFilter(request, response); 
     	}
     	catch (ServletParamException e) { 
-            String message = describe(request) + " => " + e.getMessage();
+            String message = Loggers.describe(request) + " => " + e.getMessage();
             Loggers.SECURITY.warning(message);
             sendJsonError(response, e.getStatus());
         }
     	catch (JsonProcessingException e) { // Malformed JSON which browser should never send
-            String message = describe(request) + " => " + "Invalid JSON: " + e.getOriginalMessage();
+            String message = Loggers.describe(request) + " => " + "Invalid JSON: " + e.getOriginalMessage();
     		Loggers.SECURITY.warning(message);
             sendJsonError(response, HttpServletResponse.SC_BAD_REQUEST);
         }
     	catch (Exception e) { // SQL failures, bugs, etc
-            String message = describe(request) + " => " + "Unexpected error: " + e.getMessage();
+            String message = Loggers.describe(request) + " => " + "Unexpected error: " + e.getMessage();
     		Loggers.OPERATION.severe(message);
             sendJsonError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-    }
-    
-    private String describe(HttpServletRequest request) {
-        return request.getMethod() + " " + request.getRequestURI() 
-    		+ " from " + request.getRemoteAddr()
-        	+ " (user " + request.getAttribute("userId") + ")";
     }
     
     private void sendJsonError(HttpServletResponse response, int status) throws IOException {

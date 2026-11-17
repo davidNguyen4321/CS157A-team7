@@ -1,14 +1,14 @@
 package servlet.search; 
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+import java.util.LinkedHashMap;
+
+import java.io.IOException;
 
 import servlet.security.ParamSecurity;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import java.io.IOException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RecipeListRequest {
     private Integer sessionUserId;

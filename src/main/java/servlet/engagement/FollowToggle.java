@@ -1,20 +1,23 @@
 package servlet.engagement;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
+import auth.UserDAO;
 
 import database.DbAccess;
+
+import java.sql.Connection;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import servlet.security.ParamSecurity;
 import servlet.security.ServletParamException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import auth.UserDAO;
 
 @WebServlet("/Toggle/Follow")
 public class FollowToggle extends HttpServlet {

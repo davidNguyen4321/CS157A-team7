@@ -1,13 +1,12 @@
 package util;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Arrays;
-
-
-import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class SqlBuilder {
     private StringBuilder sb;
@@ -28,20 +27,22 @@ public class SqlBuilder {
 		return this;
 	}
 	
-	public void addManyInts(List<Integer> ids) {
+	public SqlBuilder addManyInts(List<Integer> ids) {
 	    for (Integer id : ids) {
 	        sb.append("?, ");
 	        sqlParams.add(id);
 	    }
 	    sb.setLength(sb.length() - 2); // remove the last comma and space
+	    return this;
 	}
 
-	public void addManyInts(Integer[] ids) {
-	    addManyInts(Arrays.asList(ids));
+	public SqlBuilder addManyInts(Integer[] ids) {
+	    return addManyInts(Arrays.asList(ids));
 	}
 	
-	public void truncate(int i) {
+	public SqlBuilder truncate(int i) {
 		sb.setLength(sb.length() - i);
+		return this;
 	}
 	
 	public PreparedStatement build(Connection connection) throws SQLException {

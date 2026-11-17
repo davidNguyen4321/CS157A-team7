@@ -1,6 +1,7 @@
 package servlet.search;
 
 import util.SqlBuilder;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,9 +23,7 @@ public class RecursionDAO {
             SqlBuilder sb = new SqlBuilder();
             sb.addString("SELECT DISTINCT ").addString(nextLevelCol)
               .addString(" FROM ").addString(tableName)
-              .addString(" WHERE ").addString(curLevelCol).addString(" IN (");
-            sb.addManyInts(newIdsToRecurse);
-            sb.addString(")");
+              .addString(" WHERE " + curLevelCol + " IN (").addManyInts(newIdsToRecurse).addString(")");
             
             try (PreparedStatement ps = sb.build(dbConnection);
             	 ResultSet nextLevelIds = ps.executeQuery()) {
