@@ -1,0 +1,85 @@
+<link rel="stylesheet" type="text/css" href="css/index.css">
+
+<script>
+function createElementWithClass(tag, className, textContent) {
+    let element = document.createElement(tag);
+    if (className) element.className = className;
+    if (textContent) element.textContent = textContent;
+    return element;
+}
+
+async function addReviewCard(containerId, recipeId, recipeName, recipeImagePath,
+        reviewDescription, rating, reviewImagePath, timeAgo,
+        reviewerId, userName, userImagePath, showUser, contextPath) {
+    contextPath = contextPath || "";
+        
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let reviewImage = reviewImagePath || recipeImagePath || "/images/recipes/recipe-placeholder.jpg";
+    let userImage = userImagePath || "/images/users/user-placeholder.png";
+
+    const reviewCard = createElementWithClass("article", "review-card");
+    reviewCard.style.cursor = "pointer";
+
+    reviewCard.onclick = function() {
+        window.location.href = "recipe.jsp?recipeId=" + recipeId;
+    };
+
+    const reviewThumb = createElementWithClass("div", "review-thumb");
+    const thumbImage = createElementWithClass("img");
+    thumbImage.src = contextPath + reviewImage;
+    thumbImage.alt = "Review";
+    reviewThumb.appendChild(thumbImage);
+
+    const reviewBody = createElementWithClass("div", "review-body");
+    const titleP = createElementWithClass("p", "review-title", recipeName);
+    const textP = createElementWithClass("p", "review-text", reviewDescription);
+
+    const reviewFooter = createElementWithClass("div", "review-footer");
+
+    const cardAuthor = createElementWithClass("div", "card-author");
+    if (showUser) {
+        const authorImage = createElementWithClass("img", "mini-pic");
+        authorImage.src = contextPath + userImage;
+        authorImage.alt = "Reviewer";
+        cardAuthor.appendChild(authorImage);
+
+        if (userName) {
+            const authorLink = createElementWithClass("a", "author-link", userName);
+            authorLink.href = "profile.jsp?id=" + reviewerId;
+            cardAuthor.appendChild(authorLink);
+        } else {
+            const anonSpan = createElementWithClass("span", "", "Anonymous");
+            cardAuthor.appendChild(anonSpan);
+        }
+    }
+
+    const reviewMeta = createElementWithClass("div", "review-meta");
+    const dateSpan = createElementWithClass("span", "review-date", timeAgo);
+    
+    const ratingSpan = createElementWithClass("span", "card-rating");
+    const starsSpan = createElementWithClass("span", "stars");
+    starsSpan.style.setProperty("--rating", rating);
+
+    starsSpan.setAttribute("aria-label", rating + " out of 5 stars");
+    
+    ratingSpan.appendChild(starsSpan);
+    ratingSpan.appendChild(document.createTextNode(rating + "/5"));
+    
+    reviewMeta.appendChild(dateSpan);
+    reviewMeta.appendChild(ratingSpan);
+
+    reviewFooter.appendChild(cardAuthor);
+    reviewFooter.appendChild(reviewMeta);
+    
+    reviewBody.appendChild(titleP);
+    reviewBody.appendChild(textP);
+    reviewBody.appendChild(reviewFooter);
+    
+    reviewCard.appendChild(reviewThumb);
+    reviewCard.appendChild(reviewBody);
+    
+    container.appendChild(reviewCard);
+}
+</script>

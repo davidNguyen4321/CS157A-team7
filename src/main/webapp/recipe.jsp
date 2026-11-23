@@ -10,11 +10,16 @@
 <%@ page import="java.util.List" %>
 <%@ page import="util.Loggers" %>
 <%@ page import="java.util.logging.Level" %>
+<%@ page import="util.TimeFormatter" %>
+<%@ page import="java.time.LocalDateTime" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
 
 <%
-    int recipeId;
+int recipeId;
+	int sessionUserId = (Integer) session.getAttribute("userId");
+    String sessionUserTimezone = (String) session.getAttribute("userTimezone");
 
     try {
         recipeId = Integer.parseInt(request.getParameter("recipeId"));
@@ -30,7 +35,7 @@
     try {
         Connection dbConnection = DbAccess.getConnection();
 
-        recipe = RecipeDAO.findById(recipeId, dbConnection);
+        recipe = RecipeDAO.findById(recipeId, dbConnection, sessionUserId);
 
         if (recipe == null) {
             Loggers.SECURITY.warning(Loggers.describe(request) + " => Recipe " + recipeId + " not found");
@@ -91,15 +96,15 @@
                     <%
                     String authorImage = recipe.authorImagePath;
 
-                                            if (authorImage == null || authorImage.isEmpty()) {
-                                                authorImage = "/images/users/user-placeholder.png";
-                                            }
+                                                                if (authorImage == null || authorImage.isEmpty()) {
+                                                                    authorImage = "/images/users/user-placeholder.png";
+                                                                }
                     %>
 
                     <img src="${pageContext.request.contextPath}<%= WebUtils.esc(authorImage) %>"
                          alt="Author">
 
-                    <a href="profile.jsp?id=<%=recipe.authorId%>">
+                    <a href="profile.jsp?id=<%=recipe.authorId%>" class="author-link">
                         <%=WebUtils.esc(recipe.authorName)%>
                     </a>
                 <%
@@ -123,12 +128,52 @@
             <%
             }
             %>
+			<section id="recipe-engagement">
+				<%
+				int reviewCount = recipe.reviewCount;
 
-            <button class="recipe-button"
-                    type="button"
-                    onclick="alert('Review creation will be available soon!')">
-                Leave a Review
-            </button>
+						if (reviewCount>0){
+							float rating = Float.parseFloat(recipe.averageRating);
+							java.text.DecimalFormat df = new java.text.DecimalFormat("#.#");
+							String displayRating = df.format(rating);
+				%>
+					<span class="rating">
+						<%=displayRating%>/5
+						<span class="stars"
+							style="--rating: <%=rating%>;"
+							aria-label="<%=displayRating%> out of 5 stars"></span>
+						 (<%=reviewCount%>)
+	                </span>
+                <%
+                }
+                %>
+	            <button class="recipe-button"
+	                    type="button"
+	                    onclick="alert('Review creation will be available soon!')">
+	                Leave a Review
+	            </button>
+			</section>
+			<script>
+	       		let engagement = document.getElementById("recipe-engagement");
+			</script>
+	       	<%
+	       	if (recipe.authorId == sessionUserId){
+	       	%>
+	            <script>
+					engagement.append(createBookmarkCountLabel(<%=recipe.bookmarkCount%>, "32"));
+				</script>
+			<%
+			}
+				else{
+			%>
+		       	<script>
+					let bookmark = document.createElement("button");
+					createNewBookmark(bookmark, <%=recipeId%>, <%=recipe.bookmarkCount%>, <%=recipe.userBookmarked%>, "32");
+					engagement.append(bookmark);
+				</script>
+			<%
+			}
+			%>
         </div>
     </section>
 
@@ -196,6 +241,25 @@
         </p>
     </section>
 
+	<script>
+	function applySmartCrop(img) {
+	    const maxCrop = 0.30;
+	    
+	    const naturalRatio = img.naturalWidth / img.naturalHeight;
+	    const fullyScaledHeight = img.clientWidth / naturalRatio;
+	    
+	    const choppedHeight = fullyScaledHeight - 400;
+	    const cropPercentage = choppedHeight > 0 ? (choppedHeight / fullyScaledHeight) : 0;
+	    
+	    if (cropPercentage > maxCrop) {
+	        img.style.objectFit = 'contain';
+	        img.style.backgroundColor = '#f8f9fa';
+	    } else {
+	        img.style.objectFit = 'cover';
+	    }
+	}
+	</script>
+
     <section class="recipe-section">
         <h2>Reviews</h2>
 
@@ -207,44 +271,68 @@
         }
         %>
 
-        <%
-        for (ReviewItem review : reviews) {
-        %>
+		<%
+		for (ReviewItem review : reviews) {
+			String formattedTime = TimeFormatter.formatTimeAgo(
+					review.timestamp,
+					review.timezone,
+					sessionUserTimezone);
+		%>
             <div class="review-card">
-
-                <div>
-                    <%
-                        String reviewerImage = review.reviewerImagePath;
-
-                        if (reviewerImage == null || reviewerImage.isEmpty()) {
-                            reviewerImage = "/images/users/user-placeholder.png";
-                        }
-                    %>
-
-                    <img class="reviewer-image"
-                         src="${pageContext.request.contextPath}<%= WebUtils.esc(reviewerImage) %>"
-                         alt="Reviewer">
-
-                    <strong>
-                        <%= review.reviewerName == null
-                                ? "Anonymous"
-                                : WebUtils.esc(review.reviewerName) %>
-                    </strong>
-                </div>
-
-                <div class="review-stars">
-                    <% for (int i = 0; i < review.rating; i++) { %>
-                        ★
-                    <% } %>
-                </div>
-
-                <p>
+            	<div class="review-header">
+				    <strong class="review-name" style="font-size: 25px;"><%=WebUtils.esc(review.name) %></strong>
+				
+				    <div class="review-subheader">
+				        <%
+				        String reviewerImage = review.reviewerImagePath;
+				        if (reviewerImage == null || reviewerImage.isEmpty()) {
+				            reviewerImage = "/images/users/user-placeholder.png";
+				        }
+				        %>
+				        <img class="reviewer-image"
+				             src="${pageContext.request.contextPath}<%= WebUtils.esc(reviewerImage) %>"
+				             alt="Reviewer">
+				             
+				        <div class="review-meta">
+				            <div class="review-author-line">
+				                <%
+				                if (review.reviewerName != null) {
+				                %>
+				                    <a href="profile.jsp?id=<%=review.reviewerId%>" class="author-link">
+				                        <%=WebUtils.esc(review.reviewerName)%>
+				                    </a>
+				                <%
+				                } else {
+				                %>
+				                    <strong class="author-link">Anonymous</strong>
+				                <%
+				                }
+				                %>
+				            </div>
+				            <div class="review-author-line">
+				                <span class="rating">
+				                    <%=review.rating %>/5
+				                    <span class="stars"
+				                        style="--rating: <%=review.rating %>;"
+				                        aria-label="<%=review.rating %> out of 5 stars"></span>
+				                </span>
+				                <span class="review-date">
+				                	<%=WebUtils.esc(formattedTime)%>
+				                </span>
+				            </div>
+				        </div>
+				    </div>
+				</div>
+				<% if (review.reviewImagePath != null && !review.reviewImagePath.trim().isEmpty()) { %>
+				    <div class="review-image-wrapper">
+				        <img class="review-attached-image" 
+				             src="${pageContext.request.contextPath}<%= WebUtils.esc(review.reviewImagePath) %>" 
+				             alt="Review photo from <%= review.reviewerName == null ? "Anonymous" : WebUtils.esc(review.reviewerName) %>">
+				    </div>
+				<% } %>
+                <p class="review-text">
                     <%= WebUtils.esc(review.description) %>
                 </p>
-
-                <small>
-                    <%= review.timestamp %>
-                </small>
             </div>
         <% } %>
     </section>

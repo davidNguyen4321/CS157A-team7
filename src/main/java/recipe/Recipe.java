@@ -11,6 +11,12 @@ public class Recipe {
     public String instructions;
     public Integer totalMinutes;
     public String course;
+    
+    public int bookmarkCount;
+    public boolean userBookmarked = false;
+    
+    public int reviewCount;
+    public String averageRating;
 
     public int authorId;
     public String authorName;

@@ -11,12 +11,24 @@ import java.util.List;
 
 public class RecipeDAO {
 
-    public static Recipe findById(int recipeId, Connection dbConnection) {
+    public static Recipe findById(int recipeId, Connection dbConnection, int sessionUserId) {
     	SqlBuilder sb = new SqlBuilder();
-    	sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, instructions, total_minutes, course, author_id, user_name, user_image_path ")
-    	  .addString("FROM recipes LEFT JOIN users ON recipes.author_id = users.user_id ")
+    	sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, instructions, total_minutes, course, ")
+    	.addString("review_count, average_rating, ")
+        .addString("bookmark_count, user_bookmarked, ")
+        .addString("author_id, users.user_name, users.user_image_path ")
+    	.addString("FROM recipes LEFT JOIN users ON recipes.author_id = users.user_id ")
+    	.addString("NATURAL JOIN (");
+	          sb.addString("SELECT recipe_id, COUNT(bookmark_users.user_id) AS bookmark_count, SUM(bookmark_users.user_id = ?) AS user_bookmarked ").addParam(sessionUserId)
+	          .addString("FROM recipes NATURAL LEFT JOIN (SELECT b.recipe_id, b.user_id FROM bookmark b NATURAL JOIN users WHERE user_status = 'Active') bookmark_users ")
+	          .addString("GROUP BY recipe_id ");
+        sb.addString(") recipes_users ")
+        .addString("NATURAL JOIN (");
+	        sb.addString("SELECT recipe_id, COUNT(review_id) AS review_count, AVG(rating) AS average_rating ")
+	        .addString("FROM recipes NATURAL LEFT JOIN (SELECT recipe_id, review_id, rating FROM reviews WHERE review_status = 'Active') active_reviews ")
+	        .addString("GROUP BY recipe_id ");
+	    sb.addString(") recipes_reviews ")
     	  .addString("WHERE recipe_id = ? AND recipe_status = 'Active'").addParam(recipeId);
-
         try (PreparedStatement ps = sb.build(dbConnection);
         	 ResultSet rs = ps.executeQuery()) {
             if (!rs.next()) return null;
@@ -29,6 +41,13 @@ public class RecipeDAO {
             recipe.instructions = rs.getString("instructions");
             recipe.totalMinutes = (Integer) rs.getObject("total_minutes");
             recipe.course = rs.getString("course");
+            
+            recipe.reviewCount = rs.getInt("review_count");
+            recipe.averageRating = String.format("%.1f", rs.getFloat("average_rating"));
+            
+            recipe.bookmarkCount = rs.getInt("bookmark_count");
+            recipe.userBookmarked = rs.getInt("user_bookmarked")>0;
+            
             recipe.authorId = rs.getInt("author_id");
             recipe.authorName = rs.getString("user_name");
             recipe.authorImagePath = rs.getString("user_image_path");
@@ -44,7 +63,7 @@ public class RecipeDAO {
 	        throw new RuntimeException("Recipe data load failed: " + e.getMessage(), e);
         }
     }
-
+    
     private static void loadIngredients(Connection dbConnection, Recipe recipe) throws SQLException {
     	SqlBuilder sb = new SqlBuilder();
     	

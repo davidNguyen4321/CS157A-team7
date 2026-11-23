@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RecipeListRequest {
     private Integer sessionUserId;
+    private String sessionUserTimezone;
 	private String searchTerm;
     private Map<String, String> sortOptions;
     private Map<String, Integer[]> filterIdMap;
@@ -20,10 +21,11 @@ public class RecipeListRequest {
     private Map<String, Boolean> options;
     private Map<Integer, Integer[]> ingredientMatches = new LinkedHashMap<>(); // wanted id -> ids that satisfy it
 
-    public RecipeListRequest(Map<String, String> parameterMap, Integer sessionUserId) throws IOException {        
+    public RecipeListRequest(Map<String, String> parameterMap, Integer sessionUserId, String sessionTimezone) throws IOException {        
         ObjectMapper mapper = new ObjectMapper();
                 
         this.sessionUserId = sessionUserId;
+        this.sessionUserTimezone = sessionTimezone;
         this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));
         this.sortOptions = mapper.readValue(parameterMap.get("sortOptions"), new TypeReference<Map<String, String>>() {});
         this.filterIdMap = mapper.readValue(parameterMap.get("filterIds"), new TypeReference<Map<String, Integer[]>>() {});
@@ -54,6 +56,7 @@ public class RecipeListRequest {
     }
 
     protected Integer getUserId() { return sessionUserId; }
+    protected String getUserTimezone() {return sessionUserTimezone; }
     protected String getSearchTerm() { return searchTerm; }
     protected Map<String, String> getSortOptions() { return sortOptions; }
     protected Map<String, Integer[]> getFilterIdMap() { return filterIdMap; }

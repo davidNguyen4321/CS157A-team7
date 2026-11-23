@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -15,7 +15,7 @@ public class ReviewListDAO {
     public static List<ReviewItem> findByRecipeId(int recipeId, Connection dbConnection) {
         SqlBuilder sb = new SqlBuilder();
         
-        sb.addString("SELECT review_description, rating, review_active_timestamp, user_name, user_image_path ")
+        sb.addString("SELECT reviewer_id, review_name, review_description, rating, review_active_timestamp, review_image_path, user_name, user_image_path, timezone ")
           .addString("FROM reviews LEFT JOIN users ON reviews.reviewer_id = users.user_id ")
           .addString("WHERE recipe_id = ? AND review_status = 'Active' ").addParam(recipeId);
         sb.addString("ORDER BY review_active_timestamp DESC");
@@ -26,9 +26,13 @@ public class ReviewListDAO {
             List<ReviewItem> reviews = new ArrayList<>();
             while (rs.next()) {
                 ReviewItem review = new ReviewItem();
+                review.reviewerId = rs.getInt("reviewer_id");
+                review.name = rs.getString("review_name");
                 review.description = rs.getString("review_description");
                 review.rating = rs.getInt("rating");
-                review.timestamp = rs.getDate("review_active_timestamp").toString();
+                review.timestamp = rs.getObject("review_active_timestamp", LocalDateTime.class).toString();
+                review.timezone = rs.getString("timezone");
+                review.reviewImagePath = rs.getString("review_image_path");
                 review.reviewerName = rs.getString("user_name");
                 review.reviewerImagePath = rs.getString("user_image_path");
                 reviews.add(review);

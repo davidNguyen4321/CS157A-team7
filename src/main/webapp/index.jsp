@@ -3,14 +3,18 @@
 <%@ page import="database.DbAccess" %>
 
 <%@ page import="util.WebUtils" %>
+<%@ page import="util.TimeFormatter" %>
 
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="java.time.LocalDateTime" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
 <%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
+<%@ include file="/WEB-INF/fragments/review_card_maker.jspf" %>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,13 +27,14 @@
 <body>
 
     <%
-        String currentTab = request.getParameter("tab"); 
-        if (currentTab == null || currentTab.trim().isEmpty()) {
-            currentTab = "discover";
-        }
-        
-        Connection dbConnection = DbAccess.getConnection();
-        int sessionUserId = (Integer) session.getAttribute("userId");
+    String currentTab = request.getParameter("tab"); 
+            if (currentTab == null || currentTab.trim().isEmpty()) {
+                currentTab = "discover";
+            }
+            
+            Connection dbConnection = DbAccess.getConnection();
+            int sessionUserId = (Integer) session.getAttribute("userId");
+            String sessionUserTimezone = (String) session.getAttribute("userTimezone");
     %>
     
     <%@ include file="/WEB-INF/fragments/header.jspf" %>
@@ -89,53 +94,58 @@
 	                      </div>
 	                      
 						<div id="GeneralPanel" class="filter-panel">
-							<div class="filter-panel-container-no-grid sort-row" style="align-items: center;">
+							<div class="filter-panel-top">
 								<h1 class="filter-panel-name">
 								Sort By
 		                    	</h1>
 		                    	<div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
-		                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date');">
-								    <p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
-								</button>
-		                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks');">
-									<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
-								</button>
-		                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews');">
-		                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
-		                    	</button>
-		                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'RatingsSortText', 'Ratings');">
-		                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
-		                    	</button>
-								    <h1 class="filter-panel-name" style="margin-left: auto;">Courses</h1>
+		                    	<div>
+			                    	<button id="PublicationDateSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'PublicationDateSortText', 'Publication Date');">
+									    <p id="PublicationDateSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
+									</button>
+			                    	<button id="BookmarksSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'BookmarksSortText', 'Bookmarks');">
+										<p id="BookmarksSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
+									</button>
+			                    	<button id="ReviewSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'ReviewsSortText', 'Reviews');">
+			                    		<p id="ReviewsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
+			                    	</button>
+			                    	<button id="RatingsSortOption" type="button" class="filter-panel-sort-option" onclick="sortSelect(this, 'RatingsSortText', 'Ratings');">
+			                    		<p id="RatingsSortText" class="mini-text" style="color:#1F1800; font-size: 0.75rem;"></p>
+			                    	</button>
+		                    	</div>
+		                    	<h1 class="filter-panel-name">
+								Courses
+		                    	</h1>
 								    <div class="vrounded-divider" style="border-color:#1F1800; height:50px; opacity:0.6;"> </div>
-		                    	
+		                    		<div>
 			                    		<%
 			                    		if (dbConnection != null) {
-			                    			String sql = "SELECT DISTINCT COURSE, COURSE + 0 AS COURSE_ID " +
-			                    			     		 "FROM RECIPES " +
-			                    			     		 "WHERE COURSE IS NOT NULL " +
-			                    			     		 "ORDER BY COURSE + 0 ASC";
-			                    			try (
-			                    				PreparedStatement courseStatement = dbConnection.prepareStatement(sql);
-			                    				ResultSet courseResults = courseStatement.executeQuery()
-			                    			) {
-			                    				while(courseResults.next()){
-			                    		            int courseId = courseResults.getInt("COURSE_ID");
-			                    		            String courseName = courseResults.getString("COURSE");
-						                    		%>
-													    <button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center; padding: 0.5rem 1.5rem;" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
-													        <h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
+			                    			                    			String sql = "SELECT DISTINCT COURSE, COURSE + 0 AS COURSE_ID " +
+			                    			                    			     		 "FROM RECIPES " +
+			                    			                    			     		 "WHERE COURSE IS NOT NULL " +
+			                    			                    			     		 "ORDER BY COURSE + 0 ASC";
+			                    			                    			try (
+			                    			                    				PreparedStatement courseStatement = dbConnection.prepareStatement(sql);
+			                    			                    				ResultSet courseResults = courseStatement.executeQuery()
+			                    			                    			) {
+			                    			                    				while(courseResults.next()){
+			                    			                    		            int courseId = courseResults.getInt("COURSE_ID");
+			                    			                    		            String courseName = courseResults.getString("COURSE");
+			                    		%>
+													    <button type="button" class="filter-panel-mini-container-2" onclick="toggleBasicFilter(this, 'Course', <%=courseId%>)">
+													        <h2 class="mini-text" style="color:#1F1800; font-size: 0.75rem;  font-weight: bold;">
 													            <%=courseName%>
 													        </h2>
 													    </button>
 													<%
-		                    					}
-		                    				}
-				     					   	catch (Exception error) {
-				   					    		out.println("<p>Database error: " +error.getMessage() + "</p>");
-				   					    	}
-		                    			}
-			                    		%>
+													}
+															                    				}
+															     					   	catch (Exception error) {
+															   					    		out.println("<p>Database error: " +error.getMessage() + "</p>");
+															   					    	}
+															                    			}
+													%>
+			                    	</div>
 	                    		</div>
 	                    	<div class="filter-panel-container-no-grid">
 	                    		<div class="filter-panel-mini" style="width:1rem;">
@@ -203,17 +213,17 @@
 			                    	<div class="filter-panel-container">
 			                    		<%
 			                    		if (dbConnection != null) {
-				       						String sql = 
-		     					    				"SELECT DIETARY_RESTRICTION_ID, DIETARY_RESTRICTION_NAME " +
-		     					    				"FROM DIETARY_RESTRICTIONS " +
-		     					    				"ORDER BY DIETARY_RESTRICTION_NAME ASC";
-				     					    try (
-				     	                        PreparedStatement statement = dbConnection.prepareStatement(sql);
-				                                ResultSet dietaryRestrictions = statement.executeQuery()
-				                            ) {
-				     					    	while(dietaryRestrictions.next()){
-				     					    		int dietaryRestrictionId = dietaryRestrictions.getInt("DIETARY_RESTRICTION_ID");
-				     					    		String dietaryRestrictionName = dietaryRestrictions.getString("DIETARY_RESTRICTION_NAME");
+			                    				       						String sql = 
+			                    				     					    				"SELECT DIETARY_RESTRICTION_ID, DIETARY_RESTRICTION_NAME " +
+			                    				     					    				"FROM DIETARY_RESTRICTIONS " +
+			                    				     					    				"ORDER BY DIETARY_RESTRICTION_NAME ASC";
+			                    				     					    try (
+			                    				     	                        PreparedStatement statement = dbConnection.prepareStatement(sql);
+			                    				                                ResultSet dietaryRestrictions = statement.executeQuery()
+			                    				                            ) {
+			                    				     					    	while(dietaryRestrictions.next()){
+			                    				     					    		int dietaryRestrictionId = dietaryRestrictions.getInt("DIETARY_RESTRICTION_ID");
+			                    				     					    		String dietaryRestrictionName = dietaryRestrictions.getString("DIETARY_RESTRICTION_NAME");
 			                    		%>
 			                    			<button type="button" class="mini-container-toggleable" style="cursor:pointer; justify-content: center; align-items: center;" onclick="toggleBasicFilter(this, 'Dietary Restriction', <%=dietaryRestrictionId%> )">
 			                    				<h2 class="mini-text" style="color:#1F1800; font-size: 1rem;">
@@ -222,11 +232,11 @@
 			                    			</button>
 			                    		<%
 			                    		}
-			                    			                    				}
-			                    					     					   	catch (Exception error){
-			                    					   					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
-			                    					   					    	}
-			                    			                    			}
+			                    			                    			                    				}
+			                    			                    					     					   	catch (Exception error){
+			                    			                    					   					    	out.println("<p>Database error: " +error.getMessage() + "</p>");
+			                    			                    					   					    	}
+			                    			                    			                    			}
 			                    		%>
 									</div>
 	                    		</div>
@@ -694,12 +704,24 @@
 							}
 						}
 						
-						function addSliderListener(sliderId, toleranceDisplayId, name, makeText){
+						function addSliderListener(sliderId, toleranceDisplayId, name, makeText) {
 						    let slider = document.getElementById(sliderId);
 						    let toleranceDisplay = document.getElementById(toleranceDisplayId);
+						    
+						    const updateProgress = () => {
+						        const min = slider.min || 0;
+						        const max = slider.max || 100;
+						        const percentage = ((slider.value - min) / (max - min)) * 100;
+						        
+						        slider.style.background = `linear-gradient(to right, #826300 ${percentage}%, #F5F5DC ${percentage}%)`;
+						    };
+
+						    updateProgress();
+
 						    slider.oninput = function() {
 						        toleranceDisplay.textContent = makeText(this.value);
 						        tolerances.set(name, this.value);
+						        updateProgress(); // Update fill when dragged
 						    }
 						}
 				
@@ -750,124 +772,92 @@
 	               </div>
 	               <div id="followedScrollRow" class="horizontal-scroll-row"></div>
 					<%
-						if (dbConnection != null) {
-						    ArrayList<Integer> followedIds = new ArrayList<>();
-						    String sql = "SELECT following_id FROM follow WHERE follower_id = ?";
-						    try (PreparedStatement ps = dbConnection.prepareStatement(sql)) {
-						        ps.setInt(1, sessionUserId);
-						        try (ResultSet rs = ps.executeQuery()) {
-						            while (rs.next()) followedIds.add(rs.getInt("following_id"));
-						        }
-						    } 
-						    catch (Exception error) {
-						        out.println("<p>Database error: " + error.getMessage() + "</p>");
-						    }
-						    if (!followedIds.isEmpty()) {
+					if (dbConnection != null) {
+									    ArrayList<Integer> followedIds = new ArrayList<>();
+									    String sql = "SELECT following_id FROM follow WHERE follower_id = ?";
+									    try (PreparedStatement ps = dbConnection.prepareStatement(sql)) {
+									        ps.setInt(1, sessionUserId);
+									        try (ResultSet rs = ps.executeQuery()) {
+									            while (rs.next()) followedIds.add(rs.getInt("following_id"));
+									        }
+									    } 
+									    catch (Exception error) {
+									        out.println("<p>Database error: " + error.getMessage() + "</p>");
+									    }
+									    if (!followedIds.isEmpty()) {
 					%>
 							<script>
 							    loadRecipeStrip(
 						    		"followedScrollRow", 
-						    		<%= followedIds %>, 
+						    		<%=followedIds%>, 
 						    		{ "Publication Date": "descending" },
-						            <%= sessionUserId %>, 
-						            { showUser: true, rank: false }
+						            <%=sessionUserId%>, 
+						            { showUser: true, rank: false },
+						            false
 							    );
 							</script>
 					<%
-					    	}
-						}
+					}
+									}
 					%>
 	           </section>
 	
 	           <!-- Reviews for You -->
-	           <section>
+				<section>
 	               <div>
 	                   <h2 class="section-title">Reviews for You</h2>
 	                   <p class="section-subtitle">What people are saying about your recipes</p>
 	               </div>
-	               <div class="horizontal-scroll-row">
+	               <div id="reviewsScrollRow" class="horizontal-scroll-row">
 	                   <%
 	                   if (dbConnection != null) {
-	                   	                       String reviewSql =
-	                   	                           "SELECT r.RECIPE_ID, r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
-	                   	                           "v.REVIEW_DESCRIPTION, v.RATING, " +
-	                   	                           "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
-	                   	                           "u.USER_IMAGE_PATH FROM REVIEWS v " +
-	                   	                           "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID AND r.AUTHOR_ID = ? " +
-	                   	                           "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
-	                   	                           "WHERE v.REVIEW_STATUS = 'Active' " +
-	                   	                           "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC";
+	                                              String reviewSql =
+	                                                  "SELECT r.RECIPE_ID, r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
+	                                                  "v.REVIEW_DESCRIPTION, v.RATING, v.REVIEW_IMAGE_PATH, " +
+	                                                  "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
+	                                                  "u.USER_IMAGE_PATH, u.TIMEZONE FROM REVIEWS v " +
+	                                                  "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID AND r.AUTHOR_ID = ? " +
+	                                                  "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
+	                                                  "WHERE v.REVIEW_STATUS = 'Active' " +
+	                                                  "ORDER BY v.REVIEW_ACTIVE_TIMESTAMP DESC";
 	                   	
-	                   	                       try (
-	                   	                           PreparedStatement reviewStatement =
-	                   	                               dbConnection.prepareStatement(reviewSql);
-	                   	                       ) {
-	                   	                       	reviewStatement.setInt(1, sessionUserId);
-	                   	                       	try(
-	                   	                       		ResultSet reviews = reviewStatement.executeQuery()
-	                   						){
-	                   	                       		while (reviews.next()) {
-	                   	                       			String reviewImage =
-	                   	                       					reviews.getString("RECIPE_IMAGE_PATH");
-	                   	                       			if (reviewImage == null || reviewImage.isEmpty()) {
-	                   	                       				reviewImage = "/images/recipes/recipe-placeholder.jpg";
-	                   	                       			}
-	                   	                       			String reviewerAvatar = reviews.getString("USER_IMAGE_PATH");
-	                   	                       			if (reviewerAvatar == null || reviewerAvatar.isEmpty()){
-	                   	                       				reviewerAvatar = "/images/users/user-placeholder.png";
-	                   	                       			}
+	                                              try (PreparedStatement reviewStatement = dbConnection.prepareStatement(reviewSql)) {
+	                                                  reviewStatement.setInt(1, sessionUserId);
+	                                                  try (ResultSet reviews = reviewStatement.executeQuery()) {
+	                                                      while (reviews.next()) {
+	                                                           String rImage = reviews.getString("RECIPE_IMAGE_PATH");
+	                                                           String vImage = reviews.getString("REVIEW_IMAGE_PATH");
+	                                                           String uImage = reviews.getString("USER_IMAGE_PATH");
+	                                                           String uName = reviews.getString("USER_NAME");
+	                                                           String formattedTime = TimeFormatter.formatTimeAgo(
+	                                                        		   reviews.getObject("REVIEW_ACTIVE_TIMESTAMP", LocalDateTime.class).toString(),
+	                                                        		   reviews.getString("TIMEZONE"),
+	                                                        		   sessionUserTimezone);
 	                   %>
-	                   <article class="review-card"
-						         style="cursor: pointer;"
-						         onclick="window.location.href='recipe.jsp?recipeId=<%=reviews.getInt("RECIPE_ID")%>'">
-	                       <div class="review-thumb">
-	                           <img src="${pageContext.request.contextPath}<%=reviewImage%>" alt="Review" />
-	                       </div>
-	                       <div class="review-body">
-	                           <p class="review-title">
-	                               <%=WebUtils.esc(reviews.getString("recipe_name"))%>
-	                           </p>
-	                           <p class="review-text">
-	                               <%= WebUtils.esc(reviews.getString("review_description")) %>
-	                           </p>
-	                           <div class="review-footer">
-	                               <div class="card-author">
-	                                   <img class="mini-pic" src="<%= request.getContextPath() + reviewerAvatar %>" alt="Reviewer"/>
-	                                 	<%
-	                                 	String an = reviews.getString("USER_NAME"); int aid = reviews.getInt("REVIEWER_ID");
-	                                 	%>
-									<%
-									if (an != null) {
-									%>
-									    <a class="author-link" href="profile.jsp?id=<%=aid%>"><%=WebUtils.esc(an)%></a>
-									<%
-									} else {
-									%><span>Anonymous</span><%
-									}
-									%>
-	                               </div>
-	                               <div class="review-meta">
-	                                   <span class="review-date">
-	                                       <%=reviews.getDate("review_active_timestamp")%>
-	                                   </span>
-	                                   <span class="card-rating">
-	                                       <span class="stars"
-	                                           style="--rating: <%=reviews.getInt("RATING")%>;"
-	                                           aria-label="<%=reviews.getInt("RATING")%> out of 5 stars"></span>
-	                                       <%=reviews.getInt("RATING")%>/5
-	                                   </span>
-	                               </div>
-	                           </div>
-	                       </div>
-	                   </article>
+						<script>
+						    addReviewCard(
+						        "reviewsScrollRow",
+						        <%=reviews.getInt("RECIPE_ID")%>,
+						        "<%=WebUtils.escJS(reviews.getString("RECIPE_NAME"))%>",
+						        <%=rImage != null ? "\"" + WebUtils.escJS(rImage) + "\"" : "null"%>,
+						        "<%=WebUtils.escJS(reviews.getString("REVIEW_DESCRIPTION"))%>",
+						        <%=reviews.getInt("RATING")%>,
+						        <%=vImage != null ? "\"" + WebUtils.escJS(vImage) + "\"" : "null"%>,
+								"<%=WebUtils.escJS(formattedTime)%>",
+						        <%=reviews.getInt("REVIEWER_ID")%>,
+						        <%=uName != null ? "\"" + WebUtils.escJS(uName) + "\"" : "null"%>,
+						        <%=uImage != null ? "\"" + WebUtils.escJS(uImage) + "\"" : "null"%>,
+						        true,
+						        "${pageContext.request.contextPath}"
+						    );
+						</script>
 	                   <%
+                                   }
+                               }
+                           } catch (Exception error) {
+                               out.println("<p>Database error: " + error.getMessage() + "</p>");
+                           }
 	                   }
-	                   	                           }
-	                   	                       }
-	                   	                       catch (Exception error){
-	                   			    	out.println("<p>Database error: " +error.getMessage() + "</p>");
-	                   			    }
-	                   	                   }
 	                   %>
 	               </div>
 	           </section>
@@ -885,7 +875,9 @@
 	                	[<%= sessionUserId %>],
 	                    { "Bookmarks": "descending", "Publication Date": "descending" },
 	                    <%= sessionUserId %>, 
-	                    { showUser: false, rank: true });
+	                    { showUser: false, rank: true },
+						false
+	                );
 	               	</script>
 	           	</section>
 	       </div>

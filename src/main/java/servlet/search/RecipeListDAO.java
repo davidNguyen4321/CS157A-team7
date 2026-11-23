@@ -1,19 +1,21 @@
 package servlet.search;
 
+import util.TimeFormatter;
 import util.SqlBuilder;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.ArrayList;
 
 public class RecipeListDAO {
 	private final RecursionDAO recursionDAO = new RecursionDAO();
 
-    public ArrayList<RecipeListItem> search(RecipeListRequest requestInfo, Connection dbConnection) {
+    public ArrayList<RecipeListItem> search(RecipeListRequest requestInfo, Connection dbConnection) throws IOException{
         Map<String, Integer[]> filterIdMap = requestInfo.getFilterIdMap();
 
         filterIdMap.put("Dietary Restriction",
@@ -55,7 +57,7 @@ public class RecipeListDAO {
             );
         }
 
-        return executeRecipeQuery(buildRecipeQuery(requestInfo), dbConnection);
+        return executeRecipeQuery(buildRecipeQuery(requestInfo), dbConnection, requestInfo.getUserTimezone());
     }
     
     private SqlBuilder buildRecipeQuery(RecipeListRequest requestInfo) {
@@ -66,7 +68,7 @@ public class RecipeListDAO {
         
         SqlBuilder sb = new SqlBuilder();
         
-        sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, recipe_active_timestamp, total_minutes, ");
+        sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, recipe_active_timestamp, timezone, total_minutes, ");
         sb.addString("review_count, average_rating, ");
         sb.addString("bookmark_count, user_bookmarked, ");
         sb.addString("author_id, user_name, user_image_path ");
@@ -217,19 +219,23 @@ public class RecipeListDAO {
         }
     }
         
-    private ArrayList<RecipeListItem> executeRecipeQuery(SqlBuilder sb, Connection dbConnection) {
+    private ArrayList<RecipeListItem> executeRecipeQuery(SqlBuilder sb, Connection dbConnection, String sessionUserTimezone) throws IOException{
     	try (PreparedStatement ps = sb.build(dbConnection);
            	 ResultSet rs = ps.executeQuery()) {
            	
 		   	ArrayList<RecipeListItem> resultsList = new ArrayList<>();
 			while (rs.next()) {
+				String formattedTime = TimeFormatter.formatTimeAgo(
+						rs.getObject("recipe_active_timestamp", LocalDateTime.class).toString(),
+						rs.getString("timezone"),
+						sessionUserTimezone);
 				resultsList.add(new RecipeListItem(
 			        rs.getInt("recipe_id"),
 			        rs.getString("recipe_name"),
 			        rs.getString("recipe_image_path"),
 			        rs.getString("recipe_description"),
 			        rs.getObject("total_minutes", Integer.class),
-			        rs.getDate("recipe_active_timestamp").toString(),
+			        formattedTime,
 					rs.getInt("review_count"),
 					String.format("%.1f", rs.getFloat("average_rating")),
 					rs.getInt("bookmark_count"),

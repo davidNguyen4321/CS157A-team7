@@ -29,7 +29,9 @@ public class RecipeListSearch extends HttpServlet {
         Map<String, String> parameterMap = ParamSecurity.getParams(request, parameters);
         
         Integer sessionUserId = (Integer) request.getAttribute("userId");
-        RecipeListRequest requestInfo = new RecipeListRequest(parameterMap, sessionUserId);
+        String sessionUserTimezone = (String) request.getAttribute("userTimezone");
+
+        RecipeListRequest requestInfo = new RecipeListRequest(parameterMap, sessionUserId, sessionUserTimezone);
         Connection dbConnection = DbAccess.getConnection();
         
         try (PrintWriter pw = response.getWriter()) {

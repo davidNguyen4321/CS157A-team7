@@ -1,10 +1,12 @@
 <link rel="stylesheet" type="text/css" href="css/index.css">
+
 <script>
-	function addRecipeCard(containerId, recipeId, recipeName, 
+	async function addRecipeCard(containerId, recipeId, recipeName, 
 			recipeImagePath, recipeDescription,
-			recipeTotalMinutes, recipeActiveTimestamp, reviewCount,
+			recipeTotalMinutes, timeAgo, reviewCount,
 			averageRating, bookmarkCount, userBookmarked, userId,
 			userName, userImagePath, sessionUserId, showUser){
+			
 			let container = document.getElementById(containerId);	    	
 	    	let recipeCard = document.createElement("article");
 	    	recipeCard.classList.add("search-recipe-card");
@@ -46,7 +48,7 @@
 			recipeBadges.append(cookingTimeBadgePill);
 			let publicationDateBadgePill = document.createElement("span");
 			publicationDateBadgePill.classList.add("badge-pill");
-			publicationDateBadgePill.textContent=recipeActiveTimestamp;
+			publicationDateBadgePill.textContent=timeAgo;
 			recipeBadges.append(cookingTimeBadgePill);
 			recipeBadges.append(publicationDateBadgePill);
 			recipeImageContainer.append(recipeBadges);
@@ -119,11 +121,11 @@
 			cardStats.classList.add("card-stats");
 			let isOwnRecipe = userId && Number(userId) === Number(sessionUserId);
 			if (isOwnRecipe) {
-				cardStats.append(createBookmarkCountLabel(bookmarkCount));
+				cardStats.append(createBookmarkCountLabel(bookmarkCount, "16"));
 			}
 			else {
 				let cardBookmark = document.createElement("button");
-				createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked);
+				createNewBookmark(cardBookmark, recipeId, bookmarkCount, userBookmarked, "16");
 				cardStats.append(cardBookmark);
 			}
 			cardFooter.append(cardStats);
@@ -153,19 +155,22 @@
 		return await response.json();
 	}
 
-	function renderRecipeCards(containerId, recipes, sessionUserId, options = {}) {
+	async function renderRecipeCards(containerId, recipes, sessionUserId, options = {}) {
 		const { showUser = true, rank = false } = options;
-		recipes.forEach((recipe, index) => {
-			let recipeCard = addRecipeCard(
+		
+		for (let index = 0; index < recipes.length; index++) {
+			let recipe = recipes[index];
+			let recipeCard = await addRecipeCard(
 				containerId,
 				recipe.recipeId, recipe.recipeName,
 				recipe.recipeImagePath, recipe.recipeDescription,
-				recipe.recipeTotalMinutes, recipe.recipeActiveTimestamp,
+				recipe.recipeTotalMinutes, recipe.timeAgo,
 				recipe.reviewCount, parseFloat(recipe.averageRating),
 				recipe.bookmarkCount, recipe.userBookmarked,
 				recipe.userId, recipe.userName, recipe.userImagePath,
 				sessionUserId, showUser
 			);
+			
 			if (rank) {
 				let recipeImage = recipeCard.querySelector(".recipe-card-img");
 				let recipeCardBadges = recipeImage.querySelector(".recipe-card-badges");
@@ -174,7 +179,7 @@
 				rankBadge.textContent = "#" + (index + 1);
 				recipeImage.insertBefore(rankBadge, recipeCardBadges);
 			}
-		});
+		}
 	}
 
 	async function loadRecipeStrip(containerId, authorIds, sortOptions, sessionUserId, cardOptions, bookmarkedOnly = false) {
@@ -184,10 +189,11 @@
 			{ "Bookmarks": {}, "Cooking Time": {}, "Ratings": {}, "Reviews": {} },
 			{ "Ai Generated Description": true, "Ai Generated Appliances": true, "Ai Generated Cuisines": true, 
 			  "Ai Generated Dish Types": true, "Ai Generated Cooking Minutes": true, "Ai Generated Courses": true, "Bookmarked Only": bookmarkedOnly });
-		renderRecipeCards(containerId, recipes, sessionUserId, cardOptions);
+		await renderRecipeCards(containerId, recipes, sessionUserId, cardOptions);
+		return recipes;
 	}
 	
-	function createBookmarkCountLabel(bookmarkCount){
+	function createBookmarkCountLabel(bookmarkCount, sideLength){
 		let label = document.createElement("span");
 		label.classList.add("card-bookmark-count");
 		label.textContent = bookmarkCount;
@@ -195,18 +201,18 @@
 		let bookmarkImage = document.createElement("img");
 		bookmarkImage.classList.add("bookmark-icon");
 		bookmarkImage.setAttribute('alt', "Bookmarks");
-		bookmarkImage.setAttribute('width', "16");
-		bookmarkImage.setAttribute('height', "16");
+		bookmarkImage.setAttribute('width', sideLength);
+		bookmarkImage.setAttribute('height', sideLength);
 		bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon.svg");
 		label.append(bookmarkImage);
 		return label;
 	}
 	
-	function createNewBookmark(self, recId, bookmarkCount, userBookmarked){
+	function createNewBookmark(self, recId, bookmarkCount, userBookmarked, sideLength){
 		self.classList.add("card-bookmark");
 		self.onclick = function(event) {
 		    event.stopPropagation();
-		    toggleBookmark(self, recId);
+		    toggleBookmark(self, recId, sideLength);
 		}; 
 		// to make sure clicking bookmark only bookmarks, not opens recipe card
 		self.setAttribute("style", "cursor: pointer; border-radius: 0.5rem;");
@@ -214,8 +220,8 @@
 		let bookmarkImage = document.createElement("img");
 		bookmarkImage.classList.add("bookmark-icon");
 		bookmarkImage.setAttribute('alt', "Bookmark icon");
-		bookmarkImage.setAttribute('width', "16");
-		bookmarkImage.setAttribute('height', "16");
+		bookmarkImage.setAttribute('width', sideLength);
+		bookmarkImage.setAttribute('height', sideLength);
 		bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor;");
 		if(userBookmarked){
 			bookmarkImage.setAttribute('src', "${pageContext.request.contextPath}/images/bookmark_icon_active.svg");
@@ -228,7 +234,7 @@
 	}
 	
     bookmarkTimeout = null;
-	function toggleBookmark(self, recId){
+	function toggleBookmark(self, recId, sideLength){
 		let url = "${pageContext.request.contextPath}/Toggle/Bookmark";
 	    clearTimeout(bookmarkTimeout);
 	    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
@@ -246,16 +252,16 @@
 	        	throw new Error('Network response was not ok');
 	        }
         	let objects = await response.json(); // Creates a JSON object
-        	toggleBookmarkElement(self, objects["status"], objects["count"]);
+        	toggleBookmarkElement(self, objects["status"], objects["count"], sideLength);
 	    }, 10);
 	}
 	
-	function toggleBookmarkElement(self, toggleOnBoolean, newCount){
+	function toggleBookmarkElement(self, toggleOnBoolean, newCount, sideLength){
 		let bookmarkImage = document.createElement("img");
 		bookmarkImage.classList.add("bookmark-icon");
 		bookmarkImage.setAttribute('alt', "Bookmark icon");
-		bookmarkImage.setAttribute('width', "16");
-		bookmarkImage.setAttribute('height', "16");
+		bookmarkImage.setAttribute('width', sideLength);
+		bookmarkImage.setAttribute('height', sideLength);
 		bookmarkImage.setAttribute('style', "vertical-align: middle; stroke: currentColor; ");
 		if(toggleOnBoolean){
 			self.classList.add("active");
