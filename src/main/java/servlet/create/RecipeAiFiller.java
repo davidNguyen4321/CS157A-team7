@@ -1,7 +1,6 @@
 package servlet.create;
 
 import servlet.dropdown.DropdownItem;
-import servlet.security.ServletParamException;
 import util.GeminiClient;
 
 import java.sql.Connection;
@@ -14,41 +13,14 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public final class RecipeAiFiller {
-    private RecipeAiFiller() {}
-
+public class RecipeAiFiller {
     public static final Set<String> COURSES = Set.of("Main Course", "Appetizer / Side", "Dessert");
-    private static final Set<String> FIELDS = Set.of("description", "totalMinutes", "course", "ingredients", "appliances", "cuisines", "dishTypes");
     private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    public record SuggestRequest(String name, String instructions, List<Integer> ingredientIds, Set<String> fields) {
-        public SuggestRequest {
-            name = name == null ? "" : name.strip();
-            instructions = instructions == null ? "" : instructions.strip();
-            ingredientIds = ingredientIds == null ? List.of() : ingredientIds;
-            fields = fields == null ? Set.of() : fields;
-        }
-
-        public void validate() {
-            if (name.length() > 100 || instructions.isEmpty() || instructions.length() > 10000
-                    || fields.isEmpty() || !FIELDS.containsAll(fields)
-                    || ingredientIds.size() > 100 || ingredientIds.stream().anyMatch(Objects::isNull)) {
-                throw new ServletParamException(HttpServletResponse.SC_BAD_REQUEST, "Invalid recipe suggest request");
-            }
-        }
-    }
-
-    public record Result(String description, Integer totalMinutes, String course,
-                         List<DropdownItem> ingredients, List<DropdownItem> appliances,
-                         List<DropdownItem> cuisines, List<DropdownItem> dishTypes) {}
 
     private static final String SCHEMA = """
         {"type":"OBJECT","properties":{
@@ -61,8 +33,8 @@ public final class RecipeAiFiller {
           "dishTypeIds":{"type":"ARRAY","items":{"type":"INTEGER"}}}}
         """;
 
-    public static Result fill(SuggestRequest req, Connection db) throws Exception {
-        Set<String> f = req.fields();
+    public static RecipeSuggestResponse fill(RecipeSuggestRequest req, Connection db) throws Exception {
+    	Set<String> f = req.getFields();
 
         Map<Integer, DropdownItem> ingredients = items(db, "ingredients", "ingredient_id", "ingredient_name", "ingredient_image_path");
         Map<Integer, DropdownItem> appliances = f.contains("appliances") ? items(db, "appliances", "appliance_id", "appliance_name", "appliance_image_path") : Map.of();
@@ -76,11 +48,11 @@ public final class RecipeAiFiller {
          .append("description: 1-2 appetizing plain-text sentences, max 300 characters. ")
          .append("totalMinutes: realistic total prep plus cook time. ")
          .append("For id lists, answer only with ids from the allowed lists below, or an empty list if none fit.\n")
-         .append("<recipe>\nName: ").append(clean(req.name()))
-         .append("\nInstructions: ").append(clean(req.instructions()));
-        if (!f.contains("ingredients") && !req.ingredientIds().isEmpty()) {
+         .append("<recipe>\nName: ").append(clean(req.getName()))
+         .append("\nInstructions: ").append(clean(req.getInstructions()));
+        if (!f.contains("ingredients") && !req.getIngredientIds().isEmpty()) {
             List<String> names = new ArrayList<>();
-            for (Integer id : req.ingredientIds()) if (ingredients.containsKey(id)) names.add(ingredients.get(id).getName());
+            for (Integer id : req.getIngredientIds()) if (ingredients.containsKey(id)) names.add(ingredients.get(id).getName());
             p.append("\nIngredients: ").append(clean(String.join(", ", names)));
         }
         p.append("\n</recipe>\n");
@@ -107,7 +79,7 @@ public final class RecipeAiFiller {
             if (COURSES.contains(c)) course = c;
         }
 
-        return new Result(description, minutes, course,
+        return new RecipeSuggestResponse(description, minutes, course,
             f.contains("ingredients") ? pick(json.path("ingredientIds"), ingredients) : List.of(),
             pick(json.path("applianceIds"), appliances),
             pick(json.path("cuisineIds"), cuisines),

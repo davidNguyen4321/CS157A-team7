@@ -13,9 +13,9 @@ public class ToggleRequest {
     private final Integer targetId;
     private final Integer sessionUserId;
 
+	private static final ObjectMapper mapper = new ObjectMapper();
+
     public ToggleRequest(String parameterString, Integer sessionUserId) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        
         Map<String, Integer> parameterMap = mapper.readValue(parameterString, new TypeReference<Map<String, Integer>>() {});
  
         ParamSecurity.validateParams("toggle request", parameterMap, new String[]{"targetId"});

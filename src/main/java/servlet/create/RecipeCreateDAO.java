@@ -15,13 +15,13 @@ import java.util.Set;
 public class RecipeCreateDAO {
 
 	public static int create(RecipeCreateRequest req, int authorId, Connection dbConnection) {
-	    Set<String> fill = req.aiFill();
-	    String description = req.description();
-	    Integer minutes = req.totalMinutes();
-	    String course = req.course();
-	    List<Integer> appliances = req.applianceIds();
-	    List<Integer> cuisines = req.cuisineIds();
-	    List<Integer> dishTypes = req.dishTypeIds();
+	    Set<String> fill = req.getAiFill();
+	    String description = req.getDescription();
+	    Integer minutes = req.getTotalMinutes();
+	    String course = req.getCourse();
+	    List<Integer> appliances = req.getApplianceIds();
+	    List<Integer> cuisines = req.getCuisineIds();
+	    List<Integer> dishTypes = req.getDishTypeIds();
 
         String sql = """
             INSERT INTO recipes (recipe_name, recipe_description, instructions, total_minutes, course,
@@ -35,9 +35,9 @@ public class RecipeCreateDAO {
             try {
                 int recipeId;
                 try (PreparedStatement ps = dbConnection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    ps.setString(1, req.name());
+                    ps.setString(1, req.getName());
                     ps.setObject(2, description);
-                    ps.setString(3, req.instructions());
+                    ps.setString(3, req.getInstructions());
                     ps.setObject(4, minutes);
                     ps.setObject(5, course);
                     ps.setBoolean(6, fill.contains("description") && description != null);
@@ -56,13 +56,13 @@ public class RecipeCreateDAO {
 
                 try (PreparedStatement ps = dbConnection.prepareStatement(
                         "INSERT INTO recipes_cook_ingredients (recipe_id, ingredient_id, amount, amount_unit) VALUES (?, ?, ?, ?)")) {
-                    for (RecipeCreateRequest.IngredientLine line : req.ingredients()) {
-                        ps.setInt(1, recipeId);
-                        ps.setInt(2, line.id());
-                        ps.setObject(3, line.amount());
-                        ps.setObject(4, (line.unit() == null || line.unit().isBlank()) ? null : line.unit().strip());
-                        ps.addBatch();
-                    }
+                	for (IngredientLine line : req.getIngredients()) {
+                	    ps.setInt(1, recipeId);
+                	    ps.setInt(2, line.id);
+                	    ps.setObject(3, line.amount);
+                	    ps.setObject(4, (line.unit == null || line.unit.isBlank()) ? null : line.unit.strip());
+                	    ps.addBatch();
+                	}
                     ps.executeBatch();
                 }
 

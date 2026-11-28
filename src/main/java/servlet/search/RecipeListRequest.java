@@ -20,10 +20,10 @@ public class RecipeListRequest {
     private Map<String, Map<String, Double>> ranges;
     private Map<String, Boolean> options;
     private Map<Integer, Integer[]> ingredientMatches = new LinkedHashMap<>(); // wanted id -> ids that satisfy it
+	
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    public RecipeListRequest(Map<String, String> parameterMap, Integer sessionUserId, String sessionTimezone) throws IOException {        
-        ObjectMapper mapper = new ObjectMapper();
-                
+    public RecipeListRequest(Map<String, String> parameterMap, Integer sessionUserId, String sessionTimezone) throws IOException {                        
         this.sessionUserId = sessionUserId;
         this.sessionUserTimezone = sessionTimezone;
         this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));

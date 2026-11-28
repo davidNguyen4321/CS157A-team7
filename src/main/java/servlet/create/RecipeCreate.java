@@ -21,8 +21,7 @@ public class RecipeCreate extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int sessionUserId = (Integer) request.getAttribute("userId");
 
-        RecipeCreateRequest requestInfo = mapper.readValue(ParamSecurity.readRequestBody(request, 30000), RecipeCreateRequest.class);
-        requestInfo.validate();
+        RecipeCreateRequest requestInfo = new RecipeCreateRequest(ParamSecurity.readRequestBody(request, 30000));
 
         int recipeId = RecipeCreateDAO.create(requestInfo, sessionUserId, DbAccess.getConnection());
         response.getWriter().write(mapper.writeValueAsString(Map.of("recipeId", recipeId)));

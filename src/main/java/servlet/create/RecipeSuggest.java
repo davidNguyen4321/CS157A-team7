@@ -3,7 +3,6 @@ package servlet.create;
 import database.DbAccess;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,16 +19,17 @@ public class RecipeSuggest extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        RecipeAiFiller.SuggestRequest requestInfo =
-            mapper.readValue(ParamSecurity.readRequestBody(request, 30000), RecipeAiFiller.SuggestRequest.class);
-        requestInfo.validate();
+        RecipeSuggestRequest requestInfo = new RecipeSuggestRequest(ParamSecurity.readRequestBody(request, 30000));
 
-        try (PrintWriter pw = response.getWriter()) {
-            pw.write(mapper.writeValueAsString(RecipeAiFiller.fill(requestInfo, DbAccess.getConnection())));
+        String json;
+        try {
+            json = mapper.writeValueAsString(RecipeAiFiller.fill(requestInfo, DbAccess.getConnection()));
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) { // Gemini / network failures
             throw new IOException("Recipe suggestion failed: " + e.getMessage(), e);
         }
+
+        response.getWriter().write(json);
     }
 }

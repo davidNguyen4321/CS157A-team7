@@ -11,10 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DropdownRequest {
     private String searchTerm;
     private Integer[] excludeList;
+    
+	private static final ObjectMapper mapper = new ObjectMapper();
 
-    public DropdownRequest(Map<String, String> parameterMap) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        
+    public DropdownRequest(Map<String, String> parameterMap) throws IOException {        
         this.searchTerm = ParamSecurity.getCleanSearch(parameterMap.get("searchTerm"));
         this.excludeList = mapper.readValue(parameterMap.get("excludeArray"), Integer[].class);
     }
