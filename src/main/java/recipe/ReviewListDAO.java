@@ -26,7 +26,7 @@ public class ReviewListDAO {
 
             List<ReviewItem> reviews = new ArrayList<>();
             while (rs.next()) {
-				String formattedTime = TimeFormatter.formatTimeAgo(rs.getObject("recipe_active_timestamp", LocalDateTime.class), sessionUserTimezone);
+            	String formattedTime = TimeFormatter.formatTimeAgo(rs.getObject("review_active_timestamp", LocalDateTime.class), sessionUserTimezone);
             	
                 ReviewItem review = new ReviewItem();
                 review.reviewerId = rs.getInt("reviewer_id");

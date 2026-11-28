@@ -68,7 +68,7 @@ public class RecipeListDAO {
         
         SqlBuilder sb = new SqlBuilder();
         
-        sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, recipe_active_timestamp, timezone, total_minutes, ");
+        sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, recipe_active_timestamp, total_minutes, ");
         sb.addString("review_count, average_rating, ");
         sb.addString("bookmark_count, user_bookmarked, ");
         sb.addString("author_id, user_name, user_image_path ");

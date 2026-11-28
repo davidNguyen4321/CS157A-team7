@@ -815,7 +815,7 @@
 	                                                  "SELECT r.RECIPE_ID, r.RECIPE_NAME, r.RECIPE_IMAGE_PATH, " +
 	                                                  "v.REVIEW_DESCRIPTION, v.RATING, v.REVIEW_IMAGE_PATH, " +
 	                                                  "v.REVIEW_ACTIVE_TIMESTAMP, v.REVIEWER_ID, u.USER_NAME, " +
-	                                                  "u.USER_IMAGE_PATH, u.TIMEZONE FROM REVIEWS v " +
+	                                                  "u.USER_IMAGE_PATH FROM REVIEWS v " +
 	                                                  "JOIN RECIPES r ON v.RECIPE_ID = r.RECIPE_ID AND r.AUTHOR_ID = ? " +
 	                                                  "LEFT JOIN USERS u ON v.REVIEWER_ID = u.USER_ID " +
 	                                                  "WHERE v.REVIEW_STATUS = 'Active' " +
