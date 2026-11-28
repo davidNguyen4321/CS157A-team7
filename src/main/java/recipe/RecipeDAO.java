@@ -13,23 +13,27 @@ public class RecipeDAO {
 
     public static Recipe findById(int recipeId, Connection dbConnection, int sessionUserId) {
     	SqlBuilder sb = new SqlBuilder();
-    	sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, instructions, total_minutes, course, ")
-    	.addString("review_count, average_rating, ")
-        .addString("bookmark_count, user_bookmarked, ")
-        .addString("author_id, users.user_name, users.user_image_path ")
-    	.addString("FROM recipes LEFT JOIN users ON recipes.author_id = users.user_id ")
-    	.addString("NATURAL JOIN (");
-	          sb.addString("SELECT recipe_id, COUNT(bookmark_users.user_id) AS bookmark_count, SUM(bookmark_users.user_id = ?) AS user_bookmarked ").addParam(sessionUserId)
-	          .addString("FROM recipes NATURAL LEFT JOIN (SELECT b.recipe_id, b.user_id FROM bookmark b NATURAL JOIN users WHERE user_status = 'Active') bookmark_users ")
-	          .addString("GROUP BY recipe_id ");
-        sb.addString(") recipes_users ")
-        .addString("NATURAL JOIN (");
+    	sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, instructions, total_minutes, course, author_id, user_name, user_image_path, ")
+    	  .addString("review_count, average_rating, ")
+          .addString("bookmark_count, user_bookmarked, ");
+    	
+    	sb.addString("FROM recipes LEFT JOIN users ON recipes.author_id = users.user_id ");
+    	
+    	sb.addString("NATURAL JOIN (");
+	          sb.addString("SELECT recipe_id, COUNT(user_id) AS bookmark_count, SUM(user_id = ?) AS user_bookmarked ").addParam(sessionUserId)
+	            .addString("FROM recipes NATURAL LEFT JOIN (SELECT recipe_id, user_id FROM bookmark NATURAL JOIN users WHERE user_status = 'Active') bookmark_users ")
+	            .addString("GROUP BY recipe_id ");
+        sb.addString(") recipes_users ");
+        
+        sb.addString("NATURAL JOIN (");
 	        sb.addString("SELECT recipe_id, COUNT(review_id) AS review_count, AVG(rating) AS average_rating ")
-	        .addString("FROM recipes NATURAL LEFT JOIN (SELECT recipe_id, review_id, rating FROM reviews WHERE review_status = 'Active') active_reviews ")
-	        .addString("GROUP BY recipe_id ");
-	    sb.addString(") recipes_reviews ")
-    	  .addString("WHERE recipe_id = ? AND recipe_status = 'Active'").addParam(recipeId);
-        try (PreparedStatement ps = sb.build(dbConnection);
+	          .addString("FROM recipes NATURAL LEFT JOIN (SELECT recipe_id, review_id, rating FROM reviews WHERE review_status = 'Active') active_reviews ")
+	          .addString("GROUP BY recipe_id ");
+	    sb.addString(") recipes_reviews ");
+	    
+    	sb.addString("WHERE recipe_id = ? AND recipe_status = 'Active'").addParam(recipeId);
+        
+	    try (PreparedStatement ps = sb.build(dbConnection);
         	 ResultSet rs = ps.executeQuery()) {
             if (!rs.next()) return null;
             
@@ -46,7 +50,7 @@ public class RecipeDAO {
             recipe.averageRating = String.format("%.1f", rs.getFloat("average_rating"));
             
             recipe.bookmarkCount = rs.getInt("bookmark_count");
-            recipe.userBookmarked = rs.getInt("user_bookmarked")>0;
+            recipe.userBookmarked = rs.getInt("user_bookmarked") > 0;
             
             recipe.authorId = rs.getInt("author_id");
             recipe.authorName = rs.getString("user_name");

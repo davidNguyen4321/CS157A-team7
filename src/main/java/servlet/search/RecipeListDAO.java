@@ -225,10 +225,8 @@ public class RecipeListDAO {
            	
 		   	ArrayList<RecipeListItem> resultsList = new ArrayList<>();
 			while (rs.next()) {
-				String formattedTime = TimeFormatter.formatTimeAgo(
-						rs.getObject("recipe_active_timestamp", LocalDateTime.class).toString(),
-						rs.getString("timezone"),
-						sessionUserTimezone);
+				String formattedTime = TimeFormatter.formatTimeAgo(rs.getObject("recipe_active_timestamp", LocalDateTime.class), sessionUserTimezone);
+				
 				resultsList.add(new RecipeListItem(
 			        rs.getInt("recipe_id"),
 			        rs.getString("recipe_name"),

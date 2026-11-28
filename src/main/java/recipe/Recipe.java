@@ -13,7 +13,7 @@ public class Recipe {
     public String course;
     
     public int bookmarkCount;
-    public boolean userBookmarked = false;
+    public boolean userBookmarked;
     
     public int reviewCount;
     public String averageRating;

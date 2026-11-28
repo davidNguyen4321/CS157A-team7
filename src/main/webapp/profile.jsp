@@ -190,10 +190,7 @@ if (!available) {
                                 String rImage = rs.getString("RECIPE_IMAGE_PATH");
                                 String vImage = rs.getString("REVIEW_IMAGE_PATH");
                                 String combinedTitle = rs.getString("REVIEW_NAME") + " on " + rs.getString("RECIPE_NAME");
-                				String formattedTime = TimeFormatter.formatTimeAgo(
-                						rs.getObject("REVIEW_ACTIVE_TIMESTAMP", LocalDateTime.class).toString(),
-                						profile.timezone,
-                						sessionUserTimezone);
+                                String formattedTime = TimeFormatter.formatTimeAgo(rs.getObject("REVIEW_ACTIVE_TIMESTAMP", LocalDateTime.class), sessionUserTimezone);
         %>
 			<script>
 			    addReviewCard(

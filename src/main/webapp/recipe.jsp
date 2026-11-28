@@ -10,7 +10,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="util.Loggers" %>
 <%@ page import="java.util.logging.Level" %>
-<%@ page import="util.TimeFormatter" %>
 <%@ page import="java.time.LocalDateTime" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
@@ -43,7 +42,7 @@ int recipeId;
             return;
         }
 
-        reviews = ReviewListDAO.findByRecipeId(recipeId, dbConnection);
+        reviews = ReviewListDAO.findByRecipeId(recipeId, dbConnection, sessionUserTimezone);
     } catch (Exception e) {
         Loggers.OPERATION.log(Level.SEVERE, Loggers.describe(request) + " => Unable to load recipe " + recipeId, e);
         response.sendError(500, "Unable to load recipe.");
@@ -272,12 +271,8 @@ int recipeId;
         %>
 
 		<%
-		for (ReviewItem review : reviews) {
-			String formattedTime = TimeFormatter.formatTimeAgo(
-					review.timestamp,
-					review.timezone,
-					sessionUserTimezone);
-		%>
+        	for (ReviewItem review : reviews) {
+        %>
             <div class="review-card">
             	<div class="review-header">
 				    <strong class="review-name" style="font-size: 25px;"><%=WebUtils.esc(review.name) %></strong>
@@ -317,7 +312,7 @@ int recipeId;
 				                        aria-label="<%=review.rating %> out of 5 stars"></span>
 				                </span>
 				                <span class="review-date">
-				                	<%=WebUtils.esc(formattedTime)%>
+				                	<%=WebUtils.esc(review.timeAgo)%>
 				                </span>
 				            </div>
 				        </div>

@@ -35,6 +35,7 @@ public class ErrorHandlingFilter implements Filter {
             
             int userId = (Integer) session.getAttribute("userId");
     		request.setAttribute("userId", userId);
+    		request.setAttribute("userTimezone", session.getAttribute("userTimezone"));
     		chain.doFilter(request, response); 
     	}
     	catch (ServletParamException e) { 

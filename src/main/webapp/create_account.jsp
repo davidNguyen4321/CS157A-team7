@@ -26,6 +26,7 @@
                     session.setAttribute("userId", u.id);
                     session.setAttribute("username", u.name);
                     session.setAttribute("userImage", u.imagePath);
+                    session.setAttribute("userTimezone", u.timezone);
                     response.sendRedirect("index.jsp");
                     return;
                 }

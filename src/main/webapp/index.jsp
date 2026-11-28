@@ -829,10 +829,7 @@
 	                                                           String vImage = reviews.getString("REVIEW_IMAGE_PATH");
 	                                                           String uImage = reviews.getString("USER_IMAGE_PATH");
 	                                                           String uName = reviews.getString("USER_NAME");
-	                                                           String formattedTime = TimeFormatter.formatTimeAgo(
-	                                                        		   reviews.getObject("REVIEW_ACTIVE_TIMESTAMP", LocalDateTime.class).toString(),
-	                                                        		   reviews.getString("TIMEZONE"),
-	                                                        		   sessionUserTimezone);
+	                                                           String formattedTime = TimeFormatter.formatTimeAgo(reviews.getObject("REVIEW_ACTIVE_TIMESTAMP", LocalDateTime.class), sessionUserTimezone);
 	                   %>
 						<script>
 						    addReviewCard(
