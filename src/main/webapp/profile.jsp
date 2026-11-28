@@ -12,6 +12,7 @@
 <%@ page import="java.time.LocalDateTime" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/auth_fetch.jspf" %>
 <%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
 <%@ include file="/WEB-INF/fragments/review_card_maker.jspf" %>
 
@@ -93,7 +94,7 @@ if (!available) {
 			let url = "${pageContext.request.contextPath}/Toggle/Follow";
 		    clearTimeout(followTimeout);
 		    followTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
-				let response = await fetch(url, {
+				let response = await authFetch(url, {
 		        	method:'POST',
 		        	body: JSON.stringify({
 		        		targetId: followingID

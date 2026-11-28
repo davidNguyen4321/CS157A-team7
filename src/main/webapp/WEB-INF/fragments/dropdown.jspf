@@ -1,3 +1,5 @@
+<%@ include file="auth_fetch.jspf" %>
+
 <script>	
 	function addDropdownListener(searchId, type, panelSearchContainerId, panelContainerId, url){
 		let input = document.getElementById(searchId);
@@ -23,7 +25,7 @@
         parameters.append('excludeArray', JSON.stringify(filterIds.get(type)));
         
         //connect to web server
-		let response = await fetch(url + parameters.toString(), {
+		let response = await authFetch(url + parameters.toString(), {
         	method:'GET',
         	headers:{
                 "Content-Type": "application/json",

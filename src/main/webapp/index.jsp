@@ -12,6 +12,7 @@
 <%@ page import="java.time.LocalDateTime" %>
 
 <%@ include file="/WEB-INF/fragments/auth_check.jspf" %>
+<%@ include file="/WEB-INF/fragments/auth_fetch.jspf" %>
 <%@ include file="/WEB-INF/fragments/recipe_card_maker.jspf" %>
 <%@ include file="/WEB-INF/fragments/review_card_maker.jspf" %>
 
@@ -904,7 +905,7 @@
 			    btn.textContent = 'Thinking...';
 			    setStatus('');
 			    try {
-			        const res = await fetch(shareCtx + '/Recipes/Suggest', {
+			        const res = await authFetch(shareCtx + '/Recipes/Suggest', {
 			            method: 'POST',
 			            headers: { 'Content-Type': 'application/json' },
 			            body: JSON.stringify({

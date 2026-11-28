@@ -1,0 +1,11 @@
+<script>
+	// Client-side counterpart to auth_check.jspf: send the user to login if their session expired mid-page
+	async function authFetch(url, options) {
+		const response = await fetch(url, options);
+		if (response.status === 401) {
+			window.location.href = "${pageContext.request.contextPath}/login.jsp";
+			return new Promise(() => {}); // never resolves, so callers don't keep running while the page navigates
+		}
+		return response;
+	}
+</script>

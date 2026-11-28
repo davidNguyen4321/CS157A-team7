@@ -1,3 +1,5 @@
+<%@ include file="auth_fetch.jspf" %>
+
 <link rel="stylesheet" type="text/css" href="css/index.css">
 
 <script>
@@ -145,7 +147,7 @@
 		parameters.append('tolerances', JSON.stringify(tolerances));
 		parameters.append('ranges', JSON.stringify(ranges));
 		parameters.append('options', JSON.stringify(options));
-		let response = await fetch("${pageContext.request.contextPath}/Recipes/Search?" + parameters.toString(), {
+		let response = await authFetch("${pageContext.request.contextPath}/Recipes/Search?" + parameters.toString(), {
 			method: 'GET',
 			headers: { "Content-Type": "application/json", "Accept": "application/json" },
 		});
@@ -238,7 +240,7 @@
 		let url = "${pageContext.request.contextPath}/Toggle/Bookmark";
 	    clearTimeout(bookmarkTimeout);
 	    bookmarkTimeout = setTimeout(async function () { // to prevent the user from overloading the server with too many requests
-			let response = await fetch(url, {
+			let response = await authFetch(url, {
 	        	method:'POST',
 	        	body: JSON.stringify({
 					targetId: recId
