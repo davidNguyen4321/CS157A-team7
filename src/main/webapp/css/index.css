@@ -1154,3 +1154,16 @@ footer {
     text-decoration: none;
     color: inherit;
 }
+
+.share-form { display: flex; flex-direction: column; gap: 1rem; max-width: 640px; }
+.share-form label { display: flex; flex-direction: column; gap: 0.25rem; font-weight: 600; }
+.share-form input[type=text], .share-form input[type=number], .share-form textarea, .share-form select { padding: 0.5rem; font: inherit; }
+.share-field-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+.share-field-head h3 { margin: 0; }
+.share-field .filter-search-wrap { position: relative; }
+.genie-btn { cursor: pointer; padding: 0.35rem 0.75rem; border-radius: 999px; border: 1px solid #1F1800; background: #FFF7D9; font: inherit; }
+.genie-btn:disabled { opacity: 0.6; cursor: wait; }
+.picker-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; }
+.picker-row .mini-text { flex: 1; }
+.picker-row input[type=number] { width: 6rem; }
+.picker-row input[type=text] { width: 9rem; }

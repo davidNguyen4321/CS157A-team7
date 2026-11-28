@@ -219,7 +219,7 @@ public class RecipeListDAO {
         }
     }
         
-    private ArrayList<RecipeListItem> executeRecipeQuery(SqlBuilder sb, Connection dbConnection, String sessionUserTimezone) throws IOException{
+    private ArrayList<RecipeListItem> executeRecipeQuery(SqlBuilder sb, Connection dbConnection, String sessionUserTimezone) throws IOException {
     	try (PreparedStatement ps = sb.build(dbConnection);
            	 ResultSet rs = ps.executeQuery()) {
            	

@@ -1,0 +1,150 @@
+<script>	
+	function addDropdownListener(searchId, type, panelSearchContainerId, panelContainerId, url){
+		let input = document.getElementById(searchId);
+		let timeout = null;
+		input.addEventListener('keyup', function (e) {//tracking keyboard input
+				clearTimeout(timeout);
+			    timeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
+			    	let searchTerm = input.value;
+			    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
+			    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url);
+			    	}
+			    	else{
+			        	removeFilterPanelSearchResults(panelSearchContainerId);
+			    	}
+			    }, 10);
+		});
+	}
+	
+	async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url){
+   		searchTerm = searchTerm.trim();
+        let parameters = new URLSearchParams();
+        parameters.append('searchTerm', searchTerm);
+        parameters.append('excludeArray', JSON.stringify(filterIds.get(type)));
+        
+        //connect to web server
+		let response = await fetch(url + parameters.toString(), {
+        	method:'GET',
+        	headers:{
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+        	},
+        });
+		
+		if (!response.ok) {
+        	removeFilterPanelSearchResults(panelSearchContainerId); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
+        	throw new Error('Network response was not ok');
+        }
+       	let objects = await response.json(); // Creates a JSON object
+       	removeFilterPanelSearchResults(panelSearchContainerId);
+       	newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId);
+	}
+	
+	function removeFilterPanelSearchResults(panelSearchContainerId){ //clear results to make way for an updated version
+          	let panel = document.getElementById(panelSearchContainerId);
+		let FPSRs = panel.querySelectorAll('.filter-panel-search-autocomplete');
+		for (FPSR of FPSRs){
+			FPSR.remove();
+		}
+	}
+	
+	function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId){
+	    let panel = document.getElementById(panelSearchContainerId);
+	    
+	    if (objects.length === 0) {
+	        let none = document.createElement("div");   // a div with no onclick, so it can't be selected
+	        none.classList.add("filter-panel-search-autocomplete", "no-results");
+	        none.setAttribute("aria-disabled", "true");
+	        let noneText = document.createElement("p");
+	        noneText.classList.add("mini-text");
+	        noneText.textContent = "No elements found.";
+	        none.append(noneText);
+	        panel.append(none);
+	        return;
+	    }
+	    
+	    // Define default placeholders dynamically based on the dropdown type
+	    const placeholderMap = { 'Author': '/images/users/user-placeholder.png' };
+
+	    for (let object of objects){
+	        let id = object["id"];
+	        let name = object["name"];
+	        
+	        let newElement = document.createElement("button");
+	        newElement.classList.add("filter-panel-search-autocomplete");
+	        newElement.setAttribute('type','button');
+	        
+	        // Check if the "image" key exists in the backend response
+	        if ('image' in object) {
+	            let image = object["image"]; // Can be a string path or null
+	            let effectiveImage = image || placeholderMap[type]; // Uses DB image, or falls back to map
+	            
+	            if (effectiveImage) {
+	                let newPic = document.createElement("img");
+	                newPic.classList.add("mini-pic");
+	                newPic.setAttribute('src', "${pageContext.request.contextPath}" + effectiveImage);
+	                newPic.setAttribute('alt', "'" + type + "'");
+	                newElement.append(newPic);
+	            }
+	            
+	            newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + (effectiveImage ? "'" + effectiveImage + "'" : "null") + ", '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"');");
+	        } else {
+	            // The "image" key doesn't exist at all for this servlet
+	            newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', null, '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"');");
+	        }
+           	
+           	//the text element
+           	let newName = document.createElement("p");
+           	newName.classList.add("mini-text");
+           	newName.textContent=name;
+           	newElement.append(newName);
+           	
+           	//connecting element
+           	panel.append(newElement);
+           }
+	}
+	
+	function addFromSearch(searchId, self, id, name, image, type, panelContainerId, panelSearchContainerId){	
+		// the base element
+          	let filter = document.createElement("button");
+          	filter.classList.add("mini-container");
+          	filter.setAttribute('type','button');
+          	filter.setAttribute("onclick", "removeFilter(" + id + ", '" + type + "' );this.remove();");
+
+          	if(image){
+           	// the picture element
+           	let filterPic = document.createElement("img");
+           	filterPic.classList.add("mini-pic");
+           	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
+           	filterPic.setAttribute('alt', "'"+ type +"'");
+           	filter.append(filterPic);
+          	}
+          	
+          	//the text element
+          	let filterText = document.createElement("p");
+          	filterText.classList.add("mini-text");
+          	filterText.textContent=name;
+          	filter.append(filterText);
+          	
+          	//connecting element
+          	filterIds.get(type).push(id);
+          	let panelContainer = document.getElementById(panelContainerId);
+          	panelContainer.append(filter);
+       	removeFilterPanelSearchResults(panelSearchContainerId);
+		document.getElementById(searchId).value="";
+		if (window.onFilterAdded) window.onFilterAdded(type, id, name, image);
+	}
+	
+	function removeFilter(id, type){
+		let index = filterIds.get(type).indexOf(id);
+		if (index !== -1){
+			filterIds.get(type).splice(index, 1);
+		}
+		if (window.onFilterRemoved) window.onFilterRemoved(type, id);
+	}
+	
+	function clearFilters(type, panelContainerId) {
+	    for (let id of [...filterIds.get(type)]) removeFilter(id, type);
+	    document.getElementById(panelContainerId).replaceChildren();
+	}
+</script>

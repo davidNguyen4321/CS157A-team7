@@ -38,6 +38,7 @@
     %>
     
     <%@ include file="/WEB-INF/fragments/header.jspf" %>
+    <%@ include file="/WEB-INF/fragments/dropdown.jspf" %>
     <main>
     	<%
     	if ("discover".equals(currentTab)) {
@@ -562,148 +563,6 @@
 							}
 						}
 						
-						function addDropdownListener(searchId, type, panelSearchContainerId, panelContainerId, url){
-							let input = document.getElementById(searchId);
-							let timeout = null;
-							input.addEventListener('keyup', function (e) {//tracking keyboard input
-									clearTimeout(timeout);
-								    timeout = setTimeout(function () { // to prevent the user from overloading the server with too many requests
-								    	let searchTerm = input.value;
-								    	if(searchTerm&&searchTerm.trim()){ //to check if the search term is of value
-								    		searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url);
-								    	}
-								    	else{
-								        	removeFilterPanelSearchResults(panelSearchContainerId);
-								    	}
-								    }, 10);
-							});
-						}
-						
-						async function searchFilters(searchId, searchTerm, type, panelSearchContainerId, panelContainerId, url){
-				    		searchTerm = searchTerm.trim();
-					        let parameters = new URLSearchParams();
-					        parameters.append('searchTerm', searchTerm);
-					        parameters.append('excludeArray', JSON.stringify(filterIds.get(type)));
-					        
-					        //connect to web server
-							let response = await fetch(url + parameters.toString(), {
-					        	method:'GET',
-					        	headers:{
-					                "Content-Type": "application/json",
-					                "Accept": "application/json",
-					        	},
-					        });
-							
-							if (!response.ok) {
-					        	removeFilterPanelSearchResults(panelSearchContainerId); // There are multiple calls of these at multiple diverging points to avoid the ugly flickering of existing and not existing
-					        	throw new Error('Network response was not ok');
-					        }
-				        	let objects = await response.json(); // Creates a JSON object
-				        	removeFilterPanelSearchResults(panelSearchContainerId);
-				        	newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId);
-						}
-						
-						function removeFilterPanelSearchResults(panelSearchContainerId){ //clear results to make way for an updated version
-			            	let panel = document.getElementById(panelSearchContainerId);
-							let FPSRs = panel.querySelectorAll('.filter-panel-search-autocomplete');
-							for (FPSR of FPSRs){
-								FPSR.remove();
-							}
-						}
-						
-						function newFilterPanelSearchResults(searchId, objects, type, panelSearchContainerId, panelContainerId){
-						    let panel = document.getElementById(panelSearchContainerId);
-						    
-						    if (objects.length === 0) {
-						        let none = document.createElement("div");   // a div with no onclick, so it can't be selected
-						        none.classList.add("filter-panel-search-autocomplete", "no-results");
-						        none.setAttribute("aria-disabled", "true");
-						        let noneText = document.createElement("p");
-						        noneText.classList.add("mini-text");
-						        noneText.textContent = "No elements found.";
-						        none.append(noneText);
-						        panel.append(none);
-						        return;
-						    }
-						    
-						    // Define default placeholders dynamically based on the dropdown type
-						    const placeholderMap = { 'Author': '/images/users/user-placeholder.png' };
-
-						    for (let object of objects){
-						        let id = object["id"];
-						        let name = object["name"];
-						        
-						        let newElement = document.createElement("button");
-						        newElement.classList.add("filter-panel-search-autocomplete");
-						        newElement.setAttribute('type','button');
-						        
-						        // Check if the "image" key exists in the backend response
-						        if ('image' in object) {
-						            let image = object["image"]; // Can be a string path or null
-						            let effectiveImage = image || placeholderMap[type]; // Uses DB image, or falls back to map
-						            
-						            if (effectiveImage) {
-						                let newPic = document.createElement("img");
-						                newPic.classList.add("mini-pic");
-						                newPic.setAttribute('src', "${pageContext.request.contextPath}" + effectiveImage);
-						                newPic.setAttribute('alt', "'" + type + "'");
-						                newElement.append(newPic);
-						            }
-						            
-						            newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', " + (effectiveImage ? "'" + effectiveImage + "'" : "null") + ", '" + type + "', '" + panelContainerId + "', '"+panelSearchContainerId+"');");
-						        } else {
-						            // The "image" key doesn't exist at all for this servlet
-						            newElement.setAttribute('onclick', "addFromSearch('"+ searchId +"', this, " + id + ", '" + name + "', null, '" + type + "', '" + panelContainerId + "', '"+ panelSearchContainerId+"');");
-						        }
-				            	
-				            	//the text element
-				            	let newName = document.createElement("p");
-				            	newName.classList.add("mini-text");
-				            	newName.textContent=name;
-				            	newElement.append(newName);
-				            	
-				            	//connecting element
-				            	panel.append(newElement);
-				            }
-						}
-						
-						function addFromSearch(searchId, self, id, name, image, type, panelContainerId, panelSearchContainerId){	
-							// the base element
-			            	let filter = document.createElement("button");
-			            	filter.classList.add("mini-container");
-			            	filter.setAttribute('type','button');
-			            	filter.setAttribute("onclick", "removeFilter(" + id + ", '" + type + "' );this.remove();");
-	
-			            	if(image){
-				            	// the picture element
-				            	let filterPic = document.createElement("img");
-				            	filterPic.classList.add("mini-pic");
-				            	filterPic.setAttribute('src', "${pageContext.request.contextPath}"+image);
-				            	filterPic.setAttribute('alt', "'"+ type +"'");
-				            	filter.append(filterPic);
-			            	}
-			            	
-			            	//the text element
-			            	let filterText = document.createElement("p");
-			            	filterText.classList.add("mini-text");
-			            	filterText.textContent=name;
-			            	filter.append(filterText);
-			            	
-			            	//connecting element
-			            	filterIds.get(type).push(id);
-			            	let panelContainer = document.getElementById(panelContainerId);
-			            	panelContainer.append(filter);
-				        	removeFilterPanelSearchResults(panelSearchContainerId);
-							document.getElementById(searchId).value="";
-						}
-						
-						function removeFilter(id, type){
-							let index = filterIds.get(type).indexOf(id);
-							if (index !== -1){
-								filterIds.get(type).splice(index, 1);
-							}
-						}
-						
 						function addSliderListener(sliderId, toleranceDisplayId, name, makeText) {
 						    let slider = document.getElementById(sliderId);
 						    let toleranceDisplay = document.getElementById(toleranceDisplayId);
@@ -884,7 +743,248 @@
             <%
             } else if ("share".equals(currentTab)) {
             %>
-        	<p>Not Implemented</p>
+        	<div class="sections-container active">
+			  <section>
+			    <div>
+			      <h2 class="section-title">Share a Recipe</h2>
+			      <p class="section-subtitle">Fill things in yourself, or press ✨ and let Recipe Genie pick</p>
+			    </div>
+			
+			    <form id="shareForm" class="share-form">
+			      <label>Recipe name
+			        <input id="shareName" type="text" maxlength="100" required>
+			      </label>
+			      <label>Instructions
+			        <textarea id="shareInstructions" rows="8" maxlength="10000" required></textarea>
+			      </label>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Ingredients</h3>
+			          <button type="button" class="genie-btn" data-genie="ingredients">✨ Let Recipe Genie pick</button></div>
+			        <div class="filter-search-wrap">
+			          <div class="search-top-bar"><span class="search-icon-fixed">🔍</span>
+			            <input id="IngredientsSearch" type="text" placeholder="Search ingredients..."></div>
+			          <div id="IngredientsSearchContainer" class="filter-panel-search-container"></div>
+			        </div>
+			        <div id="IngredientsContainer" class="filter-panel-container"></div>
+			        <div id="IngredientAmounts"></div>
+			      </div>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Appliances</h3>
+			          <button type="button" class="genie-btn" data-genie="appliances">✨ Let Recipe Genie pick</button></div>
+			        <div class="filter-search-wrap">
+			          <div class="search-top-bar"><span class="search-icon-fixed">🔍</span>
+			            <input id="AppliancesSearch" type="text" placeholder="Search appliances..."></div>
+			          <div id="AppliancesSearchContainer" class="filter-panel-search-container"></div>
+			        </div>
+			        <div id="AppliancesContainer" class="filter-panel-container"></div>
+			      </div>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Cuisines</h3>
+			          <button type="button" class="genie-btn" data-genie="cuisines">✨ Let Recipe Genie pick</button></div>
+			        <div class="filter-search-wrap">
+			          <div class="search-top-bar"><span class="search-icon-fixed">🔍</span>
+			            <input id="CuisinesSearch" type="text" placeholder="Search cuisines..."></div>
+			          <div id="CuisinesSearchContainer" class="filter-panel-search-container"></div>
+			        </div>
+			        <div id="CuisinesContainer" class="filter-panel-container"></div>
+			      </div>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Dish types</h3>
+			          <button type="button" class="genie-btn" data-genie="dishTypes">✨ Let Recipe Genie pick</button></div>
+			        <div class="filter-search-wrap">
+			          <div class="search-top-bar"><span class="search-icon-fixed">🔍</span>
+			            <input id="DishTypesSearch" type="text" placeholder="Search dish types..."></div>
+			          <div id="DishTypesSearchContainer" class="filter-panel-search-container"></div>
+			        </div>
+			        <div id="DishTypesContainer" class="filter-panel-container"></div>
+			      </div>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Description</h3>
+			          <button type="button" class="genie-btn" data-genie="description">✨ Let Recipe Genie write</button></div>
+			        <textarea id="shareDescription" rows="3" maxlength="2000"></textarea>
+			      </div>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Total minutes</h3>
+			          <button type="button" class="genie-btn" data-genie="totalMinutes">✨ Let Recipe Genie estimate</button></div>
+			        <input id="shareMinutes" type="number" min="1" max="10080">
+			      </div>
+			
+			      <div class="share-field">
+			        <div class="share-field-head"><h3>Course</h3>
+			          <button type="button" class="genie-btn" data-genie="course">✨ Let Recipe Genie choose</button></div>
+			        <select id="shareCourse">
+			          <option value="">(none)</option>
+			          <option>Main Course</option>
+			          <option>Appetizer / Side</option>
+			          <option>Dessert</option>
+			        </select>
+			      </div>
+			
+			      <button type="submit" class="recipe-button">Create recipe</button>
+			      <p id="shareStatus" class="mini-text" role="status"></p>
+			    </form>
+			  </section>
+			</div>
+			
+			<script>
+			const shareCtx = '${pageContext.request.contextPath}';
+			
+			const filterIds = new Map(); // the dropdown functions read this global
+			const SHARE = {
+			    "Ingredient": { field: "ingredients", path: "Ingredients", search: "IngredientsSearch", results: "IngredientsSearchContainer", chosen: "IngredientsContainer" },
+			    "Appliance":  { field: "appliances",  path: "Appliances",  search: "AppliancesSearch",  results: "AppliancesSearchContainer",  chosen: "AppliancesContainer" },
+			    "Cuisine":    { field: "cuisines",    path: "Cuisines",    search: "CuisinesSearch",    results: "CuisinesSearchContainer",    chosen: "CuisinesContainer" },
+			    "Dish Type":  { field: "dishTypes",   path: "DishTypes",   search: "DishTypesSearch",   results: "DishTypesSearchContainer",   chosen: "DishTypesContainer" }
+			};
+			for (const [type, c] of Object.entries(SHARE)) {
+			    filterIds.set(type, []);
+			    addDropdownListener(c.search, type, c.results, c.chosen, shareCtx + '/Dropdown/' + c.path + '?');
+			}
+			
+			const el = id => document.getElementById(id);
+			const val = id => el(id).value.trim();
+			const typeOf = field => Object.keys(SHARE).find(t => SHARE[t].field === field);
+			
+			// Fields whose current value is exactly what Recipe Genie picked (drives the ai_gen_* flags)
+			const aiPicked = new Set();
+			let applyingGenie = false;
+			const ingredientRows = new Map(); // id -> {amount, unit, row}
+			
+			// Hooks called by the shared dropdown code
+			window.onFilterAdded = (type, id, name) => {
+			    if (type === 'Ingredient') addIngredientRow(id, name);
+			    if (!applyingGenie) aiPicked.delete(SHARE[type].field);
+			};
+			window.onFilterRemoved = (type, id) => {
+			    if (type === 'Ingredient') {
+			        const r = ingredientRows.get(id);
+			        if (r) { r.row.remove(); ingredientRows.delete(id); }
+			    }
+			    if (!applyingGenie) aiPicked.delete(SHARE[type].field);
+			};
+			
+			function addIngredientRow(id, name) {
+			    const row = document.createElement('div');
+			    row.className = 'picker-row';
+			    const label = document.createElement('p');
+			    label.className = 'mini-text';
+			    label.textContent = name;
+			    const amount = Object.assign(document.createElement('input'),
+			        { type: 'number', min: '0.01', max: '999.99', step: '0.01', placeholder: 'Amount' });
+			    const unit = Object.assign(document.createElement('input'),
+			        { type: 'text', maxLength: 25, placeholder: 'Unit (cups, g...)' });
+			    row.append(label, amount, unit);
+			    el('IngredientAmounts').append(row);
+			    ingredientRows.set(id, { amount, unit, row });
+			}
+			
+			// Typing in these fields means they're no longer Genie's value
+			for (const [field, id] of [['description', 'shareDescription'], ['totalMinutes', 'shareMinutes'], ['course', 'shareCourse']]) {
+			    el(id).addEventListener('input', () => aiPicked.delete(field));
+			}
+			
+			function setStatus(text) { el('shareStatus').textContent = text; }
+			
+			document.querySelectorAll('[data-genie]').forEach(btn =>
+			    btn.addEventListener('click', () => askGenie(btn.dataset.genie, btn)));
+			
+			async function askGenie(field, btn) {
+			    if (!val('shareInstructions')) {
+			        setStatus('Write the instructions first so Recipe Genie has something to work from.');
+			        return;
+			    }
+			    const label = btn.textContent;
+			    btn.disabled = true;
+			    btn.textContent = 'Thinking...';
+			    setStatus('');
+			    try {
+			        const res = await fetch(shareCtx + '/Recipes/Suggest', {
+			            method: 'POST',
+			            headers: { 'Content-Type': 'application/json' },
+			            body: JSON.stringify({
+			                name: val('shareName'),
+			                instructions: val('shareInstructions'),
+			                ingredientIds: filterIds.get('Ingredient'),
+			                fields: [field]
+			            })
+			        });
+			        if (!res.ok) throw new Error('suggest failed');
+			        const suggestion = await res.json();
+			
+			        applyingGenie = true;
+			        let applied;
+			        try { applied = applySuggestion(field, suggestion); } finally { applyingGenie = false; }
+			
+			        if (applied) aiPicked.add(field);
+			        else setStatus("Recipe Genie couldn't find a good pick for that, so nothing was changed.");
+			    } catch (err) {
+			        setStatus("Recipe Genie couldn't help right now. Try again in a moment.");
+			    } finally {
+			        btn.disabled = false;
+			        btn.textContent = label;
+			    }
+			}
+			
+			function applySuggestion(field, s) {
+			    if (field === 'description')  { if (!s.description) return false;  el('shareDescription').value = s.description; return true; }
+			    if (field === 'totalMinutes') { if (!s.totalMinutes) return false;  el('shareMinutes').value = s.totalMinutes; return true; }
+			    if (field === 'course')       { if (!s.course) return false;        el('shareCourse').value = s.course; return true; }
+			
+			    const type = typeOf(field), c = SHARE[type];
+			    const items = s[field] || [];
+			    if (items.length === 0) return false;      // keep their picks if Genie found nothing
+			    clearFilters(type, c.chosen);              // wipe existing selections
+			    for (const it of items) {
+			        addFromSearch(c.search, null, it.id, it.name, it.image, type, c.chosen, c.results);
+			    }
+			    return true;
+			}
+			
+			el('shareForm').addEventListener('submit', async (e) => {
+			    e.preventDefault();
+			
+			    const ingredients = filterIds.get('Ingredient').map(id => {
+			        const r = ingredientRows.get(id);
+			        return { id, amount: r.amount.value ? Number(r.amount.value) : null, unit: r.unit.value.trim() || null };
+			    });
+			    if (ingredients.length === 0) { setStatus('Add at least one ingredient.'); return; }
+			
+			    const body = {
+			        name: val('shareName'),
+			        instructions: val('shareInstructions'),
+			        description: val('shareDescription') || null,
+			        totalMinutes: val('shareMinutes') ? Number(val('shareMinutes')) : null,
+			        course: val('shareCourse') || null,
+			        ingredients,
+			        applianceIds: filterIds.get('Appliance'),
+			        cuisineIds: filterIds.get('Cuisine'),
+			        dishTypeIds: filterIds.get('Dish Type'),
+			        aiFill: [...aiPicked].filter(f => f !== 'ingredients') // no ai_gen column for ingredients
+			    };
+			
+			    const submit = e.target.querySelector('button[type=submit]');
+			    submit.disabled = true;
+			    setStatus('Creating your recipe...');
+			    const res = await fetch(shareCtx + '/Recipes/Create', {
+			        method: 'POST',
+			        headers: { 'Content-Type': 'application/json' },
+			        body: JSON.stringify(body)
+			    });
+			    if (!res.ok) {
+			        setStatus('Could not create the recipe. Check the fields and try again.');
+			        submit.disabled = false;
+			        return;
+			    }
+			    const { recipeId } = await res.json();
+			    location.href = 'recipe.jsp?recipeId=' + recipeId;
+			});
+			</script>
             <%
             } else {
             %> <!-- Fallback: library (also the final option) -->

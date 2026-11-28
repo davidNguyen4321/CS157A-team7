@@ -46,7 +46,7 @@ if (!available) {
        String pic = WebUtils.or(profile.imagePath, "/images/users/user-placeholder.png");
 %>
     <section class="profile-hero">
-        <img class="profile-avatar" src="${pageContext.request.contextPath}<%= pic %>" alt="Avatar">
+		<img class="profile-avatar" src="${pageContext.request.contextPath}<%= WebUtils.esc(pic) %>" alt="Avatar">
         <div id ="profile-container">
             <h1 style="margin:0;"><%=WebUtils.esc(profile.name)%></h1>
             <p class="profile-meta">Timezone: <%=WebUtils.esc(profile.timezone)%></p>

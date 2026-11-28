@@ -9,5 +9,4 @@ public class ReviewItem {
     public String reviewImagePath;
     public String reviewerName;
     public String reviewerImagePath;
-
 }
