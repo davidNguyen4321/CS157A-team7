@@ -15,7 +15,7 @@ public class RecipeDAO {
     	SqlBuilder sb = new SqlBuilder();
     	sb.addString("SELECT recipe_id, recipe_name, recipe_image_path, recipe_description, instructions, total_minutes, course, author_id, user_name, user_image_path, ")
     	  .addString("review_count, average_rating, ")
-          .addString("bookmark_count, user_bookmarked, ");
+          .addString("bookmark_count, user_bookmarked ");
     	
     	sb.addString("FROM recipes LEFT JOIN users ON recipes.author_id = users.user_id ");
     	
