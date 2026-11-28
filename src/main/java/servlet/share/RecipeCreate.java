@@ -1,4 +1,4 @@
-package servlet.create;
+package servlet.share;
 
 import database.DbAccess;
 

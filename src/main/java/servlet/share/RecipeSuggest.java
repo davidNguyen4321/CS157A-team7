@@ -1,4 +1,4 @@
-package servlet.create;
+package servlet.share;
 
 import database.DbAccess;
 
@@ -23,7 +23,7 @@ public class RecipeSuggest extends HttpServlet {
 
         String json;
         try {
-            json = mapper.writeValueAsString(RecipeAiFiller.fill(requestInfo, DbAccess.getConnection()));
+            json = mapper.writeValueAsString(RecipeSuggestGemini.fill(requestInfo, DbAccess.getConnection()));
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) { // Gemini / network failures

@@ -1,13 +1,10 @@
-package servlet.create;
+package servlet.share;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import java.util.List;
 import java.util.Set;
@@ -56,7 +53,7 @@ public class RecipeCreateDAO {
 
                 try (PreparedStatement ps = dbConnection.prepareStatement(
                         "INSERT INTO recipes_cook_ingredients (recipe_id, ingredient_id, amount, amount_unit) VALUES (?, ?, ?, ?)")) {
-                	for (IngredientLine line : req.getIngredients()) {
+                	for (RecipeCreateRequest.IngredientLine line : req.getIngredients()) {
                 	    ps.setInt(1, recipeId);
                 	    ps.setInt(2, line.id);
                 	    ps.setObject(3, line.amount);
@@ -93,17 +90,5 @@ public class RecipeCreateDAO {
             }
             ps.executeBatch();
         }
-    }
-    
-    public static Map<Integer, String> options(String table, String idCol, String nameCol, Connection dbConnection) {
-        Map<Integer, String> map = new LinkedHashMap<>();
-        try (PreparedStatement ps = dbConnection.prepareStatement(
-                "SELECT " + idCol + ", " + nameCol + " FROM " + table + " ORDER BY " + nameCol);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) map.put(rs.getInt(1), rs.getString(2));
-        } catch (SQLException e) {
-            throw new RuntimeException(table + " options load failed: " + e.getMessage(), e);
-        }
-        return map;
     }
 }

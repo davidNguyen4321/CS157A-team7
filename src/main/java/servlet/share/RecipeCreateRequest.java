@@ -1,4 +1,4 @@
-package servlet.create;
+package servlet.share;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +25,12 @@ public class RecipeCreateRequest {
         public List<IngredientLine> ingredients;
         public List<Integer> applianceIds, cuisineIds, dishTypeIds;
         public Set<String> aiFill;
+    }
+    
+    public static class IngredientLine {
+        public Integer id;
+        public Double amount;
+        public String unit;
     }
 
     private final String name, description, instructions, course;
@@ -56,7 +62,7 @@ public class RecipeCreateRequest {
         if (instructions.isEmpty() || instructions.length() > 10000) bad("instructions");
         if (description != null && description.length() > 2000) bad("description");
         if (totalMinutes != null && (totalMinutes < 1 || totalMinutes > 10080)) bad("totalMinutes");
-        if (course != null && !RecipeAiFiller.COURSES.contains(course)) bad("course");
+        if (course != null && !RecipeSuggestGemini.COURSES.contains(course)) bad("course");
         if (!AI_FIELDS.containsAll(aiFill)) bad("aiFill");
 
         if (ingredients.isEmpty() || ingredients.size() > 100) bad("ingredients");

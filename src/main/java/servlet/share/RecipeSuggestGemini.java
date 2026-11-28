@@ -1,15 +1,11 @@
-package servlet.create;
+package servlet.share;
 
 import servlet.dropdown.DropdownItem;
 import util.GeminiClient;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +14,10 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class RecipeAiFiller {
+public class RecipeSuggestGemini {
     public static final Set<String> COURSES = Set.of("Main Course", "Appetizer / Side", "Dessert");
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final RecipeSuggestDAO DAO = new RecipeSuggestDAO();
 
     private static final String SCHEMA = """
         {"type":"OBJECT","properties":{
@@ -36,10 +33,10 @@ public class RecipeAiFiller {
     public static RecipeSuggestResponse fill(RecipeSuggestRequest req, Connection db) throws Exception {
     	Set<String> f = req.getFields();
 
-        Map<Integer, DropdownItem> ingredients = items(db, "ingredients", "ingredient_id", "ingredient_name", "ingredient_image_path");
-        Map<Integer, DropdownItem> appliances = f.contains("appliances") ? items(db, "appliances", "appliance_id", "appliance_name", "appliance_image_path") : Map.of();
-        Map<Integer, DropdownItem> cuisines   = f.contains("cuisines")   ? items(db, "cuisines", "cuisine_id", "cuisine_name", null) : Map.of();
-        Map<Integer, DropdownItem> dishTypes  = f.contains("dishTypes")  ? items(db, "dish_types", "dish_type_id", "dish_type_name", null) : Map.of();
+    	Map<Integer, DropdownItem> ingredients = DAO.options("ingredients", "ingredient_id", "ingredient_name", "ingredient_image_path", db);
+    	Map<Integer, DropdownItem> appliances = f.contains("appliances") ? DAO.options("appliances", "appliance_id", "appliance_name", "appliance_image_path", db) : Map.of();
+    	Map<Integer, DropdownItem> cuisines   = f.contains("cuisines")   ? DAO.options("cuisines", "cuisine_id", "cuisine_name", null, db) : Map.of();
+    	Map<Integer, DropdownItem> dishTypes  = f.contains("dishTypes")  ? DAO.options("dish_types", "dish_type_id", "dish_type_name", null, db) : Map.of();
 
         StringBuilder p = new StringBuilder();
         p.append("You help fill in details for a recipe on a cooking website. ")
@@ -101,19 +98,5 @@ public class RecipeAiFiller {
         if (options.isEmpty()) return;
         p.append(label).append(":\n");
         options.forEach((id, item) -> p.append(id).append(" = ").append(item.getName()).append("\n"));
-    }
-
-    private static Map<Integer, DropdownItem> items(Connection db, String table, String idCol, String nameCol, String imageCol) {
-        Map<Integer, DropdownItem> map = new LinkedHashMap<>();
-        String sql = "SELECT " + idCol + ", " + nameCol + (imageCol == null ? "" : ", " + imageCol)
-                   + " FROM " + table + " ORDER BY " + nameCol;
-        try (PreparedStatement ps = db.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                map.put(rs.getInt(1), new DropdownItem(rs.getInt(1), rs.getString(2), imageCol == null ? null : rs.getString(3)));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(table + " load failed: " + e.getMessage(), e);
-        }
-        return map;
     }
 }
